@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { adicionarMeses, dataLocal, interpretarDataAmbigua, formatarData, formatarDataBR, idadeEmAnos, parseData } from '../../src/domain/datas'
+import { adicionarMeses, dataLocal, extrairDataBR, interpretarDataAmbigua, formatarData, formatarDataBR, idadeEmAnos, parseData } from '../../src/domain/datas'
 
 describe('parseData', () => {
   it('converte uma data ISO válida', () => {
@@ -90,5 +90,19 @@ describe('interpretarDataAmbigua', () => {
 
   it('rejeita texto que não é data', () => {
     expect(() => interpretarDataAmbigua('ontem', coleta)).toThrow('Data inválida')
+  })
+})
+
+describe('extrairDataBR', () => {
+  it('extrai data e hora de um texto livre', () => {
+    expect(extrairDataBR('Estoque de sangue REDE* - 10/11/2026 12:35')).toBe('2026-11-10T12:35')
+  })
+
+  it('extrai só a data quando não há hora', () => {
+    expect(extrairDataBR('Última atualização: 05/11/2026')).toBe('2026-11-05')
+  })
+
+  it('devolve null quando o texto não tem data', () => {
+    expect(extrairDataBR('Atualizado hoje')).toBeNull()
   })
 })
