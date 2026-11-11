@@ -13,7 +13,8 @@
     "test:coverage": "vitest run --coverage",
     "test:e2e": "playwright test",
     "coletar": "NODE_EXTRA_CA_CERTS=certs/sectigo-dv-r36.pem tsx scripts/coletar.ts",
-    "seed:e2e": "tsx scripts/gerar-seed-e2e.ts"
+    "seed:e2e": "tsx scripts/gerar-seed-e2e.ts",
+    "local": "node scripts/local.mjs"
   },
   "dependencies": {
     "cheerio": "^1.2.0",

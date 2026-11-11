@@ -4,6 +4,8 @@ import vue from '@vitejs/plugin-vue'
 
 export default defineConfig({
   plugins: [vue()],
+  // No `npm run dev`, a API vem do wrangler (npm run local).
+  server: { proxy: { '/api': 'http://localhost:8788' } },
   test: {
     include: ['tests/unit/**/*.test.ts'],
     coverage: {
