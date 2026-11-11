@@ -8,6 +8,13 @@ updates:
       dependencias-de-desenvolvimento:
         dependency-type: development
     open-pull-requests-limit: 5
+    ignore:
+      # vue-tsc ainda importa typescript/lib/tsc, que não existe no TypeScript 7
+      - dependency-name: typescript
+        update-types: [version-update:semver-major]
+      # os tipos acompanham a versão do Node usada no CI (.nvmrc)
+      - dependency-name: "@types/node"
+        update-types: [version-update:semver-major]
 
   - package-ecosystem: github-actions
     directory: /
