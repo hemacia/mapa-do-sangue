@@ -11,6 +11,11 @@ export function parseData(texto: string): Date {
   return data
 }
 
+// Para "hoje" vale o dia que a pessoa vê no relógio, não o dia em UTC.
+export function dataLocal(agora: Date): Date {
+  return new Date(Date.UTC(agora.getFullYear(), agora.getMonth(), agora.getDate()))
+}
+
 export function formatarData(data: Date): string {
   return data.toISOString().slice(0, 10)
 }
