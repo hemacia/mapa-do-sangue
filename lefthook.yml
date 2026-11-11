@@ -1,0 +1,24 @@
+# Ganchos do git. Instalados pelo npm install (script prepare).
+pre-commit:
+  parallel: true
+  jobs:
+    - name: gofmt
+      glob: "api/**/*.go"
+      run: |
+        test -z "$(gofmt -l {staged_files})" || { gofmt -l {staged_files}; echo "Formate com make fmt"; exit 1; }
+    - name: go vet
+      glob: "api/**/*.go"
+      root: api/
+      run: go vet ./...
+    - name: typecheck
+      glob: "*.{ts,vue}"
+      run: npm run typecheck
+
+commit-msg:
+  jobs:
+    - name: conventional commits
+      run: |
+        head -1 {1} | grep -qE '^(feat|fix|test|docs|refactor|style|build|ci|chore|perf|revert)(\([a-z0-9-]+\))?!?: .+' || {
+          echo "Mensagem fora do padrão Conventional Commits, ex.: feat: mostra o estoque por estado"
+          exit 1
+        }
