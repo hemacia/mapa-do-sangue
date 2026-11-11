@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { adicionarMeses, dataLocal, extrairDataBR, interpretarDataAmbigua, formatarData, formatarDataBR, idadeEmAnos, parseData } from '../../src/domain/datas'
+import { adicionarMeses, dataEmBrasilia, dataLocal, extrairDataBR, interpretarDataAmbigua, formatarData, formatarDataBR, idadeEmAnos, parseData } from '../../src/domain/datas'
 
 describe('parseData', () => {
   it('converte uma data ISO válida', () => {
@@ -104,5 +104,17 @@ describe('extrairDataBR', () => {
 
   it('devolve null quando o texto não tem data', () => {
     expect(extrairDataBR('Atualizado hoje')).toBeNull()
+  })
+})
+
+describe('dataEmBrasilia', () => {
+  it('usa o dia de Brasília mesmo quando em UTC já é o dia seguinte', () => {
+    const agoraUTC = new Date('2026-11-11T01:12:00Z')
+
+    expect(formatarData(dataEmBrasilia(agoraUTC))).toBe('2026-11-10')
+  })
+
+  it('vira o dia à meia-noite de Brasília, às 3h em UTC', () => {
+    expect(formatarData(dataEmBrasilia(new Date('2026-11-11T03:00:00Z')))).toBe('2026-11-11')
   })
 })
