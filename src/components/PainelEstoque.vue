@@ -14,6 +14,11 @@ const hemocentros = ref<EstoqueHemocentro[]>([])
 const tipo = ref<TipoSanguineo>('O-')
 const erro = ref('')
 
+function rotulo(hemocentro: EstoqueHemocentro): string {
+  const nivel = hemocentro.estoque[tipo.value]
+  return nivel ? ROTULOS_NIVEL[nivel] : 'Sem dado'
+}
+
 const criticos = computed(() => hemocentros.value.filter((h) => h.estoque[tipo.value] === 'critico').length)
 
 onMounted(async () => {
@@ -54,7 +59,7 @@ onMounted(async () => {
             <td>{{ hemocentro.cidade }} ({{ hemocentro.uf }})</td>
             <td>
               <span :class="['nivel', hemocentro.estoque[tipo] ?? 'sem-dado']">
-                {{ hemocentro.estoque[tipo] ? ROTULOS_NIVEL[hemocentro.estoque[tipo]] : 'Sem dado' }}
+                {{ rotulo(hemocentro) }}
               </span>
             </td>
             <td>{{ hemocentro.atualizadoNaFonte ?? 'Não informado' }}</td>
