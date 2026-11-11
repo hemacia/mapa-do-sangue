@@ -13,7 +13,6 @@ func TestCarregarUsaPadroesQuandoSoODatabaseURLEstaDefinido(t *testing.T) {
 	getenv := ambiente(map[string]string{"DATABASE_URL": "postgres://localhost/mapa"})
 
 	cfg, err := Carregar(getenv)
-
 	if err != nil {
 		t.Fatalf("erro inesperado: %v", err)
 	}
@@ -37,7 +36,6 @@ func TestCarregarLeOsValoresDoAmbiente(t *testing.T) {
 	})
 
 	cfg, err := Carregar(getenv)
-
 	if err != nil {
 		t.Fatalf("erro inesperado: %v", err)
 	}

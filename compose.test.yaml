@@ -24,7 +24,7 @@ services:
       CI: "1"
       CGO_ENABLED: "0"
       DATABASE_URL_TEST: postgres://postgres:postgres@postgres:5432/postgres?sslmode=disable
-    command: go test -coverprofile=coverage.out ./...
+    command: go test ./...
     depends_on:
       postgres:
         condition: service_healthy

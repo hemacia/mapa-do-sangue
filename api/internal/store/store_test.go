@@ -72,7 +72,6 @@ func TestPingRespondeComOBancoNoAr(t *testing.T) {
 	s := bancoDeTeste(t)
 
 	err := s.Ping(context.Background())
-
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -82,7 +81,6 @@ func TestMigrarDuasVezesNaoFalha(t *testing.T) {
 	s := bancoDeTeste(t)
 
 	err := Migrar(context.Background(), s.pool)
-
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -119,7 +117,6 @@ func TestEstoqueAtualUsaSoAUltimaColetaDeCadaHemocentro(t *testing.T) {
 	inserirLeitura(t, s, "hemominas", "A+", "estavel", agoraFixo)
 
 	estoque, err := s.EstoqueAtual(context.Background(), "")
-
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -144,7 +141,6 @@ func TestEstoqueAtualFiltraPorUF(t *testing.T) {
 	inserirLeitura(t, s, "hemoba", "O+", "estavel", agoraFixo)
 
 	estoque, err := s.EstoqueAtual(context.Background(), "BA")
-
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -164,7 +160,6 @@ func TestHistoricoContaDiasDistintosNoHorarioDeBrasilia(t *testing.T) {
 	inserirLeitura(t, s, "hemominas", "O-", "critico", dia(1, 12).AddDate(0, -2, 0)) // fora dos 30 dias
 
 	estoque, err := s.EstoqueAtual(context.Background(), "")
-
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -182,7 +177,6 @@ func TestEstatisticasCalculaTaxaECoberturaOrdenadas(t *testing.T) {
 	  ('SP', 2024, 1, 1)`)
 
 	estatisticas, err := s.Estatisticas(context.Background())
-
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -205,7 +199,6 @@ func TestMigrationCarregaAs27UFsDe2024(t *testing.T) {
 	s := bancoDeTeste(t)
 
 	estatisticas, err := s.Estatisticas(context.Background())
-
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -233,7 +226,6 @@ func TestRegistrarEContarDoacoesDoMes(t *testing.T) {
 		}
 	}
 	total, err := s.ContarDoacoes(ctx, "2026-11")
-
 	if err != nil {
 		t.Fatal(err)
 	}

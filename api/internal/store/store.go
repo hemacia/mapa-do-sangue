@@ -30,7 +30,7 @@ func Novo(pool *pgxpool.Pool, agora func() time.Time) *Store {
 // Migrar aplica as migrations embutidas que ainda não rodaram.
 func Migrar(ctx context.Context, pool *pgxpool.Pool) error {
 	db := stdlib.OpenDBFromPool(pool)
-	defer db.Close()
+	defer func() { _ = db.Close() }()
 	return migrarDB(ctx, db)
 }
 

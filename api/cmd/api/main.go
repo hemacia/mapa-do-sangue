@@ -89,8 +89,12 @@ func verificarSaude() int {
 		porta = "8080"
 	}
 	cliente := http.Client{Timeout: 2 * time.Second}
-	resp, err := cliente.Get("http://127.0.0.1:" + porta + "/healthz")
-	if err != nil || resp.StatusCode != http.StatusOK {
+	resp, err := cliente.Get("http://127.0.0.1:" + porta + "/healthz") //nolint:gosec,noctx // endereço fixo, porta do próprio container
+	if err != nil {
+		return 1
+	}
+	defer func() { _ = resp.Body.Close() }()
+	if resp.StatusCode != http.StatusOK {
 		return 1
 	}
 	return 0
