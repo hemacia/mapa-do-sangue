@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { formatarData, parseData } from '../../src/domain/datas'
-import { avaliarIdade, avaliarPeso, proximaDataApta } from '../../src/domain/elegibilidade'
+import { avaliarCandidato, avaliarIdade, avaliarPeso, proximaDataApta } from '../../src/domain/elegibilidade'
 
 const HOJE = parseData('2026-11-10')
 
@@ -113,5 +113,60 @@ describe('proximaDataApta', () => {
     const proxima = proximaDataApta(doacoes, 'masculino')
 
     expect(formatarData(proxima!)).toBe('2026-09-05')
+  })
+})
+
+describe('avaliarCandidato', () => {
+  const adulto = {
+    nascimento: parseData('1995-05-20'),
+    sexo: 'feminino' as const,
+    pesoKg: 62,
+    doacoes: [],
+  }
+
+  it('libera adulto que nunca doou e não deixa mensagens', () => {
+    const resultado = avaliarCandidato(adulto, HOJE)
+
+    expect(resultado).toEqual({ podeDoarHoje: true, mensagens: [], proximaData: null })
+  })
+
+  it('bloqueia quem ainda não completou 16 anos', () => {
+    const resultado = avaliarCandidato({ ...adulto, nascimento: parseData('2012-01-01') }, HOJE)
+
+    expect(resultado.podeDoarHoje).toBe(false)
+    expect(resultado.mensagens[0]).toMatch(/idade/i)
+  })
+
+  it('avisa sobre autorização do responsável para menores de 18', () => {
+    const resultado = avaliarCandidato({ ...adulto, nascimento: parseData('2009-06-01') }, HOJE)
+
+    expect(resultado.podeDoarHoje).toBe(true)
+    expect(resultado.mensagens[0]).toMatch(/responsável/)
+  })
+
+  it('avisa sobre avaliação médica aos 70 anos ou mais', () => {
+    const idoso = { ...adulto, nascimento: parseData('1950-01-01'), doacoes: [parseData('2025-01-01')] }
+
+    expect(avaliarCandidato(idoso, HOJE).mensagens[0]).toMatch(/70 anos/)
+  })
+
+  it('avisa sobre avaliação médica abaixo de 50 kg', () => {
+    const resultado = avaliarCandidato({ ...adulto, pesoKg: 48 }, HOJE)
+
+    expect(resultado.podeDoarHoje).toBe(true)
+    expect(resultado.mensagens[0]).toMatch(/50 kg/)
+  })
+
+  it('informa a próxima data quando ainda está no intervalo', () => {
+    const resultado = avaliarCandidato({ ...adulto, doacoes: [parseData('2026-10-01')] }, HOJE)
+
+    expect(resultado.podeDoarHoje).toBe(false)
+    expect(resultado.mensagens[0]).toContain('01/01/2027')
+  })
+
+  it('libera no dia exato em que o intervalo termina', () => {
+    const resultado = avaliarCandidato({ ...adulto, doacoes: [parseData('2026-08-10')] }, HOJE)
+
+    expect(resultado.podeDoarHoje).toBe(true)
   })
 })
