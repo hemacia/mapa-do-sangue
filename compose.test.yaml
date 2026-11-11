@@ -1,0 +1,33 @@
+# Testes de integração da API contra um Postgres limpo: make test-api-docker
+name: mapa-do-sangue-test
+
+services:
+  postgres:
+    image: postgres:18-alpine
+    environment:
+      POSTGRES_PASSWORD: postgres
+    tmpfs:
+      - /var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U postgres"]
+      interval: 1s
+      timeout: 3s
+      retries: 30
+
+  testes:
+    image: golang:1.27-alpine
+    working_dir: /src
+    volumes:
+      - ./api:/src
+      - go-mod:/go/pkg/mod
+    environment:
+      CI: "1"
+      CGO_ENABLED: "0"
+      DATABASE_URL_TEST: postgres://postgres:postgres@postgres:5432/postgres?sslmode=disable
+    command: go test -coverprofile=coverage.out ./...
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  go-mod:
