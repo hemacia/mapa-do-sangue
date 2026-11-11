@@ -7,7 +7,12 @@ import { FONTES } from '../src/coleta/fontes'
 const USER_AGENT = 'MapaDoSangue/0.1 (+https://github.com/hemacia/mapa-do-sangue)'
 
 const baixar: Baixar = async (url) => {
-  const resposta = await fetch(url, { headers: { 'User-Agent': USER_AGENT }, signal: AbortSignal.timeout(30_000) })
+  const resposta = await fetch(url, { headers: { 'User-Agent': USER_AGENT }, signal: AbortSignal.timeout(30_000) }).catch(
+    (erro: Error & { cause?: { code?: string; message?: string } }) => {
+      // "fetch failed" sozinho não diz nada: a causa real (DNS, TLS, timeout) fica em cause.
+      throw new Error(`${erro.message}: ${erro.cause?.code ?? erro.cause?.message ?? 'sem detalhe'}`)
+    },
+  )
   if (!resposta.ok) throw new Error(`HTTP ${resposta.status}`)
   return resposta.arrayBuffer()
 }
