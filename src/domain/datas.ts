@@ -54,6 +54,13 @@ export function extrairDataBR(texto: string): string | null {
   return hora ? `${data}T${hora}` : data
 }
 
+export function formatarAtualizacao(valor: string | null): string {
+  if (!valor) return 'Não informado pela fonte'
+  const [data, hora] = valor.split('T')
+  const dataBR = formatarDataBR(parseData(data))
+  return hora ? `${dataBR} às ${hora}` : dataBR
+}
+
 export function formatarDataBR(data: Date): string {
   return formatarData(data).split('-').reverse().join('/')
 }
