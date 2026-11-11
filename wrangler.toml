@@ -1,0 +1,10 @@
+name = "mapa-do-sangue"
+compatibility_date = "2026-11-01"
+pages_build_output_dir = "dist"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "mapa-do-sangue"
+# shortcut: id provisório; trocar pelo que `wrangler d1 create mapa-do-sangue` devolver.
+database_id = "00000000-0000-0000-0000-000000000000"
+migrations_dir = "migrations"
