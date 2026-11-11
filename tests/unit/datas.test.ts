@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { adicionarMeses, formatarData, formatarDataBR, idadeEmAnos, parseData } from '../../src/domain/datas'
+import { adicionarMeses, dataLocal, formatarData, formatarDataBR, idadeEmAnos, parseData } from '../../src/domain/datas'
 
 describe('parseData', () => {
   it('converte uma data ISO válida', () => {
@@ -62,5 +62,13 @@ describe('idadeEmAnos', () => {
 describe('formatarDataBR', () => {
   it('formata no padrão dia/mês/ano', () => {
     expect(formatarDataBR(parseData('2027-02-05'))).toBe('05/02/2027')
+  })
+})
+
+describe('dataLocal', () => {
+  it('usa o dia do relógio local e descarta a hora', () => {
+    const agora = new Date(2026, 10, 10, 23, 30)
+
+    expect(formatarData(dataLocal(agora))).toBe('2026-11-10')
   })
 })
