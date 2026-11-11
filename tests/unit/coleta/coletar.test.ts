@@ -1,8 +1,8 @@
 import { readFileSync } from 'node:fs'
-import { DatabaseSync } from 'node:sqlite'
 import { describe, expect, it } from 'vitest'
 import { type Baixar, coletarTodas, gerarSQL } from '../../../src/coleta/coletar'
 import { FONTES } from '../../../src/coleta/fontes'
+import { bancoComMigrations } from '../banco'
 
 const COLETADO_EM = new Date('2026-11-10T09:00:00Z')
 
@@ -22,15 +22,6 @@ const FIXTURE_POR_FONTE: Record<string, string> = {
 const baixarFixtures: Baixar = async (url) => {
   const fonte = FONTES.find((f) => f.url === url)!
   return bytesDaFixture(FIXTURE_POR_FONTE[fonte.id])
-}
-
-function bancoComMigrations() {
-  const db = new DatabaseSync(':memory:')
-  db.exec('PRAGMA foreign_keys = ON')
-  for (const arquivo of ['0001_schema_inicial.sql', '0002_fontes_iniciais.sql']) {
-    db.exec(readFileSync(new URL(`../../../migrations/${arquivo}`, import.meta.url), 'utf8'))
-  }
-  return db
 }
 
 describe('coletarTodas', () => {
