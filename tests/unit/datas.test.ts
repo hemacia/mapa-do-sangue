@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { adicionarMeses, dataLocal, formatarData, formatarDataBR, idadeEmAnos, parseData } from '../../src/domain/datas'
+import { adicionarMeses, dataLocal, interpretarDataAmbigua, formatarData, formatarDataBR, idadeEmAnos, parseData } from '../../src/domain/datas'
 
 describe('parseData', () => {
   it('converte uma data ISO válida', () => {
@@ -70,5 +70,25 @@ describe('dataLocal', () => {
     const agora = new Date(2026, 10, 10, 23, 30)
 
     expect(formatarData(dataLocal(agora))).toBe('2026-11-10')
+  })
+})
+
+describe('interpretarDataAmbigua', () => {
+  const coleta = parseData('2026-11-10')
+
+  it('lê como dia/mês quando o primeiro número passa de 12', () => {
+    expect(formatarData(interpretarDataAmbigua('29/03/2026', coleta))).toBe('2026-03-29')
+  })
+
+  it('lê como mês/dia quando o segundo número passa de 12', () => {
+    expect(formatarData(interpretarDataAmbigua('03/29/2026', coleta))).toBe('2026-03-29')
+  })
+
+  it('escolhe a leitura mais próxima da coleta sem passar dela', () => {
+    expect(formatarData(interpretarDataAmbigua('10/11/2026', coleta))).toBe('2026-11-10')
+  })
+
+  it('rejeita texto que não é data', () => {
+    expect(() => interpretarDataAmbigua('ontem', coleta)).toThrow('Data inválida')
   })
 })
