@@ -8,3 +8,13 @@ coverage:
         target: 80%
 comment:
   layout: "condensed_header, diff, flags, files"
+ignore:
+  - "api/internal/httpapi/api.gen.go"
+  - "api/cmd"
+flags:
+  web:
+    paths: ["src/", "functions/"]
+    carryforward: true
+  api:
+    paths: ["api/"]
+    carryforward: true

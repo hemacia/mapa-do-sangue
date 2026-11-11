@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   testes:
-    name: Testes (${{ matrix.os }})
+    name: Site (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -37,7 +37,7 @@ jobs:
         uses: codecov/codecov-action@v7
         with:
           files: coverage/lcov.info
-          flags: ${{ runner.os }}
+          flags: web
           use_oidc: true
           fail_ci_if_error: false
 
@@ -54,3 +54,65 @@ jobs:
           name: playwright-report-${{ runner.os }}
           path: playwright-report
           retention-days: 7
+
+  api:
+    name: API (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    defaults:
+      run:
+        working-directory: api
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: api/go.mod
+          cache-dependency-path: api/go.sum
+
+      # macOS e Windows não têm Docker no GitHub Actions: o Postgres é instalado no runner.
+      - name: Instala PostgreSQL
+        id: postgres
+        uses: ikalnytskyi/action-setup-postgres@v9
+
+      - name: Testes com cobertura
+        run: go test -coverprofile=coverage.out ./...
+        env:
+          DATABASE_URL_TEST: ${{ steps.postgres.outputs.connection-uri }}
+
+      - name: Envia cobertura para o Codecov
+        uses: codecov/codecov-action@v7
+        with:
+          files: api/coverage.out
+          flags: api
+          use_oidc: true
+          fail_ci_if_error: false
+
+  api-docker:
+    name: API em Docker, lint e contrato
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: api/go.mod
+          cache-dependency-path: api/go.sum
+
+      - name: Lint
+        uses: golangci/golangci-lint-action@v9
+        with:
+          version: v2.15.0
+          working-directory: api
+
+      - name: Código gerado do OpenAPI está atualizado
+        run: make check-generate
+
+      - name: Testes de integração em Docker
+        run: make test-api-docker
+
+      - name: Build da imagem
+        run: docker build -t mapa-do-sangue-api api

@@ -20,3 +20,21 @@ updates:
     directory: /
     schedule:
       interval: weekly
+
+  - package-ecosystem: gomod
+    directory: /api
+    schedule:
+      interval: weekly
+    groups:
+      go:
+        patterns: ["*"]
+
+  - package-ecosystem: docker
+    directories: [/api]
+    schedule:
+      interval: weekly
+
+  - package-ecosystem: docker-compose
+    directory: /
+    schedule:
+      interval: weekly
