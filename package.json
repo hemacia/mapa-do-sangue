@@ -6,7 +6,12 @@
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc -b && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "typecheck": "vue-tsc -b",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "vue": "^3.5.44"
@@ -23,5 +28,8 @@
     "vite": "^8.3.6",
     "vitest": "^4.1.12",
     "vue-tsc": "^3.3.14"
+  },
+  "engines": {
+    "node": ">=22.13"
   }
 }
