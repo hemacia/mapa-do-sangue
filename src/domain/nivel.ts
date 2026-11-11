@@ -18,8 +18,12 @@ function semAcento(texto: string): string {
   return texto.normalize('NFD').replace(/\p{Diacritic}/gu, '')
 }
 
-export function normalizarNivel(texto: string): NivelEstoque | null {
-  return SINONIMOS[semAcento(texto).trim().toLowerCase()] ?? null
+// Cada hemocentro dá um sentido diferente às palavras: no Hemosc "Alerta" é o pior nível.
+export type EscalaDaFonte = Partial<Record<string, NivelEstoque>>
+
+export function normalizarNivel(texto: string, escala: EscalaDaFonte = {}): NivelEstoque | null {
+  const chave = semAcento(texto).trim().toLowerCase()
+  return escala[chave] ?? SINONIMOS[chave] ?? null
 }
 
 export function nivelMaisGrave(niveis: NivelEstoque[]): NivelEstoque | null {
