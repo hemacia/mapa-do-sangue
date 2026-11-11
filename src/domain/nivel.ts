@@ -32,3 +32,10 @@ export function nivelMaisGrave(niveis: NivelEstoque[]): NivelEstoque | null {
     NIVEIS_ESTOQUE.indexOf(atual) < NIVEIS_ESTOQUE.indexOf(pior) ? atual : pior,
   )
 }
+
+export const ROTULOS_NIVEL: Record<NivelEstoque, string> = {
+  critico: 'Crítico',
+  alerta: 'Alerta',
+  estavel: 'Estável',
+  adequado: 'Adequado',
+}
