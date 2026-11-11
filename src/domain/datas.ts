@@ -15,6 +15,10 @@ export function formatarData(data: Date): string {
   return data.toISOString().slice(0, 10)
 }
 
+export function formatarDataBR(data: Date): string {
+  return formatarData(data).split('-').reverse().join('/')
+}
+
 export function adicionarMeses(data: Date, meses: number): Date {
   const ano = data.getUTCFullYear()
   const mes = data.getUTCMonth() + meses

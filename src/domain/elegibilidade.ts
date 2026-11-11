@@ -1,4 +1,4 @@
-import { adicionarMeses, idadeEmAnos } from './datas'
+import { adicionarMeses, formatarDataBR, idadeEmAnos } from './datas'
 
 // Regras do Anexo IV-B da Portaria GM/MS 11.685/2026 (em vigor desde 30/09/2026).
 
@@ -41,4 +41,38 @@ export function proximaDataApta(doacoes: Date[], sexo: Sexo): Date | null {
 
   const aposSairDaJanela = adicionarMeses(recentes[limiteEm12Meses - 1], 12)
   return aposSairDaJanela > aposIntervalo ? aposSairDaJanela : aposIntervalo
+}
+
+export interface Candidato {
+  nascimento: Date
+  sexo: Sexo
+  pesoKg: number
+  doacoes: Date[]
+}
+
+export interface ResultadoAvaliacao {
+  podeDoarHoje: boolean
+  mensagens: string[]
+  proximaData: Date | null
+}
+
+const MENSAGENS_IDADE: Partial<Record<Avaliacao, string>> = {
+  inapto: 'Pela idade você ainda não pode doar (de 16 a 69 anos, primeira doação até os 60)',
+  apto_com_consentimento: 'Menores de 18 anos precisam de autorização por escrito do responsável',
+  apto_com_avaliacao_medica: 'A partir de 70 anos a doação depende de avaliação médica no hemocentro',
+}
+
+export function avaliarCandidato(candidato: Candidato, hoje: Date): ResultadoAvaliacao {
+  const idade = avaliarIdade(candidato.nascimento, hoje, candidato.doacoes.length > 0)
+  const mensagens: string[] = []
+  if (MENSAGENS_IDADE[idade]) mensagens.push(MENSAGENS_IDADE[idade])
+  if (avaliarPeso(candidato.pesoKg) !== 'apto') {
+    mensagens.push('Abaixo de 50 kg a doação depende de avaliação médica no hemocentro')
+  }
+
+  const proximaData = proximaDataApta(candidato.doacoes, candidato.sexo)
+  const aguardando = proximaData !== null && proximaData > hoje
+  if (aguardando) mensagens.push(`Você poderá doar de novo a partir de ${formatarDataBR(proximaData)}`)
+
+  return { podeDoarHoje: idade !== 'inapto' && !aguardando, mensagens, proximaData }
 }
