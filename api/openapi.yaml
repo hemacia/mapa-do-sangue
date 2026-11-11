@@ -124,8 +124,8 @@ components:
         nome: { type: string }
         uf: { $ref: "#/components/schemas/UF" }
         cidade: { type: string }
-        latitude: { type: number, nullable: true }
-        longitude: { type: number, nullable: true }
+        latitude: { type: number, format: double, nullable: true }
+        longitude: { type: number, format: double, nullable: true }
         nivelGeral: { $ref: "#/components/schemas/Nivel" }
         estoque:
           type: object
@@ -148,7 +148,7 @@ components:
         ano: { type: integer }
         coletas: { type: integer, nullable: true }
         populacao: { type: integer }
-        porMil: { type: number, nullable: true }
+        porMil: { type: number, format: double, nullable: true }
         cobertura:
           type: string
           enum: [completo, incompleto, sem-dado]

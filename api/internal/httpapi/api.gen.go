@@ -114,7 +114,7 @@ type EstatisticaUF struct {
 	Cobertura EstatisticaUFCobertura `json:"cobertura"`
 	Coletas   *int                   `json:"coletas"`
 	Populacao int                    `json:"populacao"`
-	PorMil    *float32               `json:"porMil"`
+	PorMil    *float64               `json:"porMil"`
 
 	// Uf Example: MG
 	Uf UF `json:"uf"`
@@ -138,8 +138,8 @@ type EstoqueHemocentro struct {
 
 	// Id Example: hemominas-bh
 	Id        string   `json:"id"`
-	Latitude  *float32 `json:"latitude,omitempty"`
-	Longitude *float32 `json:"longitude,omitempty"`
+	Latitude  *float64 `json:"latitude,omitempty"`
+	Longitude *float64 `json:"longitude,omitempty"`
 
 	// NivelGeral Escala comum, do pior para o melhor
 	NivelGeral Nivel  `json:"nivelGeral"`
