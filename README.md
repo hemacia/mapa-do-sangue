@@ -8,7 +8,7 @@ Mapa aberto do estoque de sangue dos hemocentros do Brasil: quais tipos estão e
 ## Integrantes
 
 - Ítalo Dell Areti
-- _(nome completo da parceira de grupo)_
+- Milena Corrêa Moreira
 
 ## Sobre o sistema
 
