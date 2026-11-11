@@ -39,6 +39,15 @@ export function interpretarDataAmbigua(texto: string, coletadoEm: Date): Date {
   return candidatas.reduce((melhor, atual) => (distancia(atual) < distancia(melhor) ? atual : melhor))
 }
 
+// Devolve AAAA-MM-DD ou AAAA-MM-DDTHH:MM, no horário local da fonte.
+export function extrairDataBR(texto: string): string | null {
+  const partes = /(\d{2})\/(\d{2})\/(\d{4})(?:\s+(\d{2}:\d{2}))?/.exec(texto)
+  if (!partes) return null
+  const [, dia, mes, ano, hora] = partes
+  const data = formatarData(parseData(`${ano}-${mes}-${dia}`))
+  return hora ? `${data}T${hora}` : data
+}
+
 export function formatarDataBR(data: Date): string {
   return formatarData(data).split('-').reverse().join('/')
 }
