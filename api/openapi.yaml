@@ -1,0 +1,186 @@
+openapi: 3.0.3
+info:
+  title: Mapa do Sangue API
+  version: 1.0.0
+  description: Estoque de sangue dos hemocentros do Brasil, estatísticas por estado e registro anônimo de doações.
+  license:
+    name: MIT
+servers:
+  - url: http://localhost:8080
+paths:
+  /healthz:
+    get:
+      operationId: verificarSaude
+      summary: O processo está no ar
+      responses:
+        "200":
+          description: Vivo
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Saude" }
+  /readyz:
+    get:
+      operationId: verificarProntidao
+      summary: O processo está pronto para receber tráfego (banco acessível)
+      responses:
+        "200":
+          description: Pronto
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Saude" }
+        "503": { $ref: "#/components/responses/Problema" }
+  /v1/estoque:
+    get:
+      operationId: listarEstoque
+      summary: Estoque atual de cada hemocentro
+      parameters:
+        - name: uf
+          in: query
+          required: false
+          schema: { $ref: "#/components/schemas/UF" }
+      responses:
+        "200":
+          description: Hemocentros com o último nível de cada tipo
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/EstoqueHemocentro" }
+        "400": { $ref: "#/components/responses/Problema" }
+  /v1/estatisticas:
+    get:
+      operationId: listarEstatisticas
+      summary: Coletas por mil habitantes em cada estado (Anvisa Hemoprod + IBGE)
+      responses:
+        "200":
+          description: Uma linha por UF, da maior taxa para a menor
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/EstatisticaUF" }
+  /v1/doacoes:
+    post:
+      operationId: registrarDoacao
+      summary: Registra uma doação (só estado e tipo, sem dado pessoal)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/NovaDoacao" }
+      responses:
+        "201":
+          description: Registrada
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Doacao" }
+        "400": { $ref: "#/components/responses/Problema" }
+        "429": { $ref: "#/components/responses/Problema" }
+  /v1/doacoes/mes:
+    get:
+      operationId: contarDoacoesDoMes
+      summary: Total de doações registradas no mês corrente (horário de Brasília)
+      responses:
+        "200":
+          description: Total
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/TotalDoMes" }
+components:
+  responses:
+    Problema:
+      description: Erro no formato RFC 9457
+      content:
+        application/problem+json:
+          schema: { $ref: "#/components/schemas/Problema" }
+  schemas:
+    UF:
+      type: string
+      pattern: "^[A-Z]{2}$"
+      example: MG
+    TipoSanguineo:
+      type: string
+      enum: [A+, A-, B+, B-, AB+, AB-, O+, O-]
+    Nivel:
+      type: string
+      description: Escala comum, do pior para o melhor
+      enum: [critico, alerta, estavel, adequado]
+    Saude:
+      type: object
+      required: [status]
+      properties:
+        status: { type: string, example: ok }
+    HistoricoTipo:
+      type: object
+      required: [dias, diasCriticos]
+      properties:
+        dias: { type: integer }
+        diasCriticos: { type: integer }
+    EstoqueHemocentro:
+      type: object
+      required: [id, nome, uf, cidade, nivelGeral, estoque, coletadoEm, historico]
+      properties:
+        id: { type: string, example: hemominas-bh }
+        nome: { type: string }
+        uf: { $ref: "#/components/schemas/UF" }
+        cidade: { type: string }
+        latitude: { type: number, nullable: true }
+        longitude: { type: number, nullable: true }
+        nivelGeral: { $ref: "#/components/schemas/Nivel" }
+        estoque:
+          type: object
+          description: Nível por tipo sanguíneo (só os tipos que a fonte publica)
+          additionalProperties: { $ref: "#/components/schemas/Nivel" }
+        atualizadoNaFonte:
+          type: string
+          nullable: true
+          description: AAAA-MM-DD ou AAAA-MM-DDTHH:MM, no horário da fonte
+        coletadoEm: { type: string, format: date-time }
+        historico:
+          type: object
+          description: Dias com leitura e dias em nível crítico nos últimos 30 dias, por tipo
+          additionalProperties: { $ref: "#/components/schemas/HistoricoTipo" }
+    EstatisticaUF:
+      type: object
+      required: [uf, ano, coletas, populacao, porMil, cobertura]
+      properties:
+        uf: { $ref: "#/components/schemas/UF" }
+        ano: { type: integer }
+        coletas: { type: integer, nullable: true }
+        populacao: { type: integer }
+        porMil: { type: number, nullable: true }
+        cobertura:
+          type: string
+          enum: [completo, incompleto, sem-dado]
+    NovaDoacao:
+      type: object
+      required: [uf]
+      properties:
+        uf: { $ref: "#/components/schemas/UF" }
+        tipo:
+          allOf: [{ $ref: "#/components/schemas/TipoSanguineo" }]
+          nullable: true
+    Doacao:
+      type: object
+      required: [uf, tipo, data]
+      properties:
+        uf: { $ref: "#/components/schemas/UF" }
+        tipo:
+          allOf: [{ $ref: "#/components/schemas/TipoSanguineo" }]
+          nullable: true
+        data: { type: string, format: date }
+    TotalDoMes:
+      type: object
+      required: [mes, total]
+      properties:
+        mes: { type: string, example: "2026-11" }
+        total: { type: integer }
+    Problema:
+      type: object
+      description: RFC 9457 Problem Details
+      required: [title, status]
+      properties:
+        type: { type: string, default: about:blank }
+        title: { type: string }
+        status: { type: integer }
+        detail: { type: string }
