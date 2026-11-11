@@ -307,3 +307,18 @@ func TestRotaInexistenteResponde404(t *testing.T) {
 		t.Fatalf("status = %d, quero 404", resp.Code)
 	}
 }
+
+func TestRegistrarDoacaoRecusaCorpoGrandeDemais(t *testing.T) {
+	repo := &repositorioFalso{}
+	h := novoServidor(repo)
+	corpo := `{"uf":"MG","lixo":"` + strings.Repeat("x", 20<<10) + `"}`
+
+	resp := requisitar(h, http.MethodPost, "/v1/doacoes", corpo)
+
+	if resp.Code != http.StatusBadRequest {
+		t.Fatalf("status = %d, quero 400", resp.Code)
+	}
+	if len(repo.doacoes) != 0 {
+		t.Error("não deveria gravar")
+	}
+}

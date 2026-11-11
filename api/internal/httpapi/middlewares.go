@@ -15,6 +15,7 @@ func seguranca(proximo http.Handler) http.Handler {
 		h.Set("X-Frame-Options", "DENY")
 		h.Set("Referrer-Policy", "no-referrer")
 		h.Set("Content-Security-Policy", "default-src 'none'; frame-ancestors 'none'")
+		r.Body = http.MaxBytesReader(w, r.Body, 16<<10) // nenhuma rota precisa de corpo maior
 		proximo.ServeHTTP(w, r)
 	})
 }
