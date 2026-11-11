@@ -11,7 +11,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "coletar": "NODE_EXTRA_CA_CERTS=certs/sectigo-dv-r36.pem tsx scripts/coletar.ts"
   },
   "dependencies": {
     "cheerio": "^1.2.0",
