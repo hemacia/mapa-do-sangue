@@ -37,3 +37,17 @@ describe('nivelMaisGrave', () => {
     expect(nivelMaisGrave([])).toBeNull()
   })
 })
+
+describe('normalizarNivel com escala própria da fonte', () => {
+  it('aplica o significado da fonte antes do padrão', () => {
+    const escalaHemosc = { alerta: 'critico' as const }
+
+    expect(normalizarNivel('Alerta', escalaHemosc)).toBe('critico')
+  })
+
+  it('usa o padrão para palavras que a fonte não redefine', () => {
+    const escalaHemosc = { alerta: 'critico' as const }
+
+    expect(normalizarNivel('Reduzido', escalaHemosc)).toBe('alerta')
+  })
+})
