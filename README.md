@@ -18,8 +18,22 @@ Funcionalidades:
 
 - **Posso doar?**: verifica idade, peso e intervalo desde a última doação pelas regras da Portaria GM/MS nº 11.685/2026 (em vigor desde 30/09/2026) e informa a próxima data em que a pessoa pode doar
 - **Quem doa para quem**: compatibilidade de hemácias entre os oito tipos ABO/Rh
-- **Mapa de estoque** _(em desenvolvimento)_: nível de cada tipo sanguíneo por hemocentro, coletado diariamente das fontes públicas
+- **Mapa de estoque**: nível de cada tipo sanguíneo por hemocentro, em mapa e em tabela, coletado duas vezes por dia das fontes públicas
+- **Eu doei hoje!**: registra a doação (só estado e tipo, sem dado pessoal) e mostra quantas doações foram registradas no mês
 - **Estatísticas** _(em desenvolvimento)_: coletas por estado (Anvisa Hemoprod) e histórico de dias em nível crítico
+
+### Fontes de estoque
+
+| Hemocentro | Estado | Como o dado é publicado |
+|---|---|---|
+| HEMOES | ES | API de dados abertos do governo do ES |
+| Hemopi | PI | Endpoint JSON do site |
+| Hemominas | MG | Página do site (escala própria: "Estável" é o melhor nível) |
+| Hemocentro Unicamp | SP | Página do site (nível no nome da imagem) |
+| Hemosc | SC | Página do site em ISO-8859-1 (escala própria: "Alerta" é o pior nível) |
+| Hemoba | BA | Página do site |
+
+Os outros estados não publicam o estoque de forma que dê para coletar. Detalhes em [docs/pesquisa](docs/pesquisa/).
 
 A pesquisa que embasou o projeto (fontes por estado, regras de doação, projetos parecidos) está em [docs/pesquisa](docs/pesquisa/).
 
@@ -58,7 +72,11 @@ npx playwright install chromium
 npm run test:e2e
 ```
 
-Para rodar o site localmente: `npm run dev`.
+Os testes e2e sobem o site com as Pages Functions e um banco D1 local, populado com as páginas salvas em `tests/fixtures` (nenhum teste acessa a internet).
+
+Para rodar o site localmente: `npm run dev` (só a interface) ou `node scripts/servidor-e2e.mjs` (interface, API e banco).
+
+Para coletar o estoque de verdade: `npm run coletar` (grava `coleta.sql`).
 
 ### Boas práticas adotadas nos testes
 
