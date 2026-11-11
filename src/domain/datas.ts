@@ -20,6 +20,25 @@ export function formatarData(data: Date): string {
   return data.toISOString().slice(0, 10)
 }
 
+// O CSV do HEMOES mistura "29/03/2026" com "03/29/2026" na mesma coluna.
+export function interpretarDataAmbigua(texto: string, coletadoEm: Date): Date {
+  const partes = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec(texto.trim())
+  if (!partes) throw new Error(`Data inválida: ${texto}`)
+  const [a, b, ano] = partes.slice(1)
+  const pad = (n: string) => n.padStart(2, '0')
+  const candidatas = [`${ano}-${pad(b)}-${pad(a)}`, `${ano}-${pad(a)}-${pad(b)}`].flatMap((iso) => {
+    try {
+      return [parseData(iso)]
+    } catch {
+      return []
+    }
+  })
+  if (candidatas.length === 0) throw new Error(`Data inválida: ${texto}`)
+  const distancia = (d: Date) =>
+    d > coletadoEm ? Number.MAX_SAFE_INTEGER : coletadoEm.getTime() - d.getTime()
+  return candidatas.reduce((melhor, atual) => (distancia(atual) < distancia(melhor) ? atual : melhor))
+}
+
 export function formatarDataBR(data: Date): string {
   return formatarData(data).split('-').reverse().join('/')
 }

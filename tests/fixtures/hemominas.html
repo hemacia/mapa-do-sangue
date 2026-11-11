@@ -1,0 +1,2048 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+        <meta name="theme-color" content="#2f2c79">
+        <link rel="icon" type="image/png" sizes="32x32" href="https://www.hemominas.mg.gov.br/favicon.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="https://www.hemominas.mg.gov.br/favicon.png">
+        <link rel="shortcut icon" href="https://www.hemominas.mg.gov.br/favicon.png"> 
+        <title>Hemominas</title>
+                <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+        <!-- Forçar carregamento determinístico: Preline (app3) e Owl Carousel (app4) antes do bundle principal -->
+        <script type="module" src="https://www.hemominas.mg.gov.br/build/assets/app3.js"></script>
+        <script src="https://www.hemominas.mg.gov.br/build/assets/app4.js"></script>
+        <link rel="stylesheet" href="https://www.hemominas.mg.gov.br/css/collapsible.css">
+        
+        
+        <link rel="stylesheet" href="https://www.gstatic.com/dialogflow-console/fast/df-messenger/prod/v1/themes/df-messenger-default.css">
+        <script src="https://www.gstatic.com/dialogflow-console/fast/df-messenger/prod/v1/df-messenger.js"></script>
+        
+        
+        <link rel="stylesheet" href="https://www.hemominas.mg.gov.br/css/chatbot.css">
+        
+        
+        <link rel="stylesheet" href="https://www.hemominas.mg.gov.br/build/assets/app.css">
+        <script src="https://www.hemominas.mg.gov.br/build/assets/app2.js"></script>
+        
+        <script>
+        // Função global para toggle de colapsáveis
+        function toggleCollapsible(collapsibleId) {
+            const container = document.querySelector(`[data-collapsible-id="${collapsibleId}"]`);
+            if (container) {
+                container.classList.toggle('collapsible-expanded');
+            } else {
+            }
+        }
+        
+        // Inicializar colapsáveis: vincula clique diretamente em cada header (inclui aninhados)
+        function initializeCollapsibles() {
+            document.querySelectorAll('.collapsible-container .collapsible-header').forEach(function(header) {
+                if (header.dataset.collapsibleBound === '1') return;
+                header.dataset.collapsibleBound = '1';
+                header.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    var container = header.closest('.collapsible-container');
+                    if (container) container.classList.toggle('collapsible-expanded');
+                });
+            });
+        }
+        
+        function setActiveContentTab(container, targetId) {
+            if (!targetId) {
+                return;
+            }
+            
+            const buttons = container.querySelectorAll('.content-tab-button');
+            const panels = container.querySelectorAll('.content-tab-panel');
+            
+            buttons.forEach(button => {
+                const isActive = button.getAttribute('data-tab-target') === targetId;
+                button.classList.toggle('active', isActive);
+                button.setAttribute('aria-selected', isActive ? 'true' : 'false');
+                button.setAttribute('tabindex', isActive ? '0' : '-1');
+            });
+            
+            panels.forEach(panel => {
+                const isActive = panel.id === targetId;
+                panel.classList.toggle('active', isActive);
+                panel.setAttribute('aria-hidden', isActive ? 'false' : 'true');
+            });
+        }
+        
+        function initializeContentTabs() {
+            const containers = document.querySelectorAll('.content-tabs');
+            
+            containers.forEach((container, index) => {
+                const buttons = container.querySelectorAll('.content-tab-button');
+                const panels = container.querySelectorAll('.content-tab-panel');
+                
+                if (!buttons.length || !panels.length) {
+                    console.warn('Abas sem botões ou painéis suficientes', container);
+                    return;
+                }
+                
+                buttons.forEach(button => {
+                    if (button.dataset.tabInit === '1') {
+                        return;
+                    }
+                    
+                    button.dataset.tabInit = '1';
+                    button.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        setActiveContentTab(container, this.getAttribute('data-tab-target'));
+                    });
+                });
+                
+                const activeButton = container.querySelector('.content-tab-button.active') || buttons[0];
+                if (activeButton) {
+                    setActiveContentTab(container, activeButton.getAttribute('data-tab-target'));
+                }
+            });
+        }
+        
+        // Inicializar quando o DOM estiver pronto
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeCollapsibles();
+            initializeContentTabs();
+        });
+        
+        // Fallback: tentar novamente após delays progressivos
+        setTimeout(() => {
+            initializeCollapsibles();
+            initializeContentTabs();
+        }, 500);
+        setTimeout(() => {
+            initializeCollapsibles();
+            initializeContentTabs();
+        }, 1000);
+        setTimeout(() => {
+            initializeCollapsibles();
+            initializeContentTabs();
+        }, 2000);
+        </script>
+        
+    </head>
+    <body class="layout-fluido">
+        <a href="#conteudo-principal" class="skip-link">Ir para o conteúdo principal</a>
+        <header class="header-principal">
+        <div class="barra-topo">
+        <div class="conteudo-center-1200">
+            <div class="barra-topo-div">
+                <div class="barra-topo-div-acessibilidades">
+                    <div class="barra-topo-div-acessibilidades-fonte-contraste">
+                        <p>Fonte</p>
+                        <a href="javascript:void(0);" id="font-increase" title="Aumentar fonte" aria-label="Aumentar tamanho da fonte" role="button">+</a>
+                        <a href="javascript:void(0);" id="font-decrease" title="Diminuir fonte" aria-label="Diminuir tamanho da fonte" role="button">-</a>
+                    </div>
+                    <div class="barra-topo-div-acessibilidades-fonte-contraste">
+                        <p>Contraste</p>
+                        <a href="javascript:void(0);" id="contrast-increase" title="Aumentar contraste" aria-label="Aumentar contraste" role="button">+</a>
+                        <a href="javascript:void(0);" id="contrast-decrease" title="Diminuir contraste" aria-label="Diminuir contraste" role="button">-</a>
+                    </div>
+                </div>
+                                <div class="menu-pesquisar">
+    <form method="GET" action="https://www.hemominas.mg.gov.br/busca" role="search">
+        <label for="site-search-input" class="sr-only">Pesquisar no site da Hemominas</label>
+        <input type="search" id="site-search-input" name="q" placeholder="Pesquisar..." value="" required>
+        <button type="submit" aria-label="Pesquisar"><ion-icon name="search-outline" aria-hidden="true"></ion-icon></button>
+    </form>
+</div>
+                            </div>
+        </div>
+    </div>
+    <div class="menu-principal">
+        <div class="conteudo-center-1200">
+            <div class="menu-principal-div">
+                                <a class="logo-hemominas" href="https://www.hemominas.mg.gov.br" aria-label="Hemominas — página inicial">
+                    <span class="sr-only">Hemominas — Fundação Centro de Hematologia e Hemoterapia de Minas Gerais</span>
+                </a>
+                                <div class="menu-principal-div-links">
+                    <a class="menu-principal-div-links-a menu-principal-ativo" href="https://www.hemominas.mg.gov.br">Página Inicial</a>
+                    <div class="menu-principal-div-links-submenu ">
+                        <button type="button"
+                                class="menu-principal-servicos-toggle"
+                                aria-haspopup="true"
+                                aria-expanded="false"
+                                aria-controls="submenu-servicos-principal">
+                            Serviços
+                        </button>
+                        <div id="submenu-servicos-principal" role="menu" aria-label="Serviços">
+                                                        
+                                                            <span>Cidadão</span>
+                                                                    <a href="https://www.hemominas.mg.gov.br/servicos/cadastrar-se-como-candidato-a-doacao-de-medula-ossea">Cadastrar-se como candidato à doação de medula óssea</a>
+                                                                    <a href="https://www.hemominas.mg.gov.br/servicos/consultar-acervo-digital-de-biblioteca-especializada-em-hematologia-e-hemoterapia">Consultar acervo digital de biblioteca especializada em Hematologia e Hemoterapia</a>
+                                                                    <a href="https://www.hemominas.mg.gov.br/servicos/doar-hemacias-por-aferese">Doar hemácias por aférese</a>
+                                                                    <a href="https://www.hemominas.mg.gov.br/servicos/obter-atendimento-para-tratamento-de-coagulopatias-hereditarias">Obter atendimento para tratamento de coagulopatias hereditárias</a>
+                                                                    <a href="https://www.hemominas.mg.gov.br/servicos/obter-atendimento-para-tratamento-de-hemoglobinopatias">Obter atendimento para tratamento de hemoglobinopatias</a>
+                                                                    <a href="https://www.hemominas.mg.gov.br/servicos/realizar-a-parte-pratica-da-residencia-em-hematologia-e-hemoterapia">Realizar a parte prática da Residência em Hematologia e Hemoterapia</a>
+                                                                    <a href="https://www.hemominas.mg.gov.br/servicos/realizar-capacitacao-em-hematologia-e-hemoterapia">Realizar capacitação em Hematologia e Hemoterapia</a>
+                                                                    <a href="https://www.hemominas.mg.gov.br/servicos/realizar-capacitacao-em-hematologia-e-hemoterapia-para-atuacao-nas-agencias-transfusionais-e-assistencias-hemoterapicas">Realizar capacitação em Hematologia e Hemoterapia para atuação nas Agências Transfusionais e Assistências Hemoterápicas</a>
+                                                                    <a href="https://www.hemominas.mg.gov.br/servicos/realizar-tipificacao-de-hla-antigeno-leococitario-humano">Realizar tipificação de HLA (Antígeno Leococitário Humano)</a>
+                                                                    <a href="https://www.hemominas.mg.gov.br/servicos/submeter-se-a-sangria-terapeutica">Submeter-se à sangria terapêutica</a>
+                                                                    <a href="https://www.hemominas.mg.gov.br/servicos/submeter-se-a-transfusao-sanguinea">Submeter-se à transfusão sanguínea</a>
+                                                                    <a href="https://www.hemominas.mg.gov.br/servicos/consultar-acervo-fisico-da-biblioteca-especializada-em-hematologia-e-hemoterapia">Consultar acervo físico da biblioteca especializada em Hematologia e Hemoterapia</a>
+                                                                    <a href="https://www.hemominas.mg.gov.br/servicos/desenvolver-pesquisa-cientifica-em-hematologia-e-hemoterapia-que-envolve-seres-humanos">Desenvolver pesquisa científica em hematologia e hemoterapia que envolve seres humanos</a>
+                                                                    <a href="https://www.hemominas.mg.gov.br/servicos/desenvolver-pesquisa-cientifica-em-hematologia-e-hemoterapia-que-nao-envolve-seres-humanos">Desenvolver pesquisa científica em hematologia e hemoterapia que não envolve seres humanos</a>
+                                                                    <a href="https://www.hemominas.mg.gov.br/servicos/doar-plaquetas-por-aferese">Doar plaquetas por aférese</a>
+                                                                    <a href="https://www.hemominas.mg.gov.br/servicos/doar-sangue">Doar sangue</a>
+                                                                    <a href="https://www.hemominas.mg.gov.br/servicos/fazer-estagio-nao-obrigatorio-na-hemominas">Fazer Estágio Não Obrigatório na Hemominas</a>
+                                                                                        
+                                                            <span>Contratantes</span>
+                                                                    <a href="https://www.hemominas.mg.gov.br/servicos/contratar-servicos-de-fornecimento-de-sangue">Contratar serviços de fornecimento de sangue</a>
+                                                                    <a href="https://www.hemominas.mg.gov.br/servicos/obter-hemocomponentes-para-transfusao-via-agencias-transfusionais">Obter hemocomponentes para transfusão via Agências Transfusionais</a>
+                                                                    <a href="https://www.hemominas.mg.gov.br/servicos/obter-hemocomponentes-para-transfusao-via-assistencias-hemoterapicas">Obter hemocomponentes para transfusão via Assistências Hemoterápicas</a>
+                                                                    <a href="https://www.hemominas.mg.gov.br/servicos/realizar-coleta-de-celulas-progenitoras-hematopoeticas-para-transplante">Realizar coleta de células progenitoras hematopoéticas para transplante</a>
+                                                                    <a href="https://www.hemominas.mg.gov.br/servicos/realizar-controle-de-qualidade-de-concentrado-de-linfocitos-ou-celulas-progenitoras-hematopoeticas">Realizar controle de qualidade de concentrado de linfócitos ou células progenitoras hematopoéticas</a>
+                                                                    <a href="https://www.hemominas.mg.gov.br/servicos/realizar-criopreservacao-e-armazenamento-de-celulas-progenitoras-hematopoeticas-cph-ou-concentrado-de-linfocitos-cl">Realizar criopreservação e armazenamento de células progenitoras hematopoéticas (CPH) ou concentrado de linfócitos (CL)</a>
+                                                                    <a href="https://www.hemominas.mg.gov.br/servicos/realizar-deseritrocitacao-eou-desplasmatizacao-de-unidade-contendo-celulas-progenitoras-hematopoeticas-da-medula-ossea-coletadas-por-puncao-aspirativa">Realizar deseritrocitação e/ou desplasmatização de unidade contendo células progenitoras hematopoéticas da medula óssea coletadas por punção aspirativa</a>
+                                                                    <a href="https://www.hemominas.mg.gov.br/servicos/realizar-exames-de-imuno-hematologia-hematologia-sorologia-e-testes-de-acidos-nucleicos-nat">Realizar exames de imuno-hematologia, hematologia, sorologia e testes de ácidos nucleicos( NAT)</a>
+                                                                    <a href="https://www.hemominas.mg.gov.br/servicos/realizar-quantificacao-de-celulas-cd34-positivas-por-citometria-de-fluxo">Realizar quantificação de células CD34 positivas por citometria de fluxo</a>
+                                                                                        
+                                                    </div>
+                    </div>
+                    <a class="menu-principal-div-links-a" href="https://www.hemominas.mg.gov.br/mapa-do-site">Mapa do site</a>
+                    <!-- <a class="menu-principal-div-links-a " href="https://www.hemominas.mg.gov.br/horarios-de-atendimento">Horários de Atendimento</a> -->
+                    <a class="menu-principal-div-links-a " href="https://www.hemominas.mg.gov.br/acessibilidade">Acessibilidade</a>
+                    <a class="menu-principal-div-links-a " href="https://www.hemominas.mg.gov.br/protecao-de-dados">Proteção de Dados</a>
+                    <a class="menu-principal-div-links-a " href="https://www.hemominas.mg.gov.br/transparencia">Transparência</a>
+                </div>
+
+                                                        <div class="menu-principal-div-redes-sociais">
+                        <a class="redes-sociais-a" href="https://www.instagram.com/hemominas" target="_blank" rel="noopener noreferrer" aria-label="Instagram da Hemominas"><ion-icon name="logo-instagram" aria-hidden="true"></ion-icon></a>
+    <a class="redes-sociais-a" href="https://www.facebook.com/hemominas" target="_blank" rel="noopener noreferrer" aria-label="Facebook da Hemominas"><ion-icon name="logo-facebook" aria-hidden="true"></ion-icon></a>
+    <a class="redes-sociais-a" href="https://x.com/hemominas" target="_blank" rel="noopener noreferrer" aria-label="X (Twitter) da Hemominas">
+        <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+            <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+        </svg>
+    </a>
+    <a class="redes-sociais-a" href="https://www.youtube.com/user/HemominasDoeSangue" target="_blank" rel="noopener noreferrer" aria-label="YouTube da Hemominas"><ion-icon name="logo-youtube" aria-hidden="true"></ion-icon></a>
+                    </div>
+                                    
+                <button type="button" class="show-mobile-1024 icon-menu" aria-label="Abrir menu de navegação" aria-expanded="false" aria-controls="menu-mobile-panel"></button>
+                                <div class="show-mobile-1024 menu-pesquisar-mobile">
+                    <div class="menu-pesquisar">
+    <form method="GET" action="https://www.hemominas.mg.gov.br/busca" role="search">
+        <label for="site-search-input" class="sr-only">Pesquisar no site da Hemominas</label>
+        <input type="search" id="site-search-input" name="q" placeholder="Pesquisar..." value="" required>
+        <button type="submit" aria-label="Pesquisar"><ion-icon name="search-outline" aria-hidden="true"></ion-icon></button>
+    </form>
+</div>
+                </div>
+                            </div>
+        </div>
+    </div>
+
+    <div class="menu-inferior">
+        <div class="conteudo-center-1200">
+            <nav class="menu-inferior-interna" role="navigation" aria-label="Menu principal">
+                                                        <div class="menu-inferior-interna-item" data-menu-id="1">
+                                                    <button type="button"
+                                    class="menu-inferior-interna-item-a menu-submenu-toggle"
+                                    aria-haspopup="true"
+                                    aria-expanded="false"
+                                    aria-controls="submenu-menu-1">
+                                A HEMOMINAS
+                            </button>
+                                                                            <div id="submenu-menu-1" class="menu-inferior-interna-item-submenu " role="menu" aria-label="Submenu A HEMOMINAS">
+                                <div class="menu-inferior-interna-item-submenu-div">
+                                                                                                                        <div class="menu-inferior-interna-item-submenu-div-coluna">
+                                                <span role="presentation">SOBRE NÓS</span>
+                                                                                                                                                                                                                <a class="" href="/missao-e-valores" target="_self" role="menuitem">Missão e Valores</a>
+                                                                                                                                                                                                                                                                    <a class="" href="/objetivo-operacional-e-competencia-legal" target="_self" role="menuitem">Objetivo Operacional e Competência Legal</a>
+                                                                                                                                                                                                                                                                    <a class="" href="/integracao-institucional" target="_self" role="menuitem">Integração Institucional</a>
+                                                                                                                                                                                                                                                                    <a class="" href="/composicao-de-conselhos" target="_self" role="menuitem">Composição de Conselhos</a>
+                                                                                                                                                                                                                                                                    <a class="" href="/comissao-de-etica" target="_self" role="menuitem">Comissão de Ética</a>
+                                                                                                                                                                                                                                                                    <a class="" href="/organograma" target="_self" role="menuitem">Organograma</a>
+                                                                                                                                                                                                                                                                    <a class="" href="/quem-e-quem" target="_self" role="menuitem">Quem é Quem</a>
+                                                                                                                                                                                                                                                                    <a class="rmv-box-shadow" href="/legislacao" target="_self" role="menuitem">Legislação</a>
+                                                                                                                                                </div>
+                                                                                    <div class="menu-inferior-interna-item-submenu-div-coluna">
+                                                <span role="presentation">CONHEÇA</span>
+                                                                                                                                                                                                                <a class="" href="/acreditacao" target="_self" role="menuitem">Acreditação</a>
+                                                                                                                                                                                                                                                                    <a class="" href="/humanizacao" target="_self" role="menuitem">Humanização</a>
+                                                                                                                                                                                                                                                                    <a class="" href="/planejamento-estrategico" target="_self" role="menuitem">Planejamento Estratégico</a>
+                                                                                                                                                                                                                                                                    <a class="" href="/integridade" target="_self" role="menuitem">Integridade</a>
+                                                                                                                                                                                                                                                                    <a class="" href="/plano-diretor" target="_self" role="menuitem">Plano Diretor</a>
+                                                                                                                                                                                                                                                                    <a class="" href="/reconhecimento" target="_self" role="menuitem">Reconhecimento</a>
+                                                                                                                                                                                                                                                                    <a class="rmv-box-shadow" href="/responsabilidade-socio-ambiental" target="_self" role="menuitem">Responsabilidade socio-ambiental</a>
+                                                                                                                                                </div>
+                                                                                    <div class="menu-inferior-interna-item-submenu-div-coluna">
+                                                <span role="presentation">HISTÓRIA</span>
+                                                                                                                                                                                                                <a class="" href="/hemominas-no-tempo" target="_self" role="menuitem">Hemominas no tempo</a>
+                                                                                                                                                                                                                                                                    <a class="" href="/hemominas-hoje" target="_self" role="menuitem">Hemominas hoje</a>
+                                                                                                                                                                                                                                                                    <a class="" href="/ex-presidentes" target="_self" role="menuitem">Ex-Presidentes</a>
+                                                                                                                                                                                                                                                                    <a class="rmv-box-shadow" href="/antecedentes-hemoterapia-em-minas" target="_self" role="menuitem">Antecedentes: Hemoterapia em Minas</a>
+                                                                                                                                                </div>
+                                                                                    <div class="menu-inferior-interna-item-submenu-div-coluna">
+                                                <span role="presentation">PROGRAMAS E AÇÕES</span>
+                                                                                                                                                                                                                <a class="" href="/assistencia-em-hematologia-hemoterapia-celulas-e-tecidos-biologicos" target="_self" role="menuitem">Assistência em Hematologia, Hemoterapia, Células e Tecidos Biológicos</a>
+                                                                                                                                                                                                                                                                    <a class="rmv-box-shadow" href="/apoio-as-politicas-publicas" target="_self" role="menuitem">Apoio às Políticas Públicas</a>
+                                                                                                                                                </div>
+                                                                                                            </div>
+                            </div>
+                                            </div>
+                                                        <div class="menu-inferior-interna-item" data-menu-id="2">
+                                                    <button type="button"
+                                    class="menu-inferior-interna-item-a menu-submenu-toggle"
+                                    aria-haspopup="true"
+                                    aria-expanded="false"
+                                    aria-controls="submenu-menu-2">
+                                DOAÇÃO E ATENDIMENTO AMBULATORIAL
+                            </button>
+                                                                            <div id="submenu-menu-2" class="menu-inferior-interna-item-submenu " role="menu" aria-label="Submenu DOAÇÃO E ATENDIMENTO AMBULATORIAL">
+                                <div class="menu-inferior-interna-item-submenu-div">
+                                                                                                                        <div class="menu-inferior-interna-item-submenu-div-coluna">
+                                                <span role="presentation">DOAÇÃO DE SANGUE</span>
+                                                                                                                                                                                                                <a class="" href="/condicoes-e-restricoes" target="_self" role="menuitem">Condições e restrições</a>
+                                                                                                                                                                                                                                                                    <a class="" href="/orientacoes-sobre-doacao" target="_self" role="menuitem">Orientações sobre doação</a>
+                                                                                                                                                                                                                                                                    <a class="rmv-box-shadow" href="/doacao-por-aferese" target="_self" role="menuitem">Doação por aférese</a>
+                                                                                                                                                </div>
+                                                                                    <div class="menu-inferior-interna-item-submenu-div-coluna">
+                                                <span role="presentation">AMBULATÓRIO</span>
+                                                                                                                                                                                                                <a class="" href="/doacao-de-medula-ossea" target="_self" role="menuitem">Doação de medula óssea</a>
+                                                                                                                                                                                                                                                                    <a class="" href="/tipos-de-atendimento" target="_self" role="menuitem">Tipos de atendimento</a>
+                                                                                                                                                                                                                                                                    <a class="rmv-box-shadow" href="/atencao-multidisciplinar" target="_self" role="menuitem">Atenção multidisciplinar</a>
+                                                                                                                                                </div>
+                                                                                    <div class="menu-inferior-interna-item-submenu-div-coluna">
+                                                <span role="presentation">HEMOTERAPIA</span>
+                                                                                                                                                                                                                <a class="" href="/o-sangue" target="_self" role="menuitem">O sangue</a>
+                                                                                                                                                                                                                                                                    <a class="" href="/sangue-breve-historia" target="_self" role="menuitem">Sangue – breve história</a>
+                                                                                                                                                                                                                                                                    <a class="" href="/fracionamento" target="_self" role="menuitem">Fracionamento</a>
+                                                                                                                                                                                                                                                                    <a class="" href="/hemocomponentes-e-hemoderivados" target="_self" role="menuitem">Hemocomponentes e Hemoderivados</a>
+                                                                                                                                                                                                                                                                    <a class="" href="/componentes-e-tipos-sanguineos" target="_self" role="menuitem">Componentes e tipos sanguíneos</a>
+                                                                                                                                                                                                                                                                    <a class="" href="/usos-e-aplicacoes-de-hemocomponentes" target="_self" role="menuitem">Usos e aplicações de Hemocomponentes</a>
+                                                                                                                                                                                                                                                                    <a class="rmv-box-shadow" href="/programa-pbm" target="_self" role="menuitem">Programa PBM</a>
+                                                                                                                                                </div>
+                                                                                    <div class="menu-inferior-interna-item-submenu-div-coluna">
+                                                <span role="presentation">HEMATOLOGIA</span>
+                                                                                                                                                                                                                <a class="" href="/htlv-e-doencas-associadas" target="_self" role="menuitem">HTLV e doenças associadas</a>
+                                                                                                                                                                                                                                                                    <a class="rmv-box-shadow" href="/doencas-do-sangue" target="_self" role="menuitem">Doenças do sangue</a>
+                                                                                                                                                </div>
+                                                                                    <div class="menu-inferior-interna-item-submenu-div-coluna">
+                                                <span role="presentation">SAIBA MAIS</span>
+                                                                                                                                                                                                                <a class="" href="/coleta-externa" target="_self" role="menuitem">Coleta externa</a>
+                                                                                                                                                                                                                                                                    <a class="" href="/grupos-e-caravanas" target="_self" role="menuitem">Grupos e caravanas</a>
+                                                                                                                                                                                                                                                                    <a class="" href="/programa-doador-do-futuro" target="_self" role="menuitem">Programa Doador do Futuro</a>
+                                                                                                                                                                                                                                                                    <a class="rmv-box-shadow" href="/unidade-movel-de-coleta-externa" target="_self" role="menuitem">Unidade Móvel de Coleta Externa</a>
+                                                                                                                                                </div>
+                                                                                                            </div>
+                            </div>
+                                            </div>
+                                                        <div class="menu-inferior-interna-item" data-menu-id="3">
+                                                    <button type="button"
+                                    class="menu-inferior-interna-item-a menu-submenu-toggle"
+                                    aria-haspopup="true"
+                                    aria-expanded="false"
+                                    aria-controls="submenu-menu-3">
+                                UNIDADES E CONTRATANTES
+                            </button>
+                                                                            <div id="submenu-menu-3" class="menu-inferior-interna-item-submenu " role="menu" aria-label="Submenu UNIDADES E CONTRATANTES">
+                                <div class="menu-inferior-interna-item-submenu-div">
+                                                                                                                        <div class="menu-inferior-interna-item-submenu-div-coluna">
+                                                <span role="presentation">REDE HEMOMINAS</span>
+                                                                                                                                                                                                                <a class="" href="/hemocentro" target="_self" role="menuitem">Hemocentro</a>
+                                                                                                                                                                                                                                                                    <a class="" href="/hemonucleo" target="_self" role="menuitem">Hemonúcleo</a>
+                                                                                                                                                                                                                                                                    <a class="" href="/unidade-de-coleta-e-transfusao" target="_self" role="menuitem">Unidade de coleta e transfusão</a>
+                                                                                                                                                                                                                                                                    <a class="" href="/posto-avancado-de-coleta-externa-pace" target="_self" role="menuitem">Posto Avançado de Coleta Externa - PACE</a>
+                                                                                                                                                                                                                                                                    <a class="rmv-box-shadow" href="/cetebio" target="_self" role="menuitem">Cetebio</a>
+                                                                                                                                                </div>
+                                                                                    <div class="menu-inferior-interna-item-submenu-div-coluna">
+                                                <span role="presentation">CONTRATANTES</span>
+                                                                                                                                                                                                                <a class="" href="/como-se-tornar-um-contratante" target="_self" role="menuitem">Como se tornar um contratante</a>
+                                                                                                                                                                                                                                                                    <a class="" href="http://200.198.51.99/canal_atendimento_contratante/app/index.php" target="_blank" role="menuitem">Canal de atendimento</a>
+                                                                                                                                                                                                                                                                    <a class="" href="/centros-transplantadores" target="_self" role="menuitem">Centros Transplantadores</a>
+                                                                                                                                                                                                                                                                    <a class="rmv-box-shadow" href="/plasmaferese" target="_self" role="menuitem">Plasmaférese</a>
+                                                                                                                                                </div>
+                                                                                                            </div>
+                            </div>
+                                            </div>
+                                                        <div class="menu-inferior-interna-item" data-menu-id="4">
+                                                    <button type="button"
+                                    class="menu-inferior-interna-item-a menu-submenu-toggle"
+                                    aria-haspopup="true"
+                                    aria-expanded="false"
+                                    aria-controls="submenu-menu-4">
+                                ENSINO E PESQUISA
+                            </button>
+                                                                            <div id="submenu-menu-4" class="menu-inferior-interna-item-submenu " role="menu" aria-label="Submenu ENSINO E PESQUISA">
+                                <div class="menu-inferior-interna-item-submenu-div">
+                                                                                                                        <div class="menu-inferior-interna-item-submenu-div-coluna">
+                                                <span role="presentation">PESQUISA CIENTÍFICA</span>
+                                                                                                                                                                                                                <a class="" href="/servico-de-pesquisa" target="_self" role="menuitem">Serviço de pesquisa</a>
+                                                                                                                                                                                                                                                                    <a class="" href="/fluxo-de-desenvolvimento-de-pesquisa" target="_self" role="menuitem">Fluxo de desenvolvimento de pesquisa</a>
+                                                                                                                                                                                                                                                                    <a class="" href="/projetos-de-pesquisa" target="_self" role="menuitem">Projetos de Pesquisa</a>
+                                                                                                                                                                                                                                                                    <a class="" href="/comite-de-etica" target="_self" role="menuitem">Comitê de ética</a>
+                                                                                                                                                                                                                                                                    <a class="" href="/linhas-e-grupos-de-pesquisa" target="_self" role="menuitem">Linhas e Grupos de Pesquisa</a>
+                                                                                                                                                                                                                                                                    <a class="" href="/fundacoes-de-apoio" target="_self" role="menuitem">Fundações de Apoio</a>
+                                                                                                                                                                                                                                                                    <a class="" href="/iniciacao-cientifica" target="_self" role="menuitem">Iniciação Científica</a>
+                                                                                                                                                                                                                                                                    <a class="rmv-box-shadow" href="/uso-de-redcap" target="_self" role="menuitem">Uso de REDCap</a>
+                                                                                                                                                </div>
+                                                                                    <div class="menu-inferior-interna-item-submenu-div-coluna">
+                                                <span role="presentation">BIOBANCO</span>
+                                                                                                                                                                                                                <a class="rmv-box-shadow" href="/biobanco-da-fundacao-hemominas" target="_self" role="menuitem">Biobanco da Fundação Hemominas</a>
+                                                                                                                                                </div>
+                                                                                    <div class="menu-inferior-interna-item-submenu-div-coluna">
+                                                <span role="presentation">ENSINO</span>
+                                                                                                                                                                                                                <a class="" href="/treinamento-de-publico-externo" target="_self" role="menuitem">Treinamento de público externo</a>
+                                                                                                                                                                                                                                                                    <a class="" href="/visita-tecnica" target="_self" role="menuitem">Visita técnica</a>
+                                                                                                                                                                                                                                                                    <a class="" href="/palestra-tecnica" target="_self" role="menuitem">Palestra técnica</a>
+                                                                                                                                                                                                                                                                    <a class="rmv-box-shadow" href="/estagios" target="_self" role="menuitem">Estágios</a>
+                                                                                                                                                </div>
+                                                                                    <div class="menu-inferior-interna-item-submenu-div-coluna">
+                                                <span role="presentation">INOVAÇÃO</span>
+                                                                                                                                                                                                                <a class="" href="/sobre-o-nucleo-de-inovacoes-tecnologicas-nit" target="_self" role="menuitem">Sobre o Núcleo de Inovações Tecnológicas - NIT</a>
+                                                                                                                                                                                                                                                                    <a class="" href="/orientacoes-para-inovacao" target="_self" role="menuitem">Orientações para Inovação</a>
+                                                                                                                                                                                                                                                                    <a class="rmv-box-shadow" href="/propriedade-intelectual-e-inovacao" target="_self" role="menuitem">Propriedade intelectual e inovação</a>
+                                                                                                                                                </div>
+                                                                                    <div class="menu-inferior-interna-item-submenu-div-coluna">
+                                                <span role="presentation">BIBLIOTECA</span>
+                                                                                                                                                                                                                <a class="" href="/conheca-a-biblioteca" target="_self" role="menuitem">Conheça a Biblioteca</a>
+                                                                                                                                                                                                                                                                    <a class="" href="/consulte-o-acervo-biblivre" target="_self" role="menuitem">Consulte o acervo (Biblivre)</a>
+                                                                                                                                                                                                                                                                    <a class="rmv-box-shadow" href="/publicacoes-hemominas" target="_self" role="menuitem">Publicações Hemominas</a>
+                                                                                                                                                </div>
+                                                                                                            </div>
+                            </div>
+                                            </div>
+                                                        <div class="menu-inferior-interna-item" data-menu-id="5">
+                                                    <button type="button"
+                                    class="menu-inferior-interna-item-a menu-submenu-toggle"
+                                    aria-haspopup="true"
+                                    aria-expanded="false"
+                                    aria-controls="submenu-menu-5">
+                                LICITAÇÃO E CONTRATOS
+                            </button>
+                                                                            <div id="submenu-menu-5" class="menu-inferior-interna-item-submenu position-right-0" role="menu" aria-label="Submenu LICITAÇÃO E CONTRATOS">
+                                <div class="menu-inferior-interna-item-submenu-div">
+                                                                                                                        <div class="menu-inferior-interna-item-submenu-div-coluna">
+                                                <span role="presentation">LICITAÇÃO</span>
+                                                                                                                                                                                                                <a class="" href="/avisos-de-licitacao" target="_self" role="menuitem">Avisos de Licitação</a>
+                                                                                                                                                                                                                                                                    <a class="" href="/resultados-de-licitacao" target="_self" role="menuitem">Resultados de Licitação</a>
+                                                                                                                                                                                                                                                                    <a class="" href="/portal-de-compras" target="_self" role="menuitem">Portal de Compras</a>
+                                                                                                                                                                                                                                                                    <a class="rmv-box-shadow" href="/responsaveis-nas-unidades" target="_self" role="menuitem">Responsáveis nas unidades</a>
+                                                                                                                                                </div>
+                                                                                    <div class="menu-inferior-interna-item-submenu-div-coluna">
+                                                <span role="presentation">CONTRATO</span>
+                                                                                                                                                                                                                <a class="rmv-box-shadow" href="/contratos-celebrados" target="_self" role="menuitem">Contratos Celebrados</a>
+                                                                                                                                                </div>
+                                                                                    <div class="menu-inferior-interna-item-submenu-div-coluna">
+                                                <span role="presentation">CHAMAMENTO PÚBLICO E SESSÃO PÚBLICA</span>
+                                                                                                                                                                                                                <a class="" href="/chamamento-publico" target="_self" role="menuitem">Chamamento Público</a>
+                                                                                                                                                                                                                                                                    <a class="rmv-box-shadow" href="/sessao-publica" target="_self" role="menuitem">Sessão Pública</a>
+                                                                                                                                                </div>
+                                                                                    <div class="menu-inferior-interna-item-submenu-div-coluna">
+                                                <span role="presentation">DOAÇÕES DE BENS E SERVIÇOS</span>
+                                                                                                                                                                                                                <a class="rmv-box-shadow" href="/propostas-de-doacoes-de-bens-e-servicos" target="_self" role="menuitem">Propostas de Doações de Bens e Serviços</a>
+                                                                                                                                                </div>
+                                                                                    <div class="menu-inferior-interna-item-submenu-div-coluna">
+                                                <span role="presentation">LEGISLAÇÃO</span>
+                                                                                                                                                                                                                <a class="" href="/contratos" target="_self" role="menuitem">Contratos</a>
+                                                                                                                                                                                                                                                                    <a class="rmv-box-shadow" href="/licitacao" target="_self" role="menuitem">Licitação</a>
+                                                                                                                                                </div>
+                                                                                                            </div>
+                            </div>
+                                            </div>
+                                                        <div class="menu-inferior-interna-item" data-menu-id="6">
+                                                    <button type="button"
+                                    class="menu-inferior-interna-item-a menu-submenu-toggle"
+                                    aria-haspopup="true"
+                                    aria-expanded="false"
+                                    aria-controls="submenu-menu-6">
+                                TRABALHE
+                            </button>
+                                                                            <div id="submenu-menu-6" class="menu-inferior-interna-item-submenu position-right-0" role="menu" aria-label="Submenu TRABALHE">
+                                <div class="menu-inferior-interna-item-submenu-div">
+                                                                            <div class="menu-inferior-interna-item-submenu-div-coluna">
+                                                                                                                                                                                                <a class="" href="/concurso-publico" target="_self" role="menuitem">Concurso Público</a>
+                                                                                                                                                                                                                                                <a class="" href="/selecao-publica" target="_self" role="menuitem">Seleção Pública</a>
+                                                                                                                                                                                                                                                <a class="rmv-box-shadow" href="/programas-de-estagio" target="_self" role="menuitem">Programas de Estágio</a>
+                                                                                                                                    </div>
+                                                                    </div>
+                            </div>
+                                            </div>
+                                                        <div class="menu-inferior-interna-item" data-menu-id="7">
+                                                    <button type="button"
+                                    class="menu-inferior-interna-item-a menu-submenu-toggle"
+                                    aria-haspopup="true"
+                                    aria-expanded="false"
+                                    aria-controls="submenu-menu-7">
+                                ATENDIMENTO
+                            </button>
+                                                                            <div id="submenu-menu-7" class="menu-inferior-interna-item-submenu position-right-0" role="menu" aria-label="Submenu ATENDIMENTO">
+                                <div class="menu-inferior-interna-item-submenu-div">
+                                                                            <div class="menu-inferior-interna-item-submenu-div-coluna">
+                                                                                                                                                                                                <a class="" href="/fale-conosco" target="_self" role="menuitem">Fale Conosco</a>
+                                                                                                                                                                                                                                                <a class="" href="/duvidas-frequentes" target="_self" role="menuitem">Dúvidas Frequentes</a>
+                                                                                                                                                                                                                                                <a class="" href="/horarios-de-atendimento" target="_self" role="menuitem">Horários de atendimento</a>
+                                                                                                                                                                                                                                                <a class="" href="/ouvidoria-do-sushemominas" target="_self" role="menuitem">Ouvidoria do SUS/Hemominas</a>
+                                                                                                                                                                                                                                                <a class="rmv-box-shadow" href="/imprensa" target="_self" role="menuitem">Imprensa</a>
+                                                                                                                                    </div>
+                                                                    </div>
+                            </div>
+                                            </div>
+                            </nav>
+        </div>
+    </div>
+</header>
+
+<div class="menu-mobile" id="menu-mobile-panel" role="dialog" aria-modal="true" aria-label="Menu de navegação" aria-hidden="true">
+    <div class="menu-mobile-container">
+                <div class="menu-mobile-container-logo" role="img" aria-label="Logotipo da Hemominas"></div>
+                <div class="menu-mobile-container-itens">
+            <div class="menu-mobile-container-itens-item">
+                <a class="menu-mobile-container-itens-item-a" href="https://www.hemominas.mg.gov.br">Página Inicial</a>
+            </div>
+            <!-- Menu de Serviços dinâmico -->
+            <div class="menu-mobile-container-itens-item">
+                <button type="button"
+                        class="menu-mobile-container-itens-item-a abrir-submenu-mobile menu-submenu-mobile-toggle"
+                        id="servicos-mobile"
+                        aria-expanded="false"
+                        aria-controls="submenu-mobile-servicos-mobile">
+                    Serviços
+                </button>
+                <button type="button"
+                        class="menu-submenu-mobile-toggle menu-mobile-submenu-icon"
+                        data-submenu-id="servicos-mobile"
+                        aria-label="Expandir submenu Serviços"
+                        aria-expanded="false"
+                        aria-controls="submenu-mobile-servicos-mobile">
+                    <ion-icon class="ion-icon-servicos-mobile" name="add-circle-outline" aria-hidden="true"></ion-icon>
+                </button>
+            </div>
+            <div class="menu-mobile-container-itens-item-submenu submenu-mobile-servicos-mobile" id="submenu-mobile-servicos-mobile">
+                                
+                                    <span>Cidadão</span>
+                                            <a class="" href="https://www.hemominas.mg.gov.br/servicos/cadastrar-se-como-candidato-a-doacao-de-medula-ossea">Cadastrar-se como candidato à doação de medula óssea</a>
+                                            <a class="" href="https://www.hemominas.mg.gov.br/servicos/consultar-acervo-digital-de-biblioteca-especializada-em-hematologia-e-hemoterapia">Consultar acervo digital de biblioteca especializada em Hematologia e Hemoterapia</a>
+                                            <a class="" href="https://www.hemominas.mg.gov.br/servicos/doar-hemacias-por-aferese">Doar hemácias por aférese</a>
+                                            <a class="" href="https://www.hemominas.mg.gov.br/servicos/obter-atendimento-para-tratamento-de-coagulopatias-hereditarias">Obter atendimento para tratamento de coagulopatias hereditárias</a>
+                                            <a class="" href="https://www.hemominas.mg.gov.br/servicos/obter-atendimento-para-tratamento-de-hemoglobinopatias">Obter atendimento para tratamento de hemoglobinopatias</a>
+                                            <a class="" href="https://www.hemominas.mg.gov.br/servicos/realizar-a-parte-pratica-da-residencia-em-hematologia-e-hemoterapia">Realizar a parte prática da Residência em Hematologia e Hemoterapia</a>
+                                            <a class="" href="https://www.hemominas.mg.gov.br/servicos/realizar-capacitacao-em-hematologia-e-hemoterapia">Realizar capacitação em Hematologia e Hemoterapia</a>
+                                            <a class="" href="https://www.hemominas.mg.gov.br/servicos/realizar-capacitacao-em-hematologia-e-hemoterapia-para-atuacao-nas-agencias-transfusionais-e-assistencias-hemoterapicas">Realizar capacitação em Hematologia e Hemoterapia para atuação nas Agências Transfusionais e Assistências Hemoterápicas</a>
+                                            <a class="" href="https://www.hemominas.mg.gov.br/servicos/realizar-tipificacao-de-hla-antigeno-leococitario-humano">Realizar tipificação de HLA (Antígeno Leococitário Humano)</a>
+                                            <a class="" href="https://www.hemominas.mg.gov.br/servicos/submeter-se-a-sangria-terapeutica">Submeter-se à sangria terapêutica</a>
+                                            <a class="" href="https://www.hemominas.mg.gov.br/servicos/submeter-se-a-transfusao-sanguinea">Submeter-se à transfusão sanguínea</a>
+                                            <a class="" href="https://www.hemominas.mg.gov.br/servicos/consultar-acervo-fisico-da-biblioteca-especializada-em-hematologia-e-hemoterapia">Consultar acervo físico da biblioteca especializada em Hematologia e Hemoterapia</a>
+                                            <a class="" href="https://www.hemominas.mg.gov.br/servicos/desenvolver-pesquisa-cientifica-em-hematologia-e-hemoterapia-que-envolve-seres-humanos">Desenvolver pesquisa científica em hematologia e hemoterapia que envolve seres humanos</a>
+                                            <a class="" href="https://www.hemominas.mg.gov.br/servicos/desenvolver-pesquisa-cientifica-em-hematologia-e-hemoterapia-que-nao-envolve-seres-humanos">Desenvolver pesquisa científica em hematologia e hemoterapia que não envolve seres humanos</a>
+                                            <a class="" href="https://www.hemominas.mg.gov.br/servicos/doar-plaquetas-por-aferese">Doar plaquetas por aférese</a>
+                                            <a class="" href="https://www.hemominas.mg.gov.br/servicos/doar-sangue">Doar sangue</a>
+                                            <a class="rmv-box-shadow" href="https://www.hemominas.mg.gov.br/servicos/fazer-estagio-nao-obrigatorio-na-hemominas">Fazer Estágio Não Obrigatório na Hemominas</a>
+                                                    
+                                    <span>Contratantes</span>
+                                            <a class="" href="https://www.hemominas.mg.gov.br/servicos/contratar-servicos-de-fornecimento-de-sangue">Contratar serviços de fornecimento de sangue</a>
+                                            <a class="" href="https://www.hemominas.mg.gov.br/servicos/obter-hemocomponentes-para-transfusao-via-agencias-transfusionais">Obter hemocomponentes para transfusão via Agências Transfusionais</a>
+                                            <a class="" href="https://www.hemominas.mg.gov.br/servicos/obter-hemocomponentes-para-transfusao-via-assistencias-hemoterapicas">Obter hemocomponentes para transfusão via Assistências Hemoterápicas</a>
+                                            <a class="" href="https://www.hemominas.mg.gov.br/servicos/realizar-coleta-de-celulas-progenitoras-hematopoeticas-para-transplante">Realizar coleta de células progenitoras hematopoéticas para transplante</a>
+                                            <a class="" href="https://www.hemominas.mg.gov.br/servicos/realizar-controle-de-qualidade-de-concentrado-de-linfocitos-ou-celulas-progenitoras-hematopoeticas">Realizar controle de qualidade de concentrado de linfócitos ou células progenitoras hematopoéticas</a>
+                                            <a class="" href="https://www.hemominas.mg.gov.br/servicos/realizar-criopreservacao-e-armazenamento-de-celulas-progenitoras-hematopoeticas-cph-ou-concentrado-de-linfocitos-cl">Realizar criopreservação e armazenamento de células progenitoras hematopoéticas (CPH) ou concentrado de linfócitos (CL)</a>
+                                            <a class="" href="https://www.hemominas.mg.gov.br/servicos/realizar-deseritrocitacao-eou-desplasmatizacao-de-unidade-contendo-celulas-progenitoras-hematopoeticas-da-medula-ossea-coletadas-por-puncao-aspirativa">Realizar deseritrocitação e/ou desplasmatização de unidade contendo células progenitoras hematopoéticas da medula óssea coletadas por punção aspirativa</a>
+                                            <a class="" href="https://www.hemominas.mg.gov.br/servicos/realizar-exames-de-imuno-hematologia-hematologia-sorologia-e-testes-de-acidos-nucleicos-nat">Realizar exames de imuno-hematologia, hematologia, sorologia e testes de ácidos nucleicos( NAT)</a>
+                                            <a class="rmv-box-shadow" href="https://www.hemominas.mg.gov.br/servicos/realizar-quantificacao-de-celulas-cd34-positivas-por-citometria-de-fluxo">Realizar quantificação de células CD34 positivas por citometria de fluxo</a>
+                                                    
+                            </div>
+            
+            <!-- Links fixos do menu -->
+            <div class="menu-mobile-container-itens-item">
+                <a class="menu-mobile-container-itens-item-a" href="https://www.hemominas.mg.gov.br/mapa-do-site">Mapa do site</a>
+            </div>
+            <div class="menu-mobile-container-itens-item">
+                <a class="menu-mobile-container-itens-item-a" href="https://www.hemominas.mg.gov.br/horarios-de-atendimento">Horários de Atendimento</a>
+            </div>
+            <div class="menu-mobile-container-itens-item">
+                <a class="menu-mobile-container-itens-item-a" href="https://www.hemominas.mg.gov.br/acessibilidade">Acessibilidade</a>
+            </div>
+            <div class="menu-mobile-container-itens-item">
+                <a class="menu-mobile-container-itens-item-a" href="https://www.hemominas.mg.gov.br/protecao-de-dados">Proteção de Dados</a>
+            </div>
+            <div class="menu-mobile-container-itens-item">
+                <a class="menu-mobile-container-itens-item-a" href="https://www.hemominas.mg.gov.br/transparencia">Transparência</a>
+            </div>
+            
+            <!-- Outros menus do sistema -->
+                                                <div class="menu-mobile-container-itens-item">
+                                                    <button type="button"
+                                    class="menu-mobile-container-itens-item-a abrir-submenu-mobile menu-submenu-mobile-toggle"
+                                    id="1"
+                                    aria-expanded="false"
+                                    aria-controls="submenu-mobile-1">
+                                A HEMOMINAS
+                            </button>
+                            <button type="button"
+                                    class="menu-submenu-mobile-toggle menu-mobile-submenu-icon abrir-submenu-mobile"
+                                    data-submenu-id="1"
+                                    aria-label="Expandir submenu A HEMOMINAS"
+                                    aria-expanded="false"
+                                    aria-controls="submenu-mobile-1">
+                                <ion-icon class="ion-icon-1" name="add-circle-outline" aria-hidden="true"></ion-icon>
+                            </button>
+                                            </div>
+                    <div class="menu-mobile-container-itens-item-submenu submenu-mobile-1" id="submenu-mobile-1">
+                                                                                    <span>SOBRE NÓS</span>
+                                                                                                            <a class="" href="/missao-e-valores" target="_self">Missão e Valores</a>
+                                                                                                                                                <a class="" href="/objetivo-operacional-e-competencia-legal" target="_self">Objetivo Operacional e Competência Legal</a>
+                                                                                                                                                <a class="" href="/integracao-institucional" target="_self">Integração Institucional</a>
+                                                                                                                                                <a class="" href="/composicao-de-conselhos" target="_self">Composição de Conselhos</a>
+                                                                                                                                                <a class="" href="/comissao-de-etica" target="_self">Comissão de Ética</a>
+                                                                                                                                                <a class="" href="/organograma" target="_self">Organograma</a>
+                                                                                                                                                <a class="" href="/quem-e-quem" target="_self">Quem é Quem</a>
+                                                                                                                                                <a class="rmv-box-shadow" href="/legislacao" target="_self">Legislação</a>
+                                                                                                                                <span>CONHEÇA</span>
+                                                                                                            <a class="" href="/acreditacao" target="_self">Acreditação</a>
+                                                                                                                                                <a class="" href="/humanizacao" target="_self">Humanização</a>
+                                                                                                                                                <a class="" href="/planejamento-estrategico" target="_self">Planejamento Estratégico</a>
+                                                                                                                                                <a class="" href="/integridade" target="_self">Integridade</a>
+                                                                                                                                                <a class="" href="/plano-diretor" target="_self">Plano Diretor</a>
+                                                                                                                                                <a class="" href="/reconhecimento" target="_self">Reconhecimento</a>
+                                                                                                                                                <a class="rmv-box-shadow" href="/responsabilidade-socio-ambiental" target="_self">Responsabilidade socio-ambiental</a>
+                                                                                                                                <span>HISTÓRIA</span>
+                                                                                                            <a class="" href="/hemominas-no-tempo" target="_self">Hemominas no tempo</a>
+                                                                                                                                                <a class="" href="/hemominas-hoje" target="_self">Hemominas hoje</a>
+                                                                                                                                                <a class="" href="/ex-presidentes" target="_self">Ex-Presidentes</a>
+                                                                                                                                                <a class="rmv-box-shadow" href="/antecedentes-hemoterapia-em-minas" target="_self">Antecedentes: Hemoterapia em Minas</a>
+                                                                                                                                <span>PROGRAMAS E AÇÕES</span>
+                                                                                                            <a class="" href="/assistencia-em-hematologia-hemoterapia-celulas-e-tecidos-biologicos" target="_self">Assistência em Hematologia, Hemoterapia, Células e Tecidos Biológicos</a>
+                                                                                                                                                <a class="rmv-box-shadow" href="/apoio-as-politicas-publicas" target="_self">Apoio às Políticas Públicas</a>
+                                                                                                                                            </div>
+                                                                <div class="menu-mobile-container-itens-item">
+                                                    <button type="button"
+                                    class="menu-mobile-container-itens-item-a abrir-submenu-mobile menu-submenu-mobile-toggle"
+                                    id="2"
+                                    aria-expanded="false"
+                                    aria-controls="submenu-mobile-2">
+                                DOAÇÃO E ATENDIMENTO AMBULATORIAL
+                            </button>
+                            <button type="button"
+                                    class="menu-submenu-mobile-toggle menu-mobile-submenu-icon abrir-submenu-mobile"
+                                    data-submenu-id="2"
+                                    aria-label="Expandir submenu DOAÇÃO E ATENDIMENTO AMBULATORIAL"
+                                    aria-expanded="false"
+                                    aria-controls="submenu-mobile-2">
+                                <ion-icon class="ion-icon-2" name="add-circle-outline" aria-hidden="true"></ion-icon>
+                            </button>
+                                            </div>
+                    <div class="menu-mobile-container-itens-item-submenu submenu-mobile-2" id="submenu-mobile-2">
+                                                                                    <span>DOAÇÃO DE SANGUE</span>
+                                                                                                            <a class="" href="/condicoes-e-restricoes" target="_self">Condições e restrições</a>
+                                                                                                                                                <a class="" href="/orientacoes-sobre-doacao" target="_self">Orientações sobre doação</a>
+                                                                                                                                                <a class="rmv-box-shadow" href="/doacao-por-aferese" target="_self">Doação por aférese</a>
+                                                                                                                                <span>AMBULATÓRIO</span>
+                                                                                                            <a class="" href="/doacao-de-medula-ossea" target="_self">Doação de medula óssea</a>
+                                                                                                                                                <a class="" href="/tipos-de-atendimento" target="_self">Tipos de atendimento</a>
+                                                                                                                                                <a class="rmv-box-shadow" href="/atencao-multidisciplinar" target="_self">Atenção multidisciplinar</a>
+                                                                                                                                <span>HEMOTERAPIA</span>
+                                                                                                            <a class="" href="/o-sangue" target="_self">O sangue</a>
+                                                                                                                                                <a class="" href="/sangue-breve-historia" target="_self">Sangue – breve história</a>
+                                                                                                                                                <a class="" href="/fracionamento" target="_self">Fracionamento</a>
+                                                                                                                                                <a class="" href="/hemocomponentes-e-hemoderivados" target="_self">Hemocomponentes e Hemoderivados</a>
+                                                                                                                                                <a class="" href="/componentes-e-tipos-sanguineos" target="_self">Componentes e tipos sanguíneos</a>
+                                                                                                                                                <a class="" href="/usos-e-aplicacoes-de-hemocomponentes" target="_self">Usos e aplicações de Hemocomponentes</a>
+                                                                                                                                                <a class="rmv-box-shadow" href="/programa-pbm" target="_self">Programa PBM</a>
+                                                                                                                                <span>HEMATOLOGIA</span>
+                                                                                                            <a class="" href="/htlv-e-doencas-associadas" target="_self">HTLV e doenças associadas</a>
+                                                                                                                                                <a class="rmv-box-shadow" href="/doencas-do-sangue" target="_self">Doenças do sangue</a>
+                                                                                                                                <span>SAIBA MAIS</span>
+                                                                                                            <a class="" href="/coleta-externa" target="_self">Coleta externa</a>
+                                                                                                                                                <a class="" href="/grupos-e-caravanas" target="_self">Grupos e caravanas</a>
+                                                                                                                                                <a class="" href="/programa-doador-do-futuro" target="_self">Programa Doador do Futuro</a>
+                                                                                                                                                <a class="rmv-box-shadow" href="/unidade-movel-de-coleta-externa" target="_self">Unidade Móvel de Coleta Externa</a>
+                                                                                                                                            </div>
+                                                                <div class="menu-mobile-container-itens-item">
+                                                    <button type="button"
+                                    class="menu-mobile-container-itens-item-a abrir-submenu-mobile menu-submenu-mobile-toggle"
+                                    id="3"
+                                    aria-expanded="false"
+                                    aria-controls="submenu-mobile-3">
+                                UNIDADES E CONTRATANTES
+                            </button>
+                            <button type="button"
+                                    class="menu-submenu-mobile-toggle menu-mobile-submenu-icon abrir-submenu-mobile"
+                                    data-submenu-id="3"
+                                    aria-label="Expandir submenu UNIDADES E CONTRATANTES"
+                                    aria-expanded="false"
+                                    aria-controls="submenu-mobile-3">
+                                <ion-icon class="ion-icon-3" name="add-circle-outline" aria-hidden="true"></ion-icon>
+                            </button>
+                                            </div>
+                    <div class="menu-mobile-container-itens-item-submenu submenu-mobile-3" id="submenu-mobile-3">
+                                                                                    <span>REDE HEMOMINAS</span>
+                                                                                                            <a class="" href="/hemocentro" target="_self">Hemocentro</a>
+                                                                                                                                                <a class="" href="/hemonucleo" target="_self">Hemonúcleo</a>
+                                                                                                                                                <a class="" href="/unidade-de-coleta-e-transfusao" target="_self">Unidade de coleta e transfusão</a>
+                                                                                                                                                <a class="" href="/posto-avancado-de-coleta-externa-pace" target="_self">Posto Avançado de Coleta Externa - PACE</a>
+                                                                                                                                                <a class="rmv-box-shadow" href="/cetebio" target="_self">Cetebio</a>
+                                                                                                                                <span>CONTRATANTES</span>
+                                                                                                            <a class="" href="/como-se-tornar-um-contratante" target="_self">Como se tornar um contratante</a>
+                                                                                                                                                <a class="" href="http://200.198.51.99/canal_atendimento_contratante/app/index.php" target="_blank">Canal de atendimento</a>
+                                                                                                                                                <a class="" href="/centros-transplantadores" target="_self">Centros Transplantadores</a>
+                                                                                                                                                <a class="rmv-box-shadow" href="/plasmaferese" target="_self">Plasmaférese</a>
+                                                                                                                                            </div>
+                                                                <div class="menu-mobile-container-itens-item">
+                                                    <button type="button"
+                                    class="menu-mobile-container-itens-item-a abrir-submenu-mobile menu-submenu-mobile-toggle"
+                                    id="4"
+                                    aria-expanded="false"
+                                    aria-controls="submenu-mobile-4">
+                                ENSINO E PESQUISA
+                            </button>
+                            <button type="button"
+                                    class="menu-submenu-mobile-toggle menu-mobile-submenu-icon abrir-submenu-mobile"
+                                    data-submenu-id="4"
+                                    aria-label="Expandir submenu ENSINO E PESQUISA"
+                                    aria-expanded="false"
+                                    aria-controls="submenu-mobile-4">
+                                <ion-icon class="ion-icon-4" name="add-circle-outline" aria-hidden="true"></ion-icon>
+                            </button>
+                                            </div>
+                    <div class="menu-mobile-container-itens-item-submenu submenu-mobile-4" id="submenu-mobile-4">
+                                                                                    <span>PESQUISA CIENTÍFICA</span>
+                                                                                                            <a class="" href="/servico-de-pesquisa" target="_self">Serviço de pesquisa</a>
+                                                                                                                                                <a class="" href="/fluxo-de-desenvolvimento-de-pesquisa" target="_self">Fluxo de desenvolvimento de pesquisa</a>
+                                                                                                                                                <a class="" href="/projetos-de-pesquisa" target="_self">Projetos de Pesquisa</a>
+                                                                                                                                                <a class="" href="/comite-de-etica" target="_self">Comitê de ética</a>
+                                                                                                                                                <a class="" href="/linhas-e-grupos-de-pesquisa" target="_self">Linhas e Grupos de Pesquisa</a>
+                                                                                                                                                <a class="" href="/fundacoes-de-apoio" target="_self">Fundações de Apoio</a>
+                                                                                                                                                <a class="" href="/iniciacao-cientifica" target="_self">Iniciação Científica</a>
+                                                                                                                                                <a class="rmv-box-shadow" href="/uso-de-redcap" target="_self">Uso de REDCap</a>
+                                                                                                                                <span>BIOBANCO</span>
+                                                                                                            <a class="rmv-box-shadow" href="/biobanco-da-fundacao-hemominas" target="_self">Biobanco da Fundação Hemominas</a>
+                                                                                                                                <span>ENSINO</span>
+                                                                                                            <a class="" href="/treinamento-de-publico-externo" target="_self">Treinamento de público externo</a>
+                                                                                                                                                <a class="" href="/visita-tecnica" target="_self">Visita técnica</a>
+                                                                                                                                                <a class="" href="/palestra-tecnica" target="_self">Palestra técnica</a>
+                                                                                                                                                <a class="rmv-box-shadow" href="/estagios" target="_self">Estágios</a>
+                                                                                                                                <span>INOVAÇÃO</span>
+                                                                                                            <a class="" href="/sobre-o-nucleo-de-inovacoes-tecnologicas-nit" target="_self">Sobre o Núcleo de Inovações Tecnológicas - NIT</a>
+                                                                                                                                                <a class="" href="/orientacoes-para-inovacao" target="_self">Orientações para Inovação</a>
+                                                                                                                                                <a class="rmv-box-shadow" href="/propriedade-intelectual-e-inovacao" target="_self">Propriedade intelectual e inovação</a>
+                                                                                                                                <span>BIBLIOTECA</span>
+                                                                                                            <a class="" href="/conheca-a-biblioteca" target="_self">Conheça a Biblioteca</a>
+                                                                                                                                                <a class="" href="/consulte-o-acervo-biblivre" target="_self">Consulte o acervo (Biblivre)</a>
+                                                                                                                                                <a class="rmv-box-shadow" href="/publicacoes-hemominas" target="_self">Publicações Hemominas</a>
+                                                                                                                                            </div>
+                                                                <div class="menu-mobile-container-itens-item">
+                                                    <button type="button"
+                                    class="menu-mobile-container-itens-item-a abrir-submenu-mobile menu-submenu-mobile-toggle"
+                                    id="5"
+                                    aria-expanded="false"
+                                    aria-controls="submenu-mobile-5">
+                                LICITAÇÃO E CONTRATOS
+                            </button>
+                            <button type="button"
+                                    class="menu-submenu-mobile-toggle menu-mobile-submenu-icon abrir-submenu-mobile"
+                                    data-submenu-id="5"
+                                    aria-label="Expandir submenu LICITAÇÃO E CONTRATOS"
+                                    aria-expanded="false"
+                                    aria-controls="submenu-mobile-5">
+                                <ion-icon class="ion-icon-5" name="add-circle-outline" aria-hidden="true"></ion-icon>
+                            </button>
+                                            </div>
+                    <div class="menu-mobile-container-itens-item-submenu submenu-mobile-5" id="submenu-mobile-5">
+                                                                                    <span>LICITAÇÃO</span>
+                                                                                                            <a class="" href="/avisos-de-licitacao" target="_self">Avisos de Licitação</a>
+                                                                                                                                                <a class="" href="/resultados-de-licitacao" target="_self">Resultados de Licitação</a>
+                                                                                                                                                <a class="" href="/portal-de-compras" target="_self">Portal de Compras</a>
+                                                                                                                                                <a class="rmv-box-shadow" href="/responsaveis-nas-unidades" target="_self">Responsáveis nas unidades</a>
+                                                                                                                                <span>CONTRATO</span>
+                                                                                                            <a class="rmv-box-shadow" href="/contratos-celebrados" target="_self">Contratos Celebrados</a>
+                                                                                                                                <span>CHAMAMENTO PÚBLICO E SESSÃO PÚBLICA</span>
+                                                                                                            <a class="" href="/chamamento-publico" target="_self">Chamamento Público</a>
+                                                                                                                                                <a class="rmv-box-shadow" href="/sessao-publica" target="_self">Sessão Pública</a>
+                                                                                                                                <span>DOAÇÕES DE BENS E SERVIÇOS</span>
+                                                                                                            <a class="rmv-box-shadow" href="/propostas-de-doacoes-de-bens-e-servicos" target="_self">Propostas de Doações de Bens e Serviços</a>
+                                                                                                                                <span>LEGISLAÇÃO</span>
+                                                                                                            <a class="" href="/contratos" target="_self">Contratos</a>
+                                                                                                                                                <a class="rmv-box-shadow" href="/licitacao" target="_self">Licitação</a>
+                                                                                                                                            </div>
+                                                                <div class="menu-mobile-container-itens-item">
+                                                    <button type="button"
+                                    class="menu-mobile-container-itens-item-a abrir-submenu-mobile menu-submenu-mobile-toggle"
+                                    id="6"
+                                    aria-expanded="false"
+                                    aria-controls="submenu-mobile-6">
+                                TRABALHE
+                            </button>
+                            <button type="button"
+                                    class="menu-submenu-mobile-toggle menu-mobile-submenu-icon abrir-submenu-mobile"
+                                    data-submenu-id="6"
+                                    aria-label="Expandir submenu TRABALHE"
+                                    aria-expanded="false"
+                                    aria-controls="submenu-mobile-6">
+                                <ion-icon class="ion-icon-6" name="add-circle-outline" aria-hidden="true"></ion-icon>
+                            </button>
+                                            </div>
+                    <div class="menu-mobile-container-itens-item-submenu submenu-mobile-6" id="submenu-mobile-6">
+                                                                                                                        <a class="" href="/concurso-publico" target="_self">Concurso Público</a>
+                                                                                                                                <a class="" href="/selecao-publica" target="_self">Seleção Pública</a>
+                                                                                                                                <a class="rmv-box-shadow" href="/programas-de-estagio" target="_self">Programas de Estágio</a>
+                                                                                                        </div>
+                                                                <div class="menu-mobile-container-itens-item">
+                                                    <button type="button"
+                                    class="menu-mobile-container-itens-item-a abrir-submenu-mobile menu-submenu-mobile-toggle"
+                                    id="7"
+                                    aria-expanded="false"
+                                    aria-controls="submenu-mobile-7">
+                                ATENDIMENTO
+                            </button>
+                            <button type="button"
+                                    class="menu-submenu-mobile-toggle menu-mobile-submenu-icon abrir-submenu-mobile"
+                                    data-submenu-id="7"
+                                    aria-label="Expandir submenu ATENDIMENTO"
+                                    aria-expanded="false"
+                                    aria-controls="submenu-mobile-7">
+                                <ion-icon class="ion-icon-7" name="add-circle-outline" aria-hidden="true"></ion-icon>
+                            </button>
+                                            </div>
+                    <div class="menu-mobile-container-itens-item-submenu submenu-mobile-7" id="submenu-mobile-7">
+                                                                                                                        <a class="" href="/fale-conosco" target="_self">Fale Conosco</a>
+                                                                                                                                <a class="" href="/duvidas-frequentes" target="_self">Dúvidas Frequentes</a>
+                                                                                                                                <a class="" href="/horarios-de-atendimento" target="_self">Horários de atendimento</a>
+                                                                                                                                <a class="" href="/ouvidoria-do-sushemominas" target="_self">Ouvidoria do SUS/Hemominas</a>
+                                                                                                                                <a class="rmv-box-shadow" href="/imprensa" target="_self">Imprensa</a>
+                                                                                                        </div>
+                                    </div>
+
+                                <div class="menu-mobile-container-redes-sociais">
+                <a class="redes-sociais-a" href="https://www.instagram.com/hemominas" target="_blank" rel="noopener noreferrer" aria-label="Instagram da Hemominas"><ion-icon name="logo-instagram" aria-hidden="true"></ion-icon></a>
+    <a class="redes-sociais-a" href="https://www.facebook.com/hemominas" target="_blank" rel="noopener noreferrer" aria-label="Facebook da Hemominas"><ion-icon name="logo-facebook" aria-hidden="true"></ion-icon></a>
+    <a class="redes-sociais-a" href="https://x.com/hemominas" target="_blank" rel="noopener noreferrer" aria-label="X (Twitter) da Hemominas">
+        <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+            <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+        </svg>
+    </a>
+    <a class="redes-sociais-a" href="https://www.youtube.com/user/HemominasDoeSangue" target="_blank" rel="noopener noreferrer" aria-label="YouTube da Hemominas"><ion-icon name="logo-youtube" aria-hidden="true"></ion-icon></a>
+            </div>
+                    
+    </div>
+    <button type="button" class="menu-mobile-fechar" aria-label="Fechar menu de navegação">X</button>
+</div>
+        <main id="conteudo-principal" aria-label="Conteúdo principal">
+                <h1 class="sr-only">Fundação Hemominas — Hematologia e Hemoterapia de Minas Gerais</h1>
+
+    
+        <!-- Carrossel usando o mesmo sistema do preview -->
+    <section class="container-slides" style="width: 100%; margin: 0; padding: 0;" aria-label="Banners em destaque" aria-roledescription="carrossel">
+        <div class="relative bg-gradient-to-br from-blue-900 to-red-600" style="width: 100%; aspect-ratio: 16/5; overflow: visible;">
+            <div id="home-carousel-container" class="relative w-full h-full">
+                                                                                    <div class="home-carousel-slide active no-link" 
+                             data-duration="5000"
+                             data-transition="fade"
+                             data-transition-duration="500"
+                             data-has-link="false"
+                             data-slide-id="8"
+                             >
+                                                                <img src="https://www.hemominas.mg.gov.br/storage/media/slides/1793873811_campanha-mes-do-doador.jpg" 
+                                         alt="Campanha Mês do Doador"
+                                     class="slide-image-no-link">
+                                <!-- Overlay invisível para bloquear cliques em slides sem link -->
+                                <div class="slide-no-link-blocker" 
+                                     aria-hidden="true"
+                                     onclick="event.preventDefault(); event.stopPropagation(); return false;"></div>
+                                                    </div>
+                                                                    <div class="home-carousel-slide  has-link" 
+                             data-duration="5000"
+                             data-transition="fade"
+                             data-transition-duration="500"
+                             data-has-link="true"
+                             data-slide-id="5"
+                              aria-hidden="true" >
+                                                            <a href="https://www.hemominas.mg.gov.br/condicoes-e-restricoes" target="_blank" rel="noopener noreferrer" class="slide-link" data-slide-link="5" aria-label="Hemominas Trend Doar — abrir link">
+                                    <img src="https://www.hemominas.mg.gov.br/storage/media/slides/1791311318_hemominas-trend-doar.jpg" alt="Hemominas Trend Doar">
+                                </a>
+                                                    </div>
+                                        
+                    <!-- Indicadores -->
+                                            <div class="home-carousel-indicators absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2" 
+                             style="display: flex !important; visibility: visible !important; opacity: 1 !important; z-index: 100000 !important;"
+                             role="tablist"
+                             aria-label="Seleção de banners">
+                                                            <button type="button"
+                                        class="home-carousel-indicator w-3 h-3 rounded-full bg-white" 
+                                        onclick="goToHomeSlide(0)"
+                                        role="tab"
+                                        aria-label="Ir para o banner 1 de 2"
+                                        aria-selected="true"
+                                        style="display: block !important; visibility: visible !important; opacity: 1 !important; z-index: 100000 !important;"></button>
+                                                            <button type="button"
+                                        class="home-carousel-indicator w-3 h-3 rounded-full bg-white bg-opacity-50" 
+                                        onclick="goToHomeSlide(1)"
+                                        role="tab"
+                                        aria-label="Ir para o banner 2 de 2"
+                                        aria-selected="false"
+                                        style="display: block !important; visibility: visible !important; opacity: 1 !important; z-index: 100000 !important;"></button>
+                                                    </div>
+                                        
+                    <!-- Setas de navegação -->
+                                            <button type="button" class="home-carousel-arrow absolute left-4 top-1/2 transform -translate-y-1/2 text-white hover:text-gray-300" 
+                                onclick="previousHomeSlide()"
+                                aria-label="Banner anterior">
+                            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                            </svg>
+                        </button>
+                        <button type="button" class="home-carousel-arrow absolute right-4 top-1/2 transform -translate-y-1/2 text-white hover:text-gray-300" 
+                                onclick="nextHomeSlide()"
+                                aria-label="Próximo banner">
+                            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                            </svg>
+                        </button>
+                                                </div>
+        </div>
+    </section>
+        
+    
+        <section class="container-agendamentos-home" aria-labelledby="titulo-agendamentos-home">
+        <div class="conteudo-center-1200">
+            <h2 id="titulo-agendamentos-home" class="sr-only">Serviços e informações rápidas</h2>
+            <div class="container-agendamentos-home-div">
+                <div>
+                    <i aria-hidden="true"><ion-icon name="time-outline" aria-hidden="true"></ion-icon></i>
+                    <span>
+                        <b>Horário de Atendimento</b>
+                        <p>Consulte os horários de funcionamento de todas as unidades da Rede Hemominas. Encontre a unidade mais próxima e seus horários de atendimento.</p>
+                    </span>
+                    <a href="https://www.hemominas.mg.gov.br/horarios-de-atendimento" aria-label="Horário de Atendimento — saiba mais">Saiba Mais</a>
+                </div>
+                <div class="agende-sua-doacao">
+                    <i aria-hidden="true"><ion-icon name="water-outline" aria-hidden="true"></ion-icon></i>
+                    <span>
+                        <b>Agende sua Doação Online ou Pelo MGAPP</b>
+                        <p>Agende sua doação online ou pelo MGAPP. Encontre a unidade mais próxima e seus horários de atendimento.</p>
+                    </span>
+                    <a href="https://www.mg.gov.br/agendamento_servico/doacao-de-sangue" target="_blank" rel="noopener noreferrer" aria-label="Agende sua doação online ou pelo MGAPP — saiba mais">Saiba Mais</a>
+                </div>
+                <div>
+                    <i aria-hidden="true"><ion-icon name="alert-circle-outline" aria-hidden="true"></ion-icon></i>
+                    <span>
+                        <b>Atenção!</b>
+                        <p>Atendimento de urgências em coagulopatias hereditárias e hemoglobinopatias</p>
+                    </span>
+                    <a href="https://www.hemominas.mg.gov.br/noticias/pacientes-com-diagnostico-de-coagulopatias-e-hemoglobinopatias-hereditarias" target="_blank" rel="noopener noreferrer" aria-label="Atendimento de urgências em coagulopatias e hemoglobinopatias — saiba mais">Saiba Mais</a>
+                </div>
+                <div>
+                    <i aria-hidden="true"><ion-icon name="document-text-outline" aria-hidden="true"></ion-icon></i>
+                    <span>
+                        <b>Como se Tornar um Contratante</b>
+                        <p>Saiba como se tornar um contratante da Hemominas. Encontre as condições necessárias para se tornar um contratante.</p>
+                    </span>
+                    <a href="https://www.hemominas.mg.gov.br/como-se-tornar-um-contratante" target="_blank" rel="noopener noreferrer" aria-label="Como se tornar um contratante — saiba mais">Saiba Mais</a>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+                <div class="conteudo-center-1200">
+            <div class="container-estoque-de-sangue">
+                <p class="container-estoque-de-sangue-data">Estoque de sangue REDE* - 10/11/2026 12:35</p>
+                <p class="container-estoque-de-sangue-descricao">Os gráficos abaixo não contemplam os estoques de Concentrados de Plaquetas e Plasma</p>
+                <p class="container-estoque-de-sangue-melhor-momento">Saiba o melhor momento para doar</p>
+                <div class="container-estoque-de-sangue-paleta"></div>
+                <div class="container-estoque-de-sangue-div-1">
+                    <div>
+                        <img src="https://www.hemominas.mg.gov.br/img/estoque-de-sangue/icone_critico.png" alt="Agende a doação o quanto antes">
+                        <p>Agende a doação o quanto antes</p>
+                    </div>
+                    <div>
+                        <img src="https://www.hemominas.mg.gov.br/img/estoque-de-sangue/icone_alerta.png" alt="Agende a doação nesta semana">
+                        <p>Agende a doação nesta semana</p>
+                    </div>
+                    <div>
+                        <img src="https://www.hemominas.mg.gov.br/img/estoque-de-sangue/icone_adequado.png" alt="Agende a doação na próxima semana">
+                        <p>Agende a doação na próxima semana</p>
+                    </div>
+                    <div>
+                        <img src="https://www.hemominas.mg.gov.br/img/estoque-de-sangue/icone_estavel.png" alt="Aguarde 10 dias para agendar a doação">
+                        <p>Aguarde 10 dias para agendar a doação</p>
+                    </div>
+                </div>
+                <div class="container-estoque-de-sangue-div-2">
+                                        <div>
+                            <b>O+</b>
+                            <img src="https://www.hemominas.mg.gov.br/img/estoque-de-sangue/icone_critico.png" alt="Estoque de sangue do tipo O+ está no nível Critico">
+                            <p>Critico</p>
+                        </div>
+                                        <div>
+                            <b>O-</b>
+                            <img src="https://www.hemominas.mg.gov.br/img/estoque-de-sangue/icone_critico.png" alt="Estoque de sangue do tipo O- está no nível Critico">
+                            <p>Critico</p>
+                        </div>
+                                        <div>
+                            <b>A+</b>
+                            <img src="https://www.hemominas.mg.gov.br/img/estoque-de-sangue/icone_critico.png" alt="Estoque de sangue do tipo A+ está no nível Critico">
+                            <p>Critico</p>
+                        </div>
+                                        <div>
+                            <b>A-</b>
+                            <img src="https://www.hemominas.mg.gov.br/img/estoque-de-sangue/icone_critico.png" alt="Estoque de sangue do tipo A- está no nível Critico">
+                            <p>Critico</p>
+                        </div>
+                                        <div>
+                            <b>B+</b>
+                            <img src="https://www.hemominas.mg.gov.br/img/estoque-de-sangue/icone_alerta.png" alt="Estoque de sangue do tipo B+ está no nível Alerta">
+                            <p>Alerta</p>
+                        </div>
+                                        <div>
+                            <b>B-</b>
+                            <img src="https://www.hemominas.mg.gov.br/img/estoque-de-sangue/icone_critico.png" alt="Estoque de sangue do tipo B- está no nível Critico">
+                            <p>Critico</p>
+                        </div>
+                                        <div>
+                            <b>AB+</b>
+                            <img src="https://www.hemominas.mg.gov.br/img/estoque-de-sangue/icone_estavel.png" alt="Estoque de sangue do tipo AB+ está no nível Estavel">
+                            <p>Estavel</p>
+                        </div>
+                                        <div>
+                            <b>AB-</b>
+                            <img src="https://www.hemominas.mg.gov.br/img/estoque-de-sangue/icone_adequado.png" alt="Estoque de sangue do tipo AB- está no nível Adequado">
+                            <p>Adequado</p>
+                        </div>
+                                
+                </div>
+            </div>
+        </div>
+        
+
+        <section class="container-noticias-home" aria-labelledby="titulo-noticias-home">
+        <div class="conteudo-center-1200">
+            <div class="container-noticias-home-div">
+                <h2 id="titulo-noticias-home" class="container-noticias-home-div-titulo">Notícias</h2>
+                
+                <div class="container-noticias-home-div-posts">
+                                                                    <div>
+                            <strong>
+                                                                <div style="width:100%;height:220px;display:flex;align-items:center;justify-content:center;overflow:hidden;background:#e5e7eb;">
+                                    <img src="https://www.hemominas.mg.gov.br/storage/media/noticias/1794345185_ZSn9Lylbth.jpeg" 
+                                         alt="Hemominas e Polícia Militar fortalecem parceria para ampliar a segurança nas unidades da Fundação"
+                                         style="width:100%;height:100%;object-fit:cover;object-position:center;image-rendering:auto;">
+                                </div>
+                            </strong>
+                            <span>
+                                <h3 class="container-noticias-home-titulo-item">Hemominas e Polícia Militar fortalecem parceria para ampliar a segurança nas unidades da Fundação</h3>
+                                
+                                <a href="https://www.hemominas.mg.gov.br/noticias/hemominas-e-policia-militar-fortalecem-parceria-para-ampliar-a-seguranca-nas-unidades-da-fundacao">Ver Mais</a>
+                            </span>
+                        </div>
+                                                <div>
+                            <strong>
+                                                                <div style="width:100%;height:220px;display:flex;align-items:center;justify-content:center;overflow:hidden;background:#e5e7eb;">
+                                    <img src="https://www.hemominas.mg.gov.br/storage/media/noticias/1792672052_OsOpzTBcA8.jpg" 
+                                         alt="Hemominas recebe visita técnica do Ministério da Saúde e da Hemobrás para ampliar fornecimento de plasma"
+                                         style="width:100%;height:100%;object-fit:cover;object-position:center;image-rendering:auto;">
+                                </div>
+                            </strong>
+                            <span>
+                                <h3 class="container-noticias-home-titulo-item">Hemominas recebe visita técnica do Ministério da Saúde e da Hemobrás para ampliar fornecimento de plasma</h3>
+                                
+                                <a href="https://www.hemominas.mg.gov.br/noticias/hemominas-recebe-visita-tecnica-do-ministerio-da-saude-e-da-hemobras-para-ampliar-fornecimento-de-plasma">Ver Mais</a>
+                            </span>
+                        </div>
+                                                <div>
+                            <strong>
+                                                                <div style="width:100%;height:220px;display:flex;align-items:center;justify-content:center;overflow:hidden;background:#e5e7eb;">
+                                    <img src="https://www.hemominas.mg.gov.br/storage/media/noticias/1792499780_1LsLCjDt0S.jpg" 
+                                         alt="Hemominas reforça mobilização de doadores diante da redução dos estoques de sangue em Minas Gerais"
+                                         style="width:100%;height:100%;object-fit:cover;object-position:center;image-rendering:auto;">
+                                </div>
+                            </strong>
+                            <span>
+                                <h3 class="container-noticias-home-titulo-item">Hemominas reforça mobilização de doadores diante da redução dos estoques de sangue em Minas Gerais</h3>
+                                
+                                <a href="https://www.hemominas.mg.gov.br/noticias/hemominas-reforca-mobilizacao-de-doadores-diante-da-reducao-dos-estoques-de-sangue-em-minas-gerais">Ver Mais</a>
+                            </span>
+                        </div>
+                                                <div>
+                            <strong>
+                                                                <div style="width:100%;height:220px;display:flex;align-items:center;justify-content:center;overflow:hidden;background:#e5e7eb;">
+                                    <img src="https://www.hemominas.mg.gov.br/storage/media/noticias/1791579517_YPX0n0PRxb.jpeg" 
+                                         alt="Hemonúcleo de Ponte Nova inicia coleta de sangue na nova sede e funciona também neste sábado"
+                                         style="width:100%;height:100%;object-fit:cover;object-position:center;image-rendering:auto;">
+                                </div>
+                            </strong>
+                            <span>
+                                <h3 class="container-noticias-home-titulo-item">Hemonúcleo de Ponte Nova inicia coleta de sangue na nova sede e funciona também neste sábado</h3>
+                                
+                                <a href="https://www.hemominas.mg.gov.br/noticias/hemonucleo-de-ponte-nova-inicia-coleta-de-sangue-na-nova-sede-e-funciona-tambem-neste-sabado">Ver Mais</a>
+                            </span>
+                        </div>
+                                                            </div>
+                <a class="container-noticias-home-div-mais" href="https://www.hemominas.mg.gov.br/central-noticias">Mais Notícias</a>
+            </div>
+        </div>
+    </section>
+            <section class="container-destaques-home"  aria-labelledby="titulo-destaques-home" >
+        <div class="conteudo-center-1200">
+            <div class="container-destaques-home-div">
+                                <h2 id="titulo-destaques-home" class="container-destaques-home-div-titulo">Destaques</h2>
+                                <div class="container-destaques-home-div-posts">
+                                                                        <div>
+                                <h3 class="container-destaques-home-titulo-item">Processo Seletivo Transforma Minas - Responsável pelo Laboratório de Histocompatibilidade</h3>
+                                <p>10/11/2026, 19:07</p>
+                                                                    <a href="/processo-seletivo-transforma-minas-responsavel-pelo-laboratorio-de-histocompatibilidade">Saiba Mais</a>
+                                                            </div>
+                                                    <div>
+                                <h3 class="container-destaques-home-titulo-item">Processo Seletivo Transforma Minas - Responsável pelo Setor de Acompanhamento</h3>
+                                <p>09/11/2026, 10:27</p>
+                                                                    <a href="/processo-seletivo-transforma-minas-responsavel-pelo-setor-de-acompanhamento">Saiba Mais</a>
+                                                            </div>
+                                                    <div>
+                                <h3 class="container-destaques-home-titulo-item">Estão abertas as inscrições para o Seminário Nacional de Doença Falciforme, Atenção Integral, Direitos e Equidade no SUS</h3>
+                                <p>20/10/2026, 15:29</p>
+                                                                    <a href="/estao-abertas-as-inscricoes-para-o-seminario-nacional-de-doenca-falciforme-atencao-integral-direitos-e-equidade-no-sus">Saiba Mais</a>
+                                                            </div>
+                                                            </div>
+            </div>
+        </div>
+    </section>
+            <section class="container-acesso-rapido-home" aria-labelledby="titulo-acesso-rapido-home">
+        <div class="conteudo-center-1200">
+            <div class="container-acesso-rapido-home-div">
+                <h2 id="titulo-acesso-rapido-home" class="container-acesso-rapido-home-div-titulo">Acesso Rápido</h2>
+                <style>
+                    .quick-access-item-link:hover {
+                        background: #a70202 !important;
+                    }
+                </style>
+                <div class="quick-access-preview" 
+                     style="display: flex; flex-direction: column; gap: 1rem;">
+                                                                    
+                                                    <div class="flex justify-center gap-4 mb-4 quick-access-row" data-row="0">
+                                                                    <a href="/publicacoes/atestado-de-doacao" 
+                                       target=&quot;_blank&quot; rel=&quot;noopener noreferrer&quot;
+                                       class="quick-access-item-link"
+                                       aria-label="Atestado de doação — Solicite seu atestado de doação de sangue"
+                                       style="width: 23%; min-width: 120px; height: auto; min-height: 120px; padding: 20px 10px; display: flex; flex-flow: wrap; justify-content: center; align-items: center; background: #800000; border-radius: 10px; text-decoration: none;">
+                                                                                    <span style="display: flex; flex-flow: wrap; justify-content: center; width: 100%;">
+                                                                                                    <ion-icon name="document-outline" style="float: left; width: 100%; color: #fff; margin: 0 0 10px; font-size: 30px; display: flex; justify-content: center;" aria-hidden="true"></ion-icon>
+                                                                                            </span>
+                                                                                <span style="float: left; width: 100%;">
+                                            <b style="float: left; width: 100%; font: 14px montserrat-regular; color: #fff; text-align: center;">Atestado de doação</b>
+                                                                                            <small style="float: left; width: 100%; color: #fff; font-size: 12px; margin-top: 5px; text-align: center;">Solicite seu atestado de doaçã...</small>
+                                                                                    </span>
+                                    </a>
+                                                                    <a href="https://www.hemominas.mg.gov.br/publicacoes/doacao-de-sangue-por-jovens-de-16-e-17-anosautorizacao-para-menor-de-18-anos-doar-sangue-na-hemominas" 
+                                       target=&quot;_blank&quot; rel=&quot;noopener noreferrer&quot;
+                                       class="quick-access-item-link"
+                                       aria-label="Autorização para menor de 18 anos doar sangue na Hemominas — Autorização de responsável legal para menor doar sangue"
+                                       style="width: 23%; min-width: 120px; height: auto; min-height: 120px; padding: 20px 10px; display: flex; flex-flow: wrap; justify-content: center; align-items: center; background: #800000; border-radius: 10px; text-decoration: none;">
+                                                                                    <span style="display: flex; flex-flow: wrap; justify-content: center; width: 100%;">
+                                                                                                    <ion-icon name="document-outline" style="float: left; width: 100%; color: #fff; margin: 0 0 10px; font-size: 30px; display: flex; justify-content: center;" aria-hidden="true"></ion-icon>
+                                                                                            </span>
+                                                                                <span style="float: left; width: 100%;">
+                                            <b style="float: left; width: 100%; font: 14px montserrat-regular; color: #fff; text-align: center;">Autorização para menor de 18 anos doar sangue na Hemominas</b>
+                                                                                            <small style="float: left; width: 100%; color: #fff; font-size: 12px; margin-top: 5px; text-align: center;">Autorização de responsável leg...</small>
+                                                                                    </span>
+                                    </a>
+                                                                    <a href="https://www.hemominas.mg.gov.br/como-se-tornar-um-contratante" 
+                                       target=&quot;_blank&quot; rel=&quot;noopener noreferrer&quot;
+                                       class="quick-access-item-link"
+                                       aria-label="Como se tornar um contratante — Saiba como se tornar um contratante da Hemominas"
+                                       style="width: 23%; min-width: 120px; height: auto; min-height: 120px; padding: 20px 10px; display: flex; flex-flow: wrap; justify-content: center; align-items: center; background: #800000; border-radius: 10px; text-decoration: none;">
+                                                                                    <span style="display: flex; flex-flow: wrap; justify-content: center; width: 100%;">
+                                                                                                    <ion-icon name="create-outline" style="float: left; width: 100%; color: #fff; margin: 0 0 10px; font-size: 30px; display: flex; justify-content: center;" aria-hidden="true"></ion-icon>
+                                                                                            </span>
+                                                                                <span style="float: left; width: 100%;">
+                                            <b style="float: left; width: 100%; font: 14px montserrat-regular; color: #fff; text-align: center;">Como se tornar um contratante</b>
+                                                                                            <small style="float: left; width: 100%; color: #fff; font-size: 12px; margin-top: 5px; text-align: center;">Saiba como se tornar um contra...</small>
+                                                                                    </span>
+                                    </a>
+                                                                    <a href="/condicoes-e-restricoes" 
+                                       target=&quot;_blank&quot; rel=&quot;noopener noreferrer&quot;
+                                       class="quick-access-item-link"
+                                       aria-label="Condições para doar — Conheça as condições necessárias para doar sangue"
+                                       style="width: 23%; min-width: 120px; height: auto; min-height: 120px; padding: 20px 10px; display: flex; flex-flow: wrap; justify-content: center; align-items: center; background: #800000; border-radius: 10px; text-decoration: none;">
+                                                                                    <span style="display: flex; flex-flow: wrap; justify-content: center; width: 100%;">
+                                                                                                    <ion-icon name="information-circle-outline" style="float: left; width: 100%; color: #fff; margin: 0 0 10px; font-size: 30px; display: flex; justify-content: center;" aria-hidden="true"></ion-icon>
+                                                                                            </span>
+                                                                                <span style="float: left; width: 100%;">
+                                            <b style="float: left; width: 100%; font: 14px montserrat-regular; color: #fff; text-align: center;">Condições para doar</b>
+                                                                                            <small style="float: left; width: 100%; color: #fff; font-size: 12px; margin-top: 5px; text-align: center;">Conheça as condições necessári...</small>
+                                                                                    </span>
+                                    </a>
+                                                            </div>
+                                                    <div class="flex justify-center gap-4 mb-4 quick-access-row" data-row="1">
+                                                                    <a href="https://ead.hemominas.mg.gov.br/" 
+                                       target=&quot;_blank&quot; rel=&quot;noopener noreferrer&quot;
+                                       class="quick-access-item-link"
+                                       aria-label="EAD - Educação a Distância — Cursos e capacitações online da Hemominas"
+                                       style="width: 23%; min-width: 120px; height: auto; min-height: 120px; padding: 20px 10px; display: flex; flex-flow: wrap; justify-content: center; align-items: center; background: #800000; border-radius: 10px; text-decoration: none;">
+                                                                                    <span style="display: flex; flex-flow: wrap; justify-content: center; width: 100%;">
+                                                                                                    <ion-icon name="school-outline" style="float: left; width: 100%; color: #fff; margin: 0 0 10px; font-size: 30px; display: flex; justify-content: center;" aria-hidden="true"></ion-icon>
+                                                                                            </span>
+                                                                                <span style="float: left; width: 100%;">
+                                            <b style="float: left; width: 100%; font: 14px montserrat-regular; color: #fff; text-align: center;">EAD - Educação a Distância</b>
+                                                                                            <small style="float: left; width: 100%; color: #fff; font-size: 12px; margin-top: 5px; text-align: center;">Cursos e capacitações online d...</small>
+                                                                                    </span>
+                                    </a>
+                                                                    <a href="https://atendimento1.faleconosco.mg.gov.br/ligminas-bpms-frontend/publico/br/gov/prodemge/seplag/ligminasbpms/visao/processos/RegistrarAtendimentoFaleConosco.zul?processo=PROC_00093&amp;atividade=ATIV_00388&amp;site=Hemominas" 
+                                       target=&quot;_blank&quot; rel=&quot;noopener noreferrer&quot;
+                                       class="quick-access-item-link"
+                                       aria-label="Fale Conosco — Entre em contato conosco para dúvidas e informações"
+                                       style="width: 23%; min-width: 120px; height: auto; min-height: 120px; padding: 20px 10px; display: flex; flex-flow: wrap; justify-content: center; align-items: center; background: #800000; border-radius: 10px; text-decoration: none;">
+                                                                                    <span style="display: flex; flex-flow: wrap; justify-content: center; width: 100%;">
+                                                                                                    <ion-icon name="chatbubble-outline" style="float: left; width: 100%; color: #fff; margin: 0 0 10px; font-size: 30px; display: flex; justify-content: center;" aria-hidden="true"></ion-icon>
+                                                                                            </span>
+                                                                                <span style="float: left; width: 100%;">
+                                            <b style="float: left; width: 100%; font: 14px montserrat-regular; color: #fff; text-align: center;">Fale Conosco</b>
+                                                                                            <small style="float: left; width: 100%; color: #fff; font-size: 12px; margin-top: 5px; text-align: center;">Entre em contato conosco para...</small>
+                                                                                    </span>
+                                    </a>
+                                                                    <a href="/fluxo-de-desenvolvimento-de-pesquisa" 
+                                       target=&quot;_blank&quot; rel=&quot;noopener noreferrer&quot;
+                                       class="quick-access-item-link"
+                                       aria-label="Fluxo para realizar pesquisa científica — Entenda o processo para desenvolver pesquisas científicas"
+                                       style="width: 23%; min-width: 120px; height: auto; min-height: 120px; padding: 20px 10px; display: flex; flex-flow: wrap; justify-content: center; align-items: center; background: #800000; border-radius: 10px; text-decoration: none;">
+                                                                                    <span style="display: flex; flex-flow: wrap; justify-content: center; width: 100%;">
+                                                                                                    <ion-icon name="git-network-outline" style="float: left; width: 100%; color: #fff; margin: 0 0 10px; font-size: 30px; display: flex; justify-content: center;" aria-hidden="true"></ion-icon>
+                                                                                            </span>
+                                                                                <span style="float: left; width: 100%;">
+                                            <b style="float: left; width: 100%; font: 14px montserrat-regular; color: #fff; text-align: center;">Fluxo para realizar pesquisa científica</b>
+                                                                                            <small style="float: left; width: 100%; color: #fff; font-size: 12px; margin-top: 5px; text-align: center;">Entenda o processo para desenv...</small>
+                                                                                    </span>
+                                    </a>
+                                                                    <a href="https://hemocurriculo.hemominas.mg.gov.br:9090/Hemocurriculo/" 
+                                       target=&quot;_blank&quot; rel=&quot;noopener noreferrer&quot;
+                                       class="quick-access-item-link"
+                                       aria-label="Hemocurrículo — Acesse seu hemocurrículo e histórico de doações"
+                                       style="width: 23%; min-width: 120px; height: auto; min-height: 120px; padding: 20px 10px; display: flex; flex-flow: wrap; justify-content: center; align-items: center; background: #800000; border-radius: 10px; text-decoration: none;">
+                                                                                    <span style="display: flex; flex-flow: wrap; justify-content: center; width: 100%;">
+                                                                                                    <ion-icon name="person-outline" style="float: left; width: 100%; color: #fff; margin: 0 0 10px; font-size: 30px; display: flex; justify-content: center;" aria-hidden="true"></ion-icon>
+                                                                                            </span>
+                                                                                <span style="float: left; width: 100%;">
+                                            <b style="float: left; width: 100%; font: 14px montserrat-regular; color: #fff; text-align: center;">Hemocurrículo</b>
+                                                                                            <small style="float: left; width: 100%; color: #fff; font-size: 12px; margin-top: 5px; text-align: center;">Acesse seu hemocurrículo e his...</small>
+                                                                                    </span>
+                                    </a>
+                                                            </div>
+                                                    <div class="flex justify-center gap-4 mb-4 quick-access-row" data-row="2">
+                                                                    <a href="https://www.hemominas.mg.gov.br/informe-de-rendimentos-prestadores-de-servicos-e-pagamentos-judiciais-rpv" 
+                                       target=&quot;_blank&quot; rel=&quot;noopener noreferrer&quot;
+                                       class="quick-access-item-link"
+                                       aria-label="Informes de Rendimentos - Prestadores de Serviços ( PJ e PF) e Pagamentos Judiciais de Requisitório de Pequeno Valor (RPV) — Acesse aqui e saiba mais..."
+                                       style="width: 23%; min-width: 120px; height: auto; min-height: 120px; padding: 20px 10px; display: flex; flex-flow: wrap; justify-content: center; align-items: center; background: #800000; border-radius: 10px; text-decoration: none;">
+                                                                                    <span style="display: flex; flex-flow: wrap; justify-content: center; width: 100%;">
+                                                                                                    <ion-icon name="cash-outline" style="float: left; width: 100%; color: #fff; margin: 0 0 10px; font-size: 30px; display: flex; justify-content: center;" aria-hidden="true"></ion-icon>
+                                                                                            </span>
+                                                                                <span style="float: left; width: 100%;">
+                                            <b style="float: left; width: 100%; font: 14px montserrat-regular; color: #fff; text-align: center;">Informes de Rendimentos - Prestadores de Serviços ( PJ e PF) e Pagamentos Judiciais de Requisitório de Pequeno Valor (RPV)</b>
+                                                                                            <small style="float: left; width: 100%; color: #fff; font-size: 12px; margin-top: 5px; text-align: center;">Acesse aqui e saiba mais...</small>
+                                                                                    </span>
+                                    </a>
+                                                                    <a href="https://www.hemominas.mg.gov.br/ouvidoria-do-sushemominas" 
+                                       target=&quot;_blank&quot; rel=&quot;noopener noreferrer&quot;
+                                       class="quick-access-item-link"
+                                       aria-label="Ouvidoria — Canal de comunicação para sugestões e reclamações"
+                                       style="width: 23%; min-width: 120px; height: auto; min-height: 120px; padding: 20px 10px; display: flex; flex-flow: wrap; justify-content: center; align-items: center; background: #800000; border-radius: 10px; text-decoration: none;">
+                                                                                    <span style="display: flex; flex-flow: wrap; justify-content: center; width: 100%;">
+                                                                                                    <ion-icon name="headset-outline" style="float: left; width: 100%; color: #fff; margin: 0 0 10px; font-size: 30px; display: flex; justify-content: center;" aria-hidden="true"></ion-icon>
+                                                                                            </span>
+                                                                                <span style="float: left; width: 100%;">
+                                            <b style="float: left; width: 100%; font: 14px montserrat-regular; color: #fff; text-align: center;">Ouvidoria</b>
+                                                                                            <small style="float: left; width: 100%; color: #fff; font-size: 12px; margin-top: 5px; text-align: center;">Canal de comunicação para suge...</small>
+                                                                                    </span>
+                                    </a>
+                                                                    <a href="/publicacoes/servicos" 
+                                       target=&quot;_blank&quot; rel=&quot;noopener noreferrer&quot;
+                                       class="quick-access-item-link"
+                                       aria-label="Serviços — Conheça todos os serviços oferecidos pela Hemominas"
+                                       style="width: 23%; min-width: 120px; height: auto; min-height: 120px; padding: 20px 10px; display: flex; flex-flow: wrap; justify-content: center; align-items: center; background: #800000; border-radius: 10px; text-decoration: none;">
+                                                                                    <span style="display: flex; flex-flow: wrap; justify-content: center; width: 100%;">
+                                                                                                    <ion-icon name="settings-outline" style="float: left; width: 100%; color: #fff; margin: 0 0 10px; font-size: 30px; display: flex; justify-content: center;" aria-hidden="true"></ion-icon>
+                                                                                            </span>
+                                                                                <span style="float: left; width: 100%;">
+                                            <b style="float: left; width: 100%; font: 14px montserrat-regular; color: #fff; text-align: center;">Serviços</b>
+                                                                                            <small style="float: left; width: 100%; color: #fff; font-size: 12px; margin-top: 5px; text-align: center;">Conheça todos os serviços ofer...</small>
+                                                                                    </span>
+                                    </a>
+                                                                    <a href="https://www.hemominas.mg.gov.br/publicacoes/sistema-eletronico-de-informacoes-seimg" 
+                                       target=&quot;_blank&quot; rel=&quot;noopener noreferrer&quot;
+                                       class="quick-access-item-link"
+                                       aria-label="Usuário Externo — Acesso para usuários externos ao sistema"
+                                       style="width: 23%; min-width: 120px; height: auto; min-height: 120px; padding: 20px 10px; display: flex; flex-flow: wrap; justify-content: center; align-items: center; background: #800000; border-radius: 10px; text-decoration: none;">
+                                                                                    <span style="display: flex; flex-flow: wrap; justify-content: center; width: 100%;">
+                                                                                                    <img src="https://www.hemominas.mg.gov.br/storage/media/acesso-rapido/1769539310_ToFwTnl5nf.png" alt="Usuário Externo" style="float: left; width: 100%; margin: 0 0 10px; max-width: 60px; height: auto; display: flex; justify-content: center;">
+                                                                                            </span>
+                                                                                <span style="float: left; width: 100%;">
+                                            <b style="float: left; width: 100%; font: 14px montserrat-regular; color: #fff; text-align: center;">Usuário Externo</b>
+                                                                                            <small style="float: left; width: 100%; color: #fff; font-size: 12px; margin-top: 5px; text-align: center;">Acesso para usuários externos...</small>
+                                                                                    </span>
+                                    </a>
+                                                            </div>
+                                                            </div>
+            </div>
+        </div>
+    </section>
+    
+    
+        <section class="container-cards-home-novo" aria-labelledby="titulo-cards-home-novo">
+        <div class="conteudo-center-1200">
+
+                        <div class="container-cards-home-novo-conteudo">
+                <h2 id="titulo-cards-home-novo" class="sr-only">Serviços e programas</h2>
+                                <a href="https://www.hemominas.mg.gov.br/agenda-da-presidencia" class="card-home-novo-link">
+                    <span>
+                        <i aria-hidden="true"><ion-icon name="newspaper-outline" aria-hidden="true"></ion-icon></i>
+                    </span>
+                    <strong>Agenda da Presidência e Diretores</strong>
+                    <p>Nesta seção é disponibilizada a Agenda de compromissos oficiais da Presidente e Diretores da Hemominas.</p>
+                </a>
+                                                <a href="https://www.hemominas.mg.gov.br/programe-se" class="card-home-novo-link">
+                    <span>
+                        <i aria-hidden="true"><ion-icon name="notifications-outline" aria-hidden="true"></ion-icon></i>
+                    </span>
+                    <strong>Programe-se</strong>
+                    <p>Confira os eventos de coleta de sangue e outras atividades da Hemominas. Encontre as datas, horários e locais das próximas coletas em sua região.</p>
+                </a>
+                                                <a href="https://www.hemominas.mg.gov.br/programa-pbm" target="_blank" rel="noopener noreferrer" class="card-home-novo-link">
+                    <span>
+                        <i aria-hidden="true"><ion-icon name="water-outline" aria-hidden="true"></ion-icon></i>
+                    </span>
+                    <strong>Patient Blood Management – PBM</strong>
+                    <p>O Programa PBM - Patient Blood Management visa contribuir para a redução dos riscos inerentes à transfusão, com maior qualidade na assistência e diminuição dos processos de transfusão quando um outro procedimento ou outra terapia possa ser utilizada ou existe objeção do paciente à sua realização.</p>
+                </a>
+                            </div>
+                                    <div class="container-cards-home-novo-publicacoes">
+                <h2 class="container-cards-home-novo-publicacoes-p">Publicações</h2>
+                <div class="owl-carousel owl-theme owl-publicacoes">
+                                                                                                <a class="item" href="https://www.hemominas.mg.gov.br/pasta-midia/acervo-tecnico-cientifico" 
+                                                                  target="_blank" rel="noopener noreferrer"
+                               >
+                                <div class="container-cards-home-novo-publicacoes-div">
+                                    <p>Acervo Técnico-Científico na área de Hematologia &amp; Hemoterapia e Saúde pública no contexto do SUS.</p>
+                                    <b>Ver Mais</b>
+                                </div>
+                            </a>
+                                                                                                                        <a class="item" href="https://www.hemominas.mg.gov.br/pasta-midia/patient-blood-management-pbm" 
+                                                                  target="_blank" rel="noopener noreferrer"
+                               >
+                                <div class="container-cards-home-novo-publicacoes-div">
+                                    <p>O Programa PBM - Patient Blood Management visa contribuir para a redução dos riscos inerentes à transfusão, com maior qualidade na assistência e diminuição dos processos...</p>
+                                    <b>Ver Mais</b>
+                                </div>
+                            </a>
+                                                                                                                        <a class="item" href="https://www.hemominas.mg.gov.br/publicacoes/serie-de-reportagens-sobre-o-ciclo-do-sangue" 
+                                                                  target="_blank" rel="noopener noreferrer"
+                               >
+                                <div class="container-cards-home-novo-publicacoes-div">
+                                    <p>Série Ciclo do Sangue - Os caminhos do sangue doado.</p>
+                                    <b>Ver Mais</b>
+                                </div>
+                            </a>
+                                                                                                                        <a class="item" href="https://www.hemominas.mg.gov.br/storage/media/publicacoes/1767647499_kE64dAcjsH.pdf" 
+                                                                  download
+                               >
+                                <div class="container-cards-home-novo-publicacoes-div">
+                                    <p>Informativo Conhecer e Compreender para Educar: hemoglobinopatias e coagulopatias para a escola</p>
+                                    <b>Ver Mais</b>
+                                </div>
+                            </a>
+                                                                                                                        <a class="item" href="https://www.hemominas.mg.gov.br/pasta-midia/informativo-do-grupo-identidade-da-fundacao-hemominas" 
+                                                                  target="_blank" rel="noopener noreferrer"
+                               >
+                                <div class="container-cards-home-novo-publicacoes-div">
+                                    <p>Informativo do Grupo Identidade da Fundação Hemominas</p>
+                                    <b>Ver Mais</b>
+                                </div>
+                            </a>
+                                                            </div>
+                <a class="container-cards-home-novo-publicacoes-a" href="/central-publicacoes">Outras Publicações <ion-icon name="chevron-forward-outline" aria-hidden="true"></ion-icon></a>
+            </div>
+                    </div>
+    </section>
+    
+            <section class="container-parceiros-home-section" aria-labelledby="titulo-parceiros-home">
+        <div class="conteudo-center-1200">
+            <h2 id="titulo-parceiros-home" class="sr-only">Banners de rodapé</h2>
+            <div class="container-parceiros-home">
+                <div class="owl-carousel owl-theme owl-parceiros-home" id="partners-carousel" aria-label="Carrossel de banners de rodapé">
+                                            <a class="item" href="https://www.hemominas.mg.gov.br/integridade" target="_blank" rel="noopener noreferrer" aria-label="Site do parceiro Plano de Integridade">
+                            <img src="https://www.hemominas.mg.gov.br/storage/media/partners/1759141366_teste.jpg" alt="Logotipo de Plano de Integridade">
+                        </a>
+                                            <a class="item" href="" target="_blank" rel="noopener noreferrer" aria-label="Site do parceiro DOE">
+                            <img src="https://www.hemominas.mg.gov.br/storage/media/partners/DOE.png" alt="Logotipo de DOE">
+                        </a>
+                                            <a class="item" href="https://www.ouvidoriageral.mg.gov.br/ouvidorias-tematicas/ouvidoria-de-saude" target="_blank" rel="noopener noreferrer" aria-label="Site do parceiro Ouvidoria de Saúde">
+                            <img src="https://www.hemominas.mg.gov.br/storage/media/partners/rodape_136.jpg" alt="Logotipo de Ouvidoria de Saúde">
+                        </a>
+                                            <a class="item" href="https://www.hemominas.mg.gov.br/programa-pbm" target="_blank" rel="noopener noreferrer" aria-label="Site do parceiro PBM">
+                            <img src="https://www.hemominas.mg.gov.br/storage/media/partners/rodape_PBM.jpg" alt="Logotipo de PBM">
+                        </a>
+                                            <a class="item" href="https://ead.hemominas.mg.gov.br" target="_blank" rel="noopener noreferrer" aria-label="Site do parceiro EAD Hemominas">
+                            <img src="https://www.hemominas.mg.gov.br/storage/media/partners/rodape_ead.jpg" alt="Logotipo de EAD Hemominas">
+                        </a>
+                                            <a class="item" href="https://esp.mg.gov.br" target="_blank" rel="noopener noreferrer" aria-label="Site do parceiro ESP-MG">
+                            <img src="https://www.hemominas.mg.gov.br/storage/media/partners/rodape_esp.jpg" alt="Logotipo de ESP-MG">
+                        </a>
+                                            <a class="item" href="https://www.fhemig.mg.gov.br" target="_blank" rel="noopener noreferrer" aria-label="Site do parceiro FHEMIG">
+                            <img src="https://www.hemominas.mg.gov.br/storage/media/partners/rodape_fhemig.jpg" alt="Logotipo de FHEMIG">
+                        </a>
+                                            <a class="item" href="https://www.funed.mg.gov.br" target="_blank" rel="noopener noreferrer" aria-label="Site do parceiro FUNED">
+                            <img src="https://www.hemominas.mg.gov.br/storage/media/partners/rodape_funed.jpg" alt="Logotipo de FUNED">
+                        </a>
+                                            <a class="item" href="https://www.ouvidoriageral.mg.gov.br" target="_blank" rel="noopener noreferrer" aria-label="Site do parceiro Ouvidoria Geral">
+                            <img src="https://www.hemominas.mg.gov.br/storage/media/partners/rodape_oge.jpg" alt="Logotipo de Ouvidoria Geral">
+                        </a>
+                                    </div>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        // Função para inicializar carrossel de parceiros
+        function initializePartnersCarousel() {
+            const carousel = $('.owl-parceiros-home');
+            if (carousel.length === 0) {
+                return;
+            }
+            
+            // Configurações do carrossel
+            const autoplayEnabled = true;
+            const pauseOnHover = true;
+            const showArrows = true;
+            const displayDuration = 3000;
+            const transitionDuration = 500;
+            
+            if (typeof $.fn.owlCarousel === 'undefined') {
+                setTimeout(function() {
+                    initializePartnersCarousel();
+                }, 100);
+                return;
+            }
+            
+            carousel.owlCarousel({
+                items: 4,
+                loop: true,
+                autoplay: autoplayEnabled,
+                autoplayTimeout: displayDuration,
+                autoplayHoverPause: pauseOnHover,
+                nav: showArrows,
+                dots: false,
+                navText: [
+                    '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>',
+                    '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>'
+                ],
+                smartSpeed: transitionDuration,
+                responsive: {
+                    0: { items: 1 },
+                    480: { items: 2 },
+                    768: { items: 3 },
+                    1024: { items: 4 }
+                }
+            });
+        }
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            initializePartnersCarousel();
+        });
+    </script>
+                </main>
+        <footer>
+    <div class="conteudo-center-1200">
+        <div class="footer-div">
+            <div class="footer-div-coluna">
+                <p class="footer-div-coluna-p">Links úteis</p>
+                <a class="footer-div-coluna-a" href="https://www.hemominas.mg.gov.br/protecao-de-dados">Proteção de dados</a>
+                <a class="footer-div-coluna-a" href="https://www.hemominas.mg.gov.br/transparencia">Transparência</a>
+                <a class="footer-div-coluna-a" href="https://www.hemominas.mg.gov.br/rede-hemominas">Rede Hemominas</a>
+            </div>
+            <div class="footer-div-coluna">
+                <p class="footer-div-coluna-p">Atendimento</p>
+                <a class="footer-div-coluna-a" href="https://www.hemominas.mg.gov.br/fale-conosco">Fale Conosco</a>
+                <a class="footer-div-coluna-a" href="https://www.hemominas.mg.gov.br/imprensa">Imprensa</a>
+                <a class="footer-div-coluna-a" href="https://www.hemominas.mg.gov.br/duvidas-frequentes" target="_blank" rel="noopener noreferrer">Dúvidas Frequentes</a>
+                <a class="footer-div-coluna-a" href="https://www.hemominas.mg.gov.br/horarios-de-atendimento">Horários de atendimento</a>
+                <a class="footer-div-coluna-a" href="https://www.hemominas.mg.gov.br/ouvidoria-do-sushemominas" target="_blank" rel="noopener noreferrer">Ouvidoria do SUS/Hemominas</a>
+            </div>
+            <div class="footer-div-coluna">
+                <p class="footer-div-coluna-p">Administração Central</p>
+                                                <span class="footer-div-coluna-a">R. Grão Pará, 882 - Funcionários <br>Belo Horizonte/MG</span>
+                <span class="footer-div-coluna-a">CEP: 30.150-348</span>
+            </div>
+            <div class="footer-div-coluna">
+                <p class="footer-div-coluna-p"><a href="https://www.hemominas.mg.gov.br/intranet/login" target="_blank" rel="noopener noreferrer">Intranet</a></p>
+                <a class="footer-div-coluna-logo-intranet" href="https://www.hemominas.mg.gov.br/intranet/login" target="_blank" rel="noopener noreferrer" aria-label="Acessar o portal da Intranet Hemominas (abre em nova guia)"><ion-icon name="globe-outline" aria-hidden="true"></ion-icon></a>
+            </div>
+            <div class="footer-div-coluna">
+                                <a class="footer-div-coluna-logo" href="https://www.hemominas.mg.gov.br" aria-label="Hemominas — página inicial">
+                    <span class="sr-only">Logotipo da Fundação Hemominas</span>
+                </a>
+                            </div>
+        </div>
+    </div>
+    <div class="footer-copyright">
+        <div class="conteudo-center-1200">
+            <p>© 2026 | Hemominas - Fundação Centro de Hematologia e Hemoterapia de Minas Gerais</p>
+            <p>Desenvolvido por <a href="https://aemsolutions.com.br" target="_blank" rel="noopener noreferrer">A&M Solutions Agência Digital</a></p>
+        </div>
+    </div>
+</footer>
+        
+        
+        <script>
+        (function() {
+            
+            const defaultFontSize = 100;
+            const minFontSize = 80;
+            const maxFontSize = 150;
+            const stepFontSize = 10;
+
+            function applyFontSize(size) {
+                document.documentElement.style.setProperty('--font-size-multiplier', (size / 100) + '');
+                localStorage.setItem('fontSize', size);
+            }
+
+            function toggleDarkMode() {
+                const isDark = document.body.classList.contains('dark-mode');
+                if (isDark) {
+                    document.body.classList.remove('dark-mode');
+                    localStorage.setItem('darkMode', 'false');
+                } else {
+                    document.body.classList.add('dark-mode');
+                    localStorage.setItem('darkMode', 'true');
+                }
+            }
+
+            function loadPreferences() {
+                const savedFontSize = localStorage.getItem('fontSize');
+                const savedDarkMode = localStorage.getItem('darkMode');
+                if (savedFontSize) applyFontSize(parseFloat(savedFontSize));
+                if (savedDarkMode === 'true') document.body.classList.add('dark-mode');
+            }
+
+            function initAccessibility() {
+                const fontIncrease = document.getElementById('font-increase');
+                const fontDecrease = document.getElementById('font-decrease');
+                const contrastIncrease = document.getElementById('contrast-increase');
+                const contrastDecrease = document.getElementById('contrast-decrease');
+
+
+                if (fontIncrease) {
+                    fontIncrease.onclick = function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        const currentSize = parseFloat(localStorage.getItem('fontSize') || defaultFontSize);
+                        applyFontSize(Math.min(currentSize + stepFontSize, maxFontSize));
+                        return false;
+                    };
+                }
+
+                if (fontDecrease) {
+                    fontDecrease.onclick = function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        const currentSize = parseFloat(localStorage.getItem('fontSize') || defaultFontSize);
+                        applyFontSize(Math.max(currentSize - stepFontSize, minFontSize));
+                        return false;
+                    };
+                }
+
+                if (contrastIncrease) {
+                    contrastIncrease.onclick = function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        toggleDarkMode();
+                        return false;
+                    };
+                }
+
+                if (contrastDecrease) {
+                    contrastDecrease.onclick = function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        document.body.classList.remove('dark-mode');
+                        localStorage.setItem('darkMode', 'false');
+                        return false;
+                    };
+                }
+
+                loadPreferences();
+            }
+
+            function tryInit() {
+                if (document.getElementById('font-increase')) {
+                    initAccessibility();
+                } else {
+                    setTimeout(tryInit, 50);
+                }
+            }
+
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', tryInit);
+            } else {
+                tryInit();
+            }
+        })();
+        </script>
+
+                    <div id="cookie-popup">
+                <span>Para aprimorar sua experiência de navegação, este site utiliza cookies. <br>Para mais informações, consulte nossa <a href="#" id="open-cookie-policy" url="https://www.hemominas.mg.gov.br/politica-de-cookies">política de cookies.</a></span>
+                <button id="accept-cookies" type="button" aria-label="Aceitar cookies">Aceitar</button>
+            </div>
+        
+        <div id="cookie-policy-modal">
+            <div class="cookie-policy-modal-div">
+                <button id="close-cookie-policy" type="button" aria-label="Fechar política de cookies">x</button>
+                <div id="cookie-policy-content"></div>
+            </div>
+        </div>
+
+        
+        <button type="button" class="chat-toggle" onclick="openChat()" aria-label="Abrir assistente virtual da Hemominas">
+            <img src="https://storage.googleapis.com/hemominas_logo/chatbot.png" alt="">
+            <span>Assistente virtual</span>
+        </button>
+        <div class="custom-df-dialog">
+            <df-messenger 
+                project-id="br-hemominas-cld-01-hml" 
+                agent-id="2071884b-600c-4bce-a964-8c7e542a765c" 
+                intent="WELCOME" 
+                session-ttl="1800" 
+                language-code="pt-br" 
+                max-query-length="-1" 
+                expand="true">
+                
+                <df-messenger-chat-bubble 
+                    chat-title='Assistente virtual' 
+                    bot-actor-image="https://storage.googleapis.com/hemominas_logo/logo_hemominas_vertical.jpg" 
+                    placeholder-text="Digite sua mensagem" 
+                    chat-collapse-icon="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=">
+                </df-messenger-chat-bubble>
+                
+                <button type="button" class="close-icon" onclick="closeChat(event)" aria-label="Fechar assistente virtual">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="800px" height="800px" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                        <g id="Complete">
+                            <g id="x-circle">
+                                <g>
+                                    <circle cx="12" cy="12" data-name="--Circle" fill="none" id="_--Circle" r="10" stroke="#577ECC" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+                                    <line fill="none" stroke="#577ECC" stroke-linecap="round" stroke-linejoin="round" stroke-width="1" x1="14.5" x2="9.5" y1="9.5" y2="14.5"/>
+                                    <line fill="none" stroke="#577ECC" stroke-linecap="round" stroke-linejoin="round" stroke-width="1" x1="14.5" x2="9.5" y1="14.5" y2="9.5"/>
+                                </g>
+                            </g>
+                        </g>
+                    </svg>
+                </button>
+            </df-messenger>
+        </div>
+
+                        
+        
+        <script src="https://www.hemominas.mg.gov.br/js/chatbot.js"></script>
+        
+        
+        
+                    <div vw class="enabled">
+    <div vw-access-button class="active"></div>
+    <div vw-plugin-wrapper>
+        <div class="vw-plugin-top-wrapper"></div>
+    </div>
+</div>
+
+<style>
+    [vw] [vw-access-button].vlibras-loading {
+        opacity: 0.75;
+        cursor: wait;
+        pointer-events: none;
+    }
+    [vw] [vw-access-button].vlibras-loading::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        margin: auto;
+        width: 18px;
+        height: 18px;
+        border: 2px solid #003366;
+        border-top-color: transparent;
+        border-radius: 50%;
+        animation: vlibras-loading-spin 0.7s linear infinite;
+        z-index: 2;
+    }
+    @keyframes vlibras-loading-spin {
+        to { transform: rotate(360deg); }
+    }
+</style>
+
+<script src="https://vlibras.gov.br/app/vlibras-plugin.js"></script>
+<script>
+    new window.VLibras.Widget('https://vlibras.gov.br/app');
+
+    (function () {
+        var accessButton = document.querySelector('[vw-access-button]');
+        var pluginWrapper = document.querySelector('[vw-plugin-wrapper]');
+        if (!accessButton || !pluginWrapper) {
+            return;
+        }
+
+        accessButton.addEventListener('click', function () {
+            if (!pluginWrapper.classList.contains('active')) {
+                accessButton.classList.add('vlibras-loading');
+            }
+        });
+
+        var observer = new MutationObserver(function () {
+            if (pluginWrapper.classList.contains('active')) {
+                accessButton.classList.remove('vlibras-loading');
+            }
+        });
+
+        observer.observe(pluginWrapper, { attributes: true, attributeFilter: ['class'] });
+    })();
+</script>
+        
+        <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+        <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+        <script>
+            // Variáveis globais para o carrossel da home
+            let homeCurrentSlide = 0;
+            let homeSlides = [];
+            let homeCarouselInterval;
+            
+            $(document).ready(function(){
+                // Garantir que indicadores estejam visíveis antes de inicializar
+                ensureIndicatorsVisible();
+
+                // Inicializar carrossel da home usando o mesmo sistema do preview
+                initializeHomeCarousel();
+
+                // Espera pelo plugin owlCarousel (pode ser carregado assincronamente em produção)
+                function initOwlCarousels(){
+                    if (typeof $.fn.owlCarousel !== 'function'){
+                        window._owlWait = (window._owlWait || 0) + 1;
+                        if (window._owlWait < 60) { // espera até ~6s (60 * 100ms)
+                            setTimeout(initOwlCarousels, 100);
+                        } else {
+                            console.warn('Owl Carousel plugin não foi encontrado após aguardar.');
+                        }
+                        return;
+                    }
+
+                    // Outros carrosséis (mantendo os existentes)
+                    $('.owl-header').owlCarousel({
+                        loop:false,
+                        margin:0,
+                        items:4,
+                        nav:true,
+                        autoplay:false,
+                        autoplayTimeout: 5000,
+                        autoplayHoverPause: false,
+                        dots:false
+                    });
+                    $('.owl-publicacoes').owlCarousel({
+                        loop:true,
+                        margin:10,
+                        items:4,
+                        nav:true,
+                        dots:false,
+                        autoHeight:true,
+                        autoplay:false,
+                        autoplayTimeout: 3000,
+                        autoplayHoverPause: false,
+                        responsiveClass:true,
+                        responsive:{
+                            0:{ items:1 },
+                            600:{ items:3 },
+                            1000:{ items:4 }
+                        }
+                    });
+
+                    // Configurações dos parceiros vindas do banco
+                    var partnersSettings = {
+                        'display_duration': 3000,
+                        'transition_duration': 500,
+                        'items_per_view': 4,
+                        'show_arrows': true,
+                        'autoplay': true,
+                        'pause_on_hover': true
+                    };
+
+                    $('.owl-parceiros-home').owlCarousel({
+                        loop:true,
+                        margin:10,
+                        items:partnersSettings.items_per_view,
+                        nav:partnersSettings.show_arrows === 'true',
+                        dots:false, // Sempre false para parceiros
+                        autoplay:partnersSettings.autoplay === 'true',
+                        autoplayTimeout: partnersSettings.display_duration,
+                        autoplayHoverPause: partnersSettings.pause_on_hover === 'true',
+                        responsiveClass:true,
+                        responsive:{
+                            0:{ items:1 },
+                            600:{ items:Math.min(3, Math.min(5, partnersSettings.items_per_view)) },
+                            1000:{ items:Math.min(5, partnersSettings.items_per_view) }
+                        }
+                    });
+                }
+
+                initOwlCarousels();
+            });
+            
+            // Função para atualizar pointer-events baseado no slide ativo - SIMPLIFICADA
+            function updateSlidePointerEvents() {
+                if (!homeSlides || homeSlides.length === 0) return;
+                
+                // Remover TODOS os estilos inline de TODOS os slides primeiro
+                homeSlides.forEach(function(slide) {
+                    slide.style.pointerEvents = '';
+                    slide.style.cursor = '';
+                    const allChildren = slide.querySelectorAll('*');
+                    allChildren.forEach(function(child) {
+                        child.style.pointerEvents = '';
+                        child.style.cursor = '';
+                    });
+                });
+                
+                // O CSS já cuida de tudo, não precisamos aplicar estilos inline
+                // Apenas garantir que o CSS está sendo respeitado
+            }
+            
+            // Funções do carrossel da home (copiadas do preview)
+            function initializeHomeCarousel() {
+                homeSlides = document.querySelectorAll('.home-carousel-slide');
+                
+                if (homeSlides.length > 0) {
+                    // Atualizar indicadores imediatamente para garantir que todos apareçam
+                    updateHomeIndicators();
+                    
+                    // Garantir visibilidade continuamente
+                    setTimeout(function() {
+                        updateHomeIndicators();
+                    }, 100);
+                    
+                    startHomeAutoplay();
+                }
+            }
+
+            function startHomeAutoplay() {
+                if (homeCarouselInterval) clearInterval(homeCarouselInterval);
+                
+                const activeSlide = document.querySelector('.home-carousel-slide.active');
+                if (activeSlide) {
+                    const duration = parseInt(activeSlide.dataset.duration) || 5000;
+                    homeCarouselInterval = setInterval(nextHomeSlide, duration);
+                }
+            }
+
+            function nextHomeSlide() {
+                if (homeSlides.length === 0) return;
+                
+                homeSlides[homeCurrentSlide].classList.remove('active');
+                homeSlides[homeCurrentSlide].setAttribute('aria-hidden', 'true');
+                homeCurrentSlide = (homeCurrentSlide + 1) % homeSlides.length;
+                homeSlides[homeCurrentSlide].classList.add('active');
+                homeSlides[homeCurrentSlide].setAttribute('aria-hidden', 'false');
+                
+                updateHomeIndicators();
+                startHomeAutoplay();
+            }
+
+            function previousHomeSlide() {
+                if (homeSlides.length === 0) return;
+                
+                homeSlides[homeCurrentSlide].classList.remove('active');
+                homeSlides[homeCurrentSlide].setAttribute('aria-hidden', 'true');
+                homeCurrentSlide = (homeCurrentSlide - 1 + homeSlides.length) % homeSlides.length;
+                homeSlides[homeCurrentSlide].classList.add('active');
+                homeSlides[homeCurrentSlide].setAttribute('aria-hidden', 'false');
+                
+                updateHomeIndicators();
+                startHomeAutoplay();
+            }
+
+            function goToHomeSlide(index) {
+                if (homeSlides.length === 0) return;
+                
+                homeSlides[homeCurrentSlide].classList.remove('active');
+                homeSlides[homeCurrentSlide].setAttribute('aria-hidden', 'true');
+                homeCurrentSlide = index;
+                homeSlides[homeCurrentSlide].classList.add('active');
+                homeSlides[homeCurrentSlide].setAttribute('aria-hidden', 'false');
+                
+                updateHomeIndicators();
+                startHomeAutoplay();
+            }
+
+            function updateHomeIndicators() {
+                const indicators = document.querySelectorAll('.home-carousel-indicator');
+                indicators.forEach((indicator, index) => {
+                    // Garantir que todos os indicadores estejam sempre visíveis
+                    indicator.style.display = 'block';
+                    indicator.style.visibility = 'visible';
+                    indicator.style.opacity = '1';
+                    indicator.style.zIndex = '100000';
+                    indicator.setAttribute('aria-selected', index === homeCurrentSlide ? 'true' : 'false');
+                    
+                    // Atualizar visual do indicador ativo vs inativo
+                    if (index === homeCurrentSlide) {
+                        // Indicador ativo - branco sólido
+                        indicator.classList.remove('bg-opacity-50');
+                        indicator.classList.add('bg-white');
+                        indicator.style.opacity = '1';
+                        indicator.style.backgroundColor = 'white';
+                    } else {
+                        // Indicador inativo - branco com opacidade
+                        indicator.classList.remove('bg-white');
+                        indicator.classList.add('bg-white', 'bg-opacity-50');
+                        indicator.style.opacity = '0.5';
+                        indicator.style.backgroundColor = 'rgba(255, 255, 255, 0.5)';
+                    }
+                });
+                
+                // Garantir que o container dos indicadores esteja sempre visível
+                const indicatorsContainer = document.querySelector('.home-carousel-indicators');
+                if (indicatorsContainer) {
+                    indicatorsContainer.style.display = 'flex';
+                    indicatorsContainer.style.visibility = 'visible';
+                    indicatorsContainer.style.opacity = '1';
+                    indicatorsContainer.style.zIndex = '100000';
+                }
+            }
+
+            // Garantir que indicadores estejam sempre visíveis
+            function ensureIndicatorsVisible() {
+                // Atualizar indicadores para garantir que todos apareçam e o ativo seja destacado
+                if (typeof updateHomeIndicators === 'function' && homeSlides.length > 0) {
+                    updateHomeIndicators();
+                }
+                
+                const indicatorsContainer = document.querySelector('.home-carousel-indicators');
+                if (indicatorsContainer) {
+                    indicatorsContainer.style.display = 'flex';
+                    indicatorsContainer.style.visibility = 'visible';
+                    indicatorsContainer.style.opacity = '1';
+                    indicatorsContainer.style.zIndex = '100000';
+                }
+                
+                const indicators = document.querySelectorAll('.home-carousel-indicator');
+                indicators.forEach(function(indicator) {
+                    indicator.style.display = 'block';
+                    indicator.style.visibility = 'visible';
+                    indicator.style.opacity = '1';
+                    indicator.style.zIndex = '100000';
+                });
+            }
+            
+            // Executar imediatamente e quando DOM estiver pronto
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', ensureIndicatorsVisible);
+            } else {
+                ensureIndicatorsVisible();
+            }
+            
+            // Executar periodicamente para garantir visibilidade
+            setInterval(ensureIndicatorsVisible, 100);
+
+            // Pausar carrossel no hover
+            document.addEventListener('DOMContentLoaded', function() {
+                const homeCarouselContainer = document.getElementById('home-carousel-container');
+                if (homeCarouselContainer) {
+                    homeCarouselContainer.addEventListener('mouseenter', function() {
+                        if (homeCarouselInterval) clearInterval(homeCarouselInterval);
+                    });
+
+                    homeCarouselContainer.addEventListener('mouseleave', function() {
+                        startHomeAutoplay();
+                    });
+                    
+                    // Bloquear cliques e interações visuais em slides sem link
+                    homeCarouselContainer.addEventListener('click', function(e) {
+                        // Permitir cliques em setas e indicadores
+                        if (e.target.closest('.home-carousel-arrow') || 
+                            e.target.closest('.home-carousel-indicator') ||
+                            e.target.classList.contains('home-carousel-arrow') ||
+                            e.target.classList.contains('home-carousel-indicator')) {
+                            return;
+                        }
+                        
+                        // Encontrar o slide ativo
+                        const activeSlide = document.querySelector('.home-carousel-slide.active');
+                        if (!activeSlide) return;
+                        
+                        // Verificar se o slide ativo tem link
+                        const hasLink = activeSlide.getAttribute('data-has-link') === 'true';
+                        
+                        // Se NÃO tem link, bloquear TUDO
+                        if (!hasLink) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            e.stopImmediatePropagation();
+                            return false;
+                        }
+                        
+                        // Se tem link, verificar se o clique foi no link
+                        const linkElement = activeSlide.querySelector('a.slide-link');
+                        if (hasLink && linkElement) {
+                            // Se clicou fora do link, bloquear
+                            if (!e.target.closest('a.slide-link')) {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                return false;
+                            }
+                        }
+                    }, true);
+                    
+                    // Função para esconder links de slides inativos quando slide ativo não tem link
+                    function hideInactiveLinks() {
+                        const activeSlide = document.querySelector('.home-carousel-slide.active');
+                        if (!activeSlide) return;
+                        
+                        const hasLink = activeSlide.getAttribute('data-has-link') === 'true';
+                        
+                        // Restaurar TODOS os links primeiro
+                        document.querySelectorAll('.home-carousel-slide a.slide-link').forEach(function(link) {
+                            const originalHref = link.getAttribute('data-original-href');
+                            if (originalHref) {
+                                link.setAttribute('href', originalHref);
+                                link.removeAttribute('data-original-href');
+                            }
+                        });
+                        
+                        // Se o slide ativo NÃO tem link, remover href dos links inativos para evitar que apareçam na barra de status
+                        if (!hasLink) {
+                            document.querySelectorAll('.home-carousel-slide:not(.active) a.slide-link').forEach(function(link) {
+                                if (!link.hasAttribute('data-original-href')) {
+                                    const currentHref = link.getAttribute('href');
+                                    if (currentHref) {
+                                        link.setAttribute('data-original-href', currentHref);
+                                    }
+                                }
+                                link.removeAttribute('href');
+                            });
+                        }
+                    }
+                    
+                    // Executar quando o carrossel inicializar e quando slides mudarem
+                    setTimeout(hideInactiveLinks, 100);
+                    
+                    // Observar mudanças no slide ativo
+                    const slideObserver = new MutationObserver(hideInactiveLinks);
+                    document.querySelectorAll('.home-carousel-slide').forEach(function(slide) {
+                        slideObserver.observe(slide, { 
+                            attributes: true, 
+                            attributeFilter: ['class'] 
+                        });
+                    });
+                }
+            });
+        </script>
+        
+        <script>
+            // Interceptor global de erros para suprimir erros do TinyMCE relacionados a webpage_content_reporter.js
+            const originalErrorHandler = window.onerror;
+            window.onerror = function(msg, url, line, col, error) {
+                // Suprimir erros relacionados a 'export' em webpage_content_reporter.js (erro interno do TinyMCE)
+                if (msg && typeof msg === 'string' && msg.includes("Unexpected token 'export'") && 
+                    url && typeof url === 'string' && url.includes('webpage_content_reporter.js')) {
+                    // Erro suprimido silenciosamente
+                    return true; // Suprimir o erro
+                }
+                // Para outros erros, usar o handler original se existir
+                if (originalErrorHandler) {
+                    return originalErrorHandler.apply(this, arguments);
+                }
+                return false;
+            };
+        </script>
+    </body>
+</html>
