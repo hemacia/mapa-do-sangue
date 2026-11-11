@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { nivelMaisGrave, normalizarNivel } from '../../src/domain/nivel'
+import { ROTULOS_NIVEL, nivelMaisGrave, normalizarNivel } from '../../src/domain/nivel'
 
 describe('normalizarNivel', () => {
   it.each([
@@ -49,5 +49,11 @@ describe('normalizarNivel com escala própria da fonte', () => {
     const escalaHemosc = { alerta: 'critico' as const }
 
     expect(normalizarNivel('Reduzido', escalaHemosc)).toBe('alerta')
+  })
+})
+
+describe('ROTULOS_NIVEL', () => {
+  it('tem rótulo em português para cada nível', () => {
+    expect(ROTULOS_NIVEL).toEqual({ critico: 'Crítico', alerta: 'Alerta', estavel: 'Estável', adequado: 'Adequado' })
   })
 })
