@@ -36,7 +36,7 @@ onMounted(async () => {
     <p v-if="erro" role="alert">{{ erro }}</p>
     <template v-else>
       <label>
-        Tipo sanguíneo
+        Tipo sanguíneo no mapa
         <select v-model="tipo" name="tipo-estoque">
           <option v-for="opcao in TIPOS_SANGUINEOS" :key="opcao" :value="opcao">{{ opcao }}</option>
         </select>
