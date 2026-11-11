@@ -19,6 +19,10 @@ import (
 )
 
 func main() {
+	// A imagem distroless não tem curl: o HEALTHCHECK do Docker chama o próprio binário.
+	if len(os.Args) > 1 && os.Args[1] == "saude" {
+		os.Exit(verificarSaude())
+	}
 	log := slog.New(slog.NewJSONHandler(os.Stdout, nil))
 	if err := executar(log); err != nil {
 		log.Error("api encerrada com erro", "erro", err)
@@ -77,4 +81,17 @@ func executar(log *slog.Logger) error {
 		return err
 	}
 	return nil
+}
+
+func verificarSaude() int {
+	porta := os.Getenv("PORT")
+	if porta == "" {
+		porta = "8080"
+	}
+	cliente := http.Client{Timeout: 2 * time.Second}
+	resp, err := cliente.Get("http://127.0.0.1:" + porta + "/healthz")
+	if err != nil || resp.StatusCode != http.StatusOK {
+		return 1
+	}
+	return 0
 }
