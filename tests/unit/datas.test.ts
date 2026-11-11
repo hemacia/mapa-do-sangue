@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { adicionarMeses, dataEmBrasilia, dataLocal, extrairDataBR, interpretarDataAmbigua, formatarData, formatarDataBR, idadeEmAnos, parseData } from '../../src/domain/datas'
+import { adicionarMeses, dataEmBrasilia, dataLocal, extrairDataBR, formatarAtualizacao, interpretarDataAmbigua, formatarData, formatarDataBR, idadeEmAnos, parseData } from '../../src/domain/datas'
 
 describe('parseData', () => {
   it('converte uma data ISO válida', () => {
@@ -116,5 +116,19 @@ describe('dataEmBrasilia', () => {
 
   it('vira o dia à meia-noite de Brasília, às 3h em UTC', () => {
     expect(formatarData(dataEmBrasilia(new Date('2026-11-11T03:00:00Z')))).toBe('2026-11-11')
+  })
+})
+
+describe('formatarAtualizacao', () => {
+  it('mostra data e hora quando a fonte informa as duas', () => {
+    expect(formatarAtualizacao('2026-11-10T12:35')).toBe('10/11/2026 às 12:35')
+  })
+
+  it('mostra só a data quando não há hora', () => {
+    expect(formatarAtualizacao('2026-11-10')).toBe('10/11/2026')
+  })
+
+  it('avisa quando a fonte não informa', () => {
+    expect(formatarAtualizacao(null)).toBe('Não informado pela fonte')
   })
 })
