@@ -33,9 +33,7 @@ Funcionalidades:
 | Hemosc | SC | Página do site em ISO-8859-1 (escala própria: "Alerta" é o pior nível) |
 | Hemoba | BA | Página do site |
 
-Os outros estados não publicam o estoque de forma que dê para coletar. Detalhes em [docs/pesquisa](docs/pesquisa/).
-
-A pesquisa que embasou o projeto (fontes por estado, regras de doação, projetos parecidos) está em [docs/pesquisa](docs/pesquisa/).
+Os outros estados não publicam o estoque de forma que dê para coletar. A pesquisa que embasou o projeto (fontes por estado, regras de doação, projetos parecidos) está em [docs/pesquisa](docs/pesquisa/).
 
 ## Tecnologias
 
