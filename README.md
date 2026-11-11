@@ -37,6 +37,15 @@ Os outros estados não publicam o estoque de forma que dê para coletar. A pesqu
 
 ## Tecnologias
 
+O projeto está migrando para a arquitetura de [docs/design](docs/design/) (Next.js, Go, PostgreSQL, Docker e Cloudflare). Já em uso na API:
+
+- **Go** (`net/http`, `pgx`): API HTTP com contrato OpenAPI (`oapi-codegen`), erros no formato RFC 9457, CORS, cabeçalhos de segurança e limite de requisições
+- **PostgreSQL**: banco com migrations versionadas (`goose`)
+- **Docker Compose**: ambiente local e testes de integração; imagem da API `distroless`
+- **golangci-lint** e **lefthook**: lint, formatação e padrão Conventional Commits verificados antes do commit
+
+Versão atual do site, que será substituída pelo Next.js:
+
 - **Vue 3 + TypeScript + Vite**: interface e regras de negócio. As regras ficam em `src/domain` como funções puras, separadas da tela, o que facilita testar
 - **Cloudflare D1 (SQLite)**: banco de dados com os hemocentros, as leituras de estoque e o histórico. O schema está em `migrations/`
 - **Cloudflare Pages**: hospedagem gratuita do site
@@ -69,6 +78,28 @@ npm run test:coverage
 npx playwright install chromium
 npm run test:e2e
 ```
+
+### API (Go + PostgreSQL)
+
+Requer Go (a versão está em `api/go.mod`) e Docker. `make help` lista todos os comandos.
+
+```bash
+cp .env.example .env
+
+# API e banco locais com recarga automática (http://localhost:8080/healthz)
+make dev
+
+# testes da API: os de banco rodam contra o Postgres do compose
+make db
+DATABASE_URL_TEST=postgres://mapa:mapa@localhost:5439/mapa?sslmode=disable make test-api
+
+# ou tudo em Docker, com um Postgres limpo
+make test-api-docker
+```
+
+Cada teste de banco cria um schema próprio, aplica as migrations e apaga o schema no fim, então os testes não dependem um do outro. O contrato da API está em `api/openapi.yaml`, e o servidor Go é gerado dele (`make generate`).
+
+### Site (versão atual)
 
 Os testes e2e sobem o site com as Pages Functions e um banco D1 local, populado com as páginas salvas em `tests/fixtures` (nenhum teste acessa a internet).
 
