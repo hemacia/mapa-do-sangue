@@ -31,3 +31,7 @@ test-results
 coleta.sql
 .dev.vars
 .vscode
+
+# ambiente
+.env
+api/coverage.out

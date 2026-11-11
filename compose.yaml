@@ -1,0 +1,40 @@
+# Ambiente local: make dev (ou docker compose up --watch)
+name: mapa-do-sangue
+
+services:
+  postgres:
+    image: postgres:18-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-mapa}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-mapa}
+      POSTGRES_DB: ${POSTGRES_DB:-mapa}
+    ports:
+      - "127.0.0.1:${POSTGRES_PORT:-5439}:5432"
+    volumes:
+      - postgres:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U \"$$POSTGRES_USER\" -d \"$$POSTGRES_DB\""]
+      interval: 2s
+      timeout: 3s
+      retries: 20
+
+  api:
+    build: ./api
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgres://${POSTGRES_USER:-mapa}:${POSTGRES_PASSWORD:-mapa}@postgres:5432/${POSTGRES_DB:-mapa}?sslmode=disable
+      ALLOWED_ORIGIN: ${ALLOWED_ORIGIN:-http://localhost:3000}
+      SHUTDOWN_TIMEOUT: ${SHUTDOWN_TIMEOUT:-10s}
+    ports:
+      - "127.0.0.1:${API_PORT:-8080}:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    develop:
+      watch:
+        - path: ./api
+          action: rebuild
+          ignore: ["**/*_test.go"]
+
+volumes:
+  postgres:
