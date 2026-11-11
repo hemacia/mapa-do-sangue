@@ -16,6 +16,12 @@ export function dataLocal(agora: Date): Date {
   return new Date(Date.UTC(agora.getFullYear(), agora.getMonth(), agora.getDate()))
 }
 
+// No servidor (Cloudflare) o relógio está em UTC: às 22h de Brasília já seria amanhã.
+export function dataEmBrasilia(agora: Date): Date {
+  const iso = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Sao_Paulo' }).format(agora)
+  return parseData(iso)
+}
+
 export function formatarData(data: Date): string {
   return data.toISOString().slice(0, 10)
 }
