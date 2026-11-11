@@ -46,10 +46,11 @@ h1 { font-size: 1.6rem; font-weight: 700; margin: 0; text-wrap: balance; letter-
     </div>
   </header>
 
-  <div class="canvas"><svg id="d" viewBox="20 95 1700 1130" role="img" aria-label="Diagrama de arquitetura do Mapa do Sangue"></svg></div>
+  <div class="canvas"><svg id="d" viewBox="20 95 1700 1300" role="img" aria-label="Diagrama de arquitetura do Mapa do Sangue"></svg></div>
 
   <section class="notes">
-    <div><b>Cada linguagem no que faz melhor</b><p>Next.js (TypeScript) cuida das páginas e das regras que rodam no navegador, como o "Posso doar?". Go cuida dos dados: coleta, banco e API.</p></div>
+    <div><b>Docker em tudo</b><p>Cada caixa da VPS é um container. O mesmo docker compose sobe o ambiente local e os testes de integração no CI. As imagens ficam no GHCR.</p></div>
+    <div><b>Cada linguagem no que faz melhor</b><p>Next.js (TypeScript) cuida das páginas e das regras que rodam no navegador. Go cuida dos dados: coleta, banco e API, com contrato OpenAPI entre os dois.</p></div>
     <div><b>SEO de verdade</b><p>Uma página por estado e por hemocentro, gerada no servidor e renovada a cada 30 minutos (ISR), com sitemap e dados estruturados.</p></div>
     <div><b>Nenhuma porta aberta</b><p>O Cloudflare recebe o tráfego e segura DDoS. A VPS só fala para fora pelo túnel, então a API não fica exposta na internet.</p></div>
     <div><b>Testado nos três sistemas</b><p>Vitest no web, go test na API com Postgres instalado no runner e Playwright no e2e, em Linux, macOS e Windows, com cobertura no Codecov.</p></div>
@@ -81,10 +82,10 @@ const GENERIC = {
 
 // Cada serviço sai por um lado diferente do nó, para as setas não se cruzarem.
 const GROUPS = [
-  { x: 250, y: 110, w: 220, h: 1000, t: 'Cloudflare', k: 'cf', icon: 'cloudflare' },
+  { x: 250, y: 110, w: 220, h: 1180, t: 'Cloudflare', k: 'cf', icon: 'cloudflare' },
   { x: 540, y: 110, w: 240, h: 440, t: 'Vercel', k: 'aws', icon: 'vercel' },
   { x: 880, y: 180, w: 520, h: 260, t: 'Código e CI', k: 'sub' },
-  { x: 860, y: 560, w: 480, h: 550, t: 'VPS · Docker Compose', k: 'aws', icon: 'docker' },
+  { x: 860, y: 560, w: 480, h: 730, t: 'VPS · Docker Compose (1 container por caixa)', k: 'aws', icon: 'docker' },
   { x: 1430, y: 690, w: 260, h: 520, t: 'Fontes de dados', k: 'ext' }
 ];
 
@@ -94,17 +95,18 @@ const NODES = [
 
   { x: 360, y: 400, t: 'DNS · proxy', s: 'DDoS · WAF · cache', i: 'cloudflare', c: '#F38020' },
   { x: 360, y: 700, t: 'Tunnel', s: 'sem porta aberta', i: 'cloudflare', c: '#F38020' },
-  { x: 360, y: 950, t: 'R2', s: 'backup do banco', i: 'cloudflare', c: '#F38020' },
+  { x: 360, y: 1170, t: 'R2', s: 'backup do banco', i: 'cloudflare', c: '#F38020' },
 
   { x: 660, y: 400, t: 'Next.js', s: 'SSR · ISR · sitemap', i: 'nextdotjs', mono: 1 },
 
-  { x: 1000, y: 300, t: 'GitHub', s: 'Actions · Dependabot', i: 'github', mono: 1 },
+  { x: 1000, y: 300, t: 'GitHub', s: 'Actions · GHCR · Dependabot', i: 'github', mono: 1 },
   { x: 1260, y: 300, t: 'Codecov', s: 'web + api', i: 'codecov', c: '#F01F7A' },
 
-  { x: 960, y: 700, t: 'cloudflared', s: 'túnel de saída', i: 'cloudflare', c: '#F38020' },
-  { x: 1200, y: 700, t: 'API', s: 'Go · net/http · pgx', i: 'go', c: '#00ADD8' },
-  { x: 960, y: 950, t: 'PostgreSQL', s: 'leituras · estatísticas', i: 'postgresql', c: '#4169E1' },
+  { x: 960, y: 700, t: 'cloudflared', s: 'túnel de saída', i: 'docker', c: '#2496ED' },
+  { x: 1200, y: 700, t: 'API', s: 'Go · OpenAPI · /healthz', i: 'go', c: '#00ADD8' },
+  { x: 960, y: 950, t: 'PostgreSQL', s: 'volume · migrations goose', i: 'postgresql', c: '#4169E1' },
   { x: 1200, y: 950, t: 'Coletor', s: 'Go · goquery · 2x/dia', i: 'go', c: '#00ADD8' },
+  { x: 960, y: 1170, t: 'Backup', s: 'pg_dump diário', g: 'archive' },
 
   { x: 1560, y: 800, t: 'Dados abertos ES', s: 'API CKAN · HEMOES', g: 'doc' },
   { x: 1560, y: 950, t: 'Hemocentros', s: 'MG · SP · SC · BA · PI', g: 'building' },
@@ -123,7 +125,8 @@ const EDGES = [
   // dados
   { p: [[1162, 715], [1080, 715], [1080, 935], [998, 935]], l: 'SQL', at: [1088, 830], v: 1 },
   { p: [[1162, 965], [998, 965]], l: 'grava', at: [1120, 983] },
-  { p: [[922, 950], [400, 950]], l: 'backup diário', at: [660, 938] },
+  { p: [[960, 1042], [960, 1130]], l: 'dump', at: [970, 1090], v: 1 },
+  { p: [[922, 1170], [400, 1170]], l: 'envia para o R2', at: [660, 1158] },
   // coletor → fontes
   { p: [[1238, 935], [1380, 935], [1380, 800], [1520, 800]], l: 'API CKAN', at: [1465, 788] },
   { p: [[1238, 950], [1520, 950]], l: 'HTML · JSON', at: [1470, 938] },
