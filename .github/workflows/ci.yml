@@ -65,6 +65,7 @@ jobs:
     defaults:
       run:
         working-directory: api
+        shell: bash # no PowerShell, -coverprofile=coverage.out vira dois argumentos
     steps:
       - uses: actions/checkout@v7
 
