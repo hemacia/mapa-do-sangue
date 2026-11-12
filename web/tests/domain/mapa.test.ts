@@ -28,3 +28,24 @@ describe('nível de cada estado no mapa', () => {
     expect(Object.values(niveis).every((nivel) => nivel === null)).toBe(true)
   })
 })
+
+describe('nível de um tipo sanguíneo em cada estado', () => {
+  it('usa o nível mais grave daquele tipo entre os hemocentros do estado', () => {
+    const hemocentros = [
+      { uf: 'SP', nivelGeral: 'critico' as const, estoque: { 'A+': 'adequado' as const, 'O-': 'critico' as const } },
+      { uf: 'SP', nivelGeral: 'alerta' as const, estoque: { 'A+': 'estavel' as const } },
+    ]
+
+    const niveis = nivelPorUF(hemocentros, 'A+')
+
+    expect(niveis.SP).toBe('estavel')
+  })
+
+  it('deixa sem nível o estado cujos hemocentros não informam o tipo', () => {
+    const hemocentros = [{ uf: 'SP', nivelGeral: 'critico' as const, estoque: { 'O-': 'critico' as const } }]
+
+    const niveis = nivelPorUF(hemocentros, 'A+')
+
+    expect(niveis.SP).toBeNull()
+  })
+})
