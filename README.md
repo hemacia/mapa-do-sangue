@@ -99,7 +99,21 @@ make test-api-docker
 
 Cada teste de banco cria um schema próprio, aplica as migrations e apaga o schema no fim, então os testes não dependem um do outro. O contrato da API está em `api/openapi.yaml`, e o servidor Go é gerado dele (`make generate`).
 
-### Site (versão atual)
+### Site novo (Next.js, em `web/`)
+
+```bash
+cd web && npm ci && cd ..
+
+# testes de unidade e de componentes, com cobertura (web/coverage)
+cd web && npm run test:coverage && cd ..
+
+# e2e: sobe API e Postgres em Docker com dados fixos, faz o build do site e roda o Playwright
+make test-e2e-web
+```
+
+Para ver o site com dados de verdade: `make dev` (API e banco), `make carregar-coleta` (coleta o estoque agora e grava no banco) e `make web` (site em http://localhost:3000). Se a porta 8080 estiver ocupada, troque `API_PORT` no `.env` e aponte `API_URL` e `NEXT_PUBLIC_API_URL` em `web/.env.local` para ela.
+
+### Site antigo (Vue, será removido)
 
 Os testes e2e sobem o site com as Pages Functions e um banco D1 local, populado com as páginas salvas em `tests/fixtures` (nenhum teste acessa a internet).
 
