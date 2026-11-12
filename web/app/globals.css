@@ -709,6 +709,25 @@ select {
   color: var(--critico-texto);
 }
 
+.compatibilidade {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  max-width: 420px;
+  margin-top: var(--space-6);
+}
+
+.compatibilidade dt {
+  color: var(--ink-2);
+  font-size: var(--text-sm);
+}
+
+.compatibilidade dd {
+  margin: 0 0 var(--space-2);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
 .vazio {
   padding: var(--space-5);
   border: 1px dashed var(--line-strong);

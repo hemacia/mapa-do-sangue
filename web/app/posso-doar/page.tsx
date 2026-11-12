@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { PossoDoar } from '@/components/PossoDoar'
+import { QuemDoaParaQuem } from '@/components/QuemDoaParaQuem'
 
 export const metadata: Metadata = {
   title: 'Posso doar sangue?',
@@ -20,6 +21,7 @@ export default function PaginaPossoDoar() {
         </p>
       </div>
       <PossoDoar />
+      <QuemDoaParaQuem />
     </div>
   )
 }
