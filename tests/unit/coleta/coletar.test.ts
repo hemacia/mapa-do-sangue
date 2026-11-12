@@ -2,7 +2,6 @@ import { readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
 import { type Baixar, coletarTodas, gerarSQL } from '../../../src/coleta/coletar'
 import { FONTES } from '../../../src/coleta/fontes'
-import { bancoComMigrations } from '../banco'
 
 const COLETADO_EM = new Date('2026-11-10T09:00:00Z')
 
@@ -56,28 +55,24 @@ describe('coletarTodas', () => {
 })
 
 describe('gerarSQL', () => {
-  it('gera inserts que o banco aceita, com uma linha por tipo e fonte', async () => {
-    const db = bancoComMigrations()
+  it('gera um insert por tipo e fonte', async () => {
     const resultados = await coletarTodas(FONTES, baixarFixtures, COLETADO_EM)
 
-    db.exec(gerarSQL(resultados, COLETADO_EM))
+    const sql = gerarSQL(resultados, COLETADO_EM)
 
-    const { total } = db.prepare('SELECT count(*) AS total FROM leituras_estoque').get() as { total: number }
-    expect(total).toBe(48)
+    expect(sql.match(/^INSERT INTO leituras_estoque/gm)).toHaveLength(48)
   })
 
   it('marca a última coleta bem-sucedida só nas fontes que funcionaram', () => {
-    const db = bancoComMigrations()
     const resultados = [
       { fonteId: 'hemoba', ok: true as const, leituras: [{ tipo: 'O-' as const, nivel: 'critico' as const }], atualizadoNaFonte: null },
       { fonteId: 'hemosc', ok: false as const, erro: 'HTTP 500' },
     ]
 
-    db.exec(gerarSQL(resultados, COLETADO_EM))
+    const sql = gerarSQL(resultados, COLETADO_EM)
 
-    const fontes = db.prepare('SELECT id, ultima_coleta_ok FROM fontes ORDER BY id').all()
-    expect(fontes).toContainEqual({ id: 'hemoba', ultima_coleta_ok: '2026-11-10T09:00:00Z' })
-    expect(fontes).toContainEqual({ id: 'hemosc', ultima_coleta_ok: null })
+    expect(sql).toContain("UPDATE fontes SET ultima_coleta_ok = '2026-11-10T09:00:00Z' WHERE id = 'hemoba';")
+    expect(sql).not.toContain("'hemosc'")
   })
 
   it('escapa aspas simples vindas da fonte', () => {
@@ -94,11 +89,12 @@ describe('gerarSQL', () => {
 })
 
 describe('FONTES', () => {
-  it('tem um hemocentro e uma fonte cadastrados no banco para cada fonte do código', () => {
-    const db = bancoComMigrations()
+  it('tem uma fonte cadastrada na migration da API para cada fonte do código', () => {
+    const migration = readFileSync(new URL('../../../api/migrations/00002_fontes_iniciais.sql', import.meta.url), 'utf8')
+    const insertFontes = migration.slice(migration.indexOf('INSERT INTO fontes'))
 
-    const ids = db.prepare('SELECT f.id FROM fontes f JOIN hemocentros h ON h.id = f.hemocentro_id ORDER BY f.id').all()
+    const ids = [...insertFontes.matchAll(/^ {2}\('([a-z]+)'/gm)].map((m) => m[1])
 
-    expect(ids.map((linha) => linha.id)).toEqual(FONTES.map((f) => f.id).sort())
+    expect(ids.sort()).toEqual(FONTES.map((f) => f.id).sort())
   })
 })

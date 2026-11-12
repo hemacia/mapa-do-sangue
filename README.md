@@ -37,22 +37,18 @@ Os outros estados não publicam o estoque de forma que dê para coletar. A pesqu
 
 ## Tecnologias
 
-O projeto está migrando para a arquitetura de [docs/design](docs/design/) (Next.js, Go, PostgreSQL, Docker e Cloudflare). Já em uso na API:
+A arquitetura completa está em [docs/design](docs/design/).
 
-- **Go** (`net/http`, `pgx`): API HTTP com contrato OpenAPI (`oapi-codegen`), erros no formato RFC 9457, CORS, cabeçalhos de segurança e limite de requisições
+- **Next.js + TypeScript** (`web/`): site com as páginas geradas no servidor (SEO), mapa em SVG desenhado com `d3-geo` a partir da malha do IBGE e cliente da API tipado pelo contrato OpenAPI. As regras de negócio ficam em `web/lib/domain` como funções puras, separadas da tela, o que facilita testar
+- **Go** (`net/http`, `pgx`, em `api/`): API HTTP com contrato OpenAPI (`oapi-codegen`), erros no formato RFC 9457, CORS, cabeçalhos de segurança e limite de requisições
 - **PostgreSQL**: banco com migrations versionadas (`goose`)
+- **Coletor em TypeScript** (`src/coleta`): lê as seis fontes e gera o SQL das leituras (será portado para Go)
 - **Docker Compose**: ambiente local e testes de integração; imagem da API `distroless`
-- **golangci-lint** e **lefthook**: lint, formatação e padrão Conventional Commits verificados antes do commit
-
-Versão atual do site, que será substituída pelo Next.js:
-
-- **Vue 3 + TypeScript + Vite**: interface e regras de negócio. As regras ficam em `src/domain` como funções puras, separadas da tela, o que facilita testar
-- **Cloudflare D1 (SQLite)**: banco de dados com os hemocentros, as leituras de estoque e o histórico. O schema está em `migrations/`
-- **Cloudflare Pages**: hospedagem gratuita do site
-- **Vitest + @vitest/coverage-v8**: testes de unidade e de componentes, com cobertura mínima de 80% configurada
-- **Playwright**: testes end-to-end no navegador
+- **Vitest + Testing Library**: testes de unidade e de componentes, com cobertura mínima de 80% configurada
+- **Playwright**: testes end-to-end no navegador, contra a API e o banco em Docker
+- **Biome, golangci-lint e lefthook**: lint, formatação e padrão Conventional Commits verificados antes do commit
 - **GitHub Actions + Codecov**: CI em Linux, macOS e Windows a cada commit, com relatório de cobertura publicado no Codecov
-- **Dependabot**: atualização semanal das dependências e das actions
+- **Dependabot**: atualização semanal das dependências, das imagens Docker e das actions
 
 ## Uso de IA
 
@@ -63,25 +59,24 @@ Usamos o **Claude Code** (Anthropic) em duas frentes:
 
 ## Execução dos testes
 
-Requer Node.js 22.13 ou superior (a versão usada no CI está em `.nvmrc`).
+Requer Node.js 22.13 ou superior (a versão usada no CI está em `.nvmrc`), Go (a versão está em `api/go.mod`) e Docker. `make help` lista todos os comandos.
+
+### Site (Next.js, em `web/`)
 
 ```bash
-npm ci
+cd web && npm ci && cd ..
 
-# testes de unidade e de componentes
-npm test
+# testes de unidade e de componentes, com cobertura (web/coverage)
+cd web && npm run test:coverage && cd ..
 
-# testes de unidade com relatório de cobertura (coverage/index.html)
-npm run test:coverage
-
-# testes end-to-end (na primeira vez, instale o navegador)
-npx playwright install chromium
-npm run test:e2e
+# e2e: sobe API e Postgres em Docker com dados fixos, faz o build do site e roda o Playwright
+# (na primeira vez: cd web && npx playwright install chromium)
+make test-e2e-web
 ```
 
-### API (Go + PostgreSQL)
+Para ver o site com dados de verdade: `make dev` (API e banco), `make carregar-coleta` (coleta o estoque agora e grava no banco) e `make web` (site em http://localhost:3000). Se a porta 8080 estiver ocupada, troque `API_PORT` no `.env` e aponte `API_URL` e `NEXT_PUBLIC_API_URL` em `web/.env.local` para ela.
 
-Requer Go (a versão está em `api/go.mod`) e Docker. `make help` lista todos os comandos.
+### API (Go + PostgreSQL)
 
 ```bash
 cp .env.example .env
@@ -99,27 +94,14 @@ make test-api-docker
 
 Cada teste de banco cria um schema próprio, aplica as migrations e apaga o schema no fim, então os testes não dependem um do outro. O contrato da API está em `api/openapi.yaml`, e o servidor Go é gerado dele (`make generate`).
 
-### Site novo (Next.js, em `web/`)
+### Coletor
 
 ```bash
-cd web && npm ci && cd ..
+npm ci
 
-# testes de unidade e de componentes, com cobertura (web/coverage)
-cd web && npm run test:coverage && cd ..
-
-# e2e: sobe API e Postgres em Docker com dados fixos, faz o build do site e roda o Playwright
-make test-e2e-web
+# testes dos leitores de cada fonte, com as páginas salvas em tests/fixtures (nenhum teste acessa a internet)
+npm run test:coverage
 ```
-
-Para ver o site com dados de verdade: `make dev` (API e banco), `make carregar-coleta` (coleta o estoque agora e grava no banco) e `make web` (site em http://localhost:3000). Se a porta 8080 estiver ocupada, troque `API_PORT` no `.env` e aponte `API_URL` e `NEXT_PUBLIC_API_URL` em `web/.env.local` para ela.
-
-### Site antigo (Vue, será removido)
-
-Os testes e2e sobem o site com as Pages Functions e um banco D1 local, populado com as páginas salvas em `tests/fixtures` (nenhum teste acessa a internet).
-
-Para rodar o site localmente: `npm run dev` (só a interface) ou `node scripts/servidor-e2e.mjs` (interface, API e banco).
-
-Para coletar o estoque de verdade: `npm run coletar` (grava `coleta.sql`).
 
 ### Boas práticas adotadas nos testes
 

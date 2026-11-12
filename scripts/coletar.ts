@@ -1,5 +1,5 @@
 // Uso: npm run coletar -- [arquivo.sql]
-// Baixa as fontes, mostra o resultado de cada uma e grava o SQL para o D1.
+// Baixa as fontes, mostra o resultado de cada uma e grava o SQL para o Postgres (make carregar-coleta).
 import { writeFileSync } from 'node:fs'
 import { type Baixar, coletarTodas, gerarSQL } from '../src/coleta/coletar'
 import { FONTES } from '../src/coleta/fontes'

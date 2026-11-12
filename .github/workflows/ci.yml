@@ -10,8 +10,8 @@ permissions:
   id-token: write # upload no Codecov por OIDC, sem token salvo no repositório
 
 jobs:
-  testes:
-    name: Site (${{ matrix.os }})
+  coletor:
+    name: Coletor (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -37,22 +37,76 @@ jobs:
         uses: codecov/codecov-action@v7
         with:
           files: coverage/lcov.info
+          flags: coletor
+          use_oidc: true
+          fail_ci_if_error: false
+
+  web:
+    name: Site (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - run: npm ci
+
+      - name: Lint
+        run: npx biome ci .
+
+      - name: Checagem de tipos
+        run: npm run typecheck
+
+      - name: Testes de unidade com cobertura
+        run: npm run test:coverage
+
+      - name: Envia cobertura para o Codecov
+        uses: codecov/codecov-action@v7
+        with:
+          files: web/coverage/lcov.info
           flags: web
           use_oidc: true
           fail_ci_if_error: false
 
+  web-e2e:
+    name: Site e2e (API e Postgres em Docker)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - run: npm ci
+        working-directory: web
+
       - name: Instala navegador do Playwright
         run: npx playwright install --with-deps chromium
+        working-directory: web
 
       - name: Testes e2e
-        run: npm run test:e2e
+        run: make test-e2e-web
 
       - name: Relatório do Playwright em caso de falha
         if: failure()
         uses: actions/upload-artifact@v7
         with:
-          name: playwright-report-${{ runner.os }}
-          path: playwright-report
+          name: playwright-report
+          path: web/playwright-report
           retention-days: 7
 
   api:

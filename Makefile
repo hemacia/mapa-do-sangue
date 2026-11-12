@@ -27,7 +27,11 @@ db: ## Sobe só o Postgres (para rodar testes fora do Docker)
 	docker compose up -d --wait postgres
 
 .PHONY: test
-test: test-web test-api ## Roda todos os testes de unidade
+test: test-coletor test-web test-api ## Roda todos os testes de unidade
+
+.PHONY: test-coletor
+test-coletor: ## Testes do coletor (Vitest, com as páginas salvas em tests/fixtures)
+	npm test
 
 .PHONY: test-web
 test-web: ## Testes do site Next.js (Vitest)
@@ -41,10 +45,6 @@ test-api: ## Testes da API; os do banco usam DATABASE_URL_TEST (make db)
 test-api-docker: ## Testes da API em Docker com Postgres limpo
 	docker compose -f compose.test.yaml run --rm testes; status=$$?; \
 	docker compose -f compose.test.yaml down -v; exit $$status
-
-.PHONY: test-e2e
-test-e2e: ## Testes end-to-end do site antigo (Vue)
-	npm run test:e2e
 
 E2E := docker compose -f compose.test.yaml --profile e2e
 

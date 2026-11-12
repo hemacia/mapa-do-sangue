@@ -11,9 +11,13 @@ comment:
 ignore:
   - "api/internal/httpapi/api.gen.go"
   - "api/cmd"
+  - "web/lib/api/schema.d.ts"
 flags:
   web:
-    paths: ["src/", "functions/"]
+    paths: ["web/"]
+    carryforward: true
+  coletor:
+    paths: ["src/"]
     carryforward: true
   api:
     paths: ["api/"]

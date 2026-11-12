@@ -10,8 +10,8 @@ pre-commit:
       glob: "api/**/*.go"
       root: api/
       run: go vet ./...
-    - name: typecheck do site antigo
-      glob: "{src,functions,tests}/**/*.{ts,vue}"
+    - name: typecheck do coletor
+      glob: "{src,scripts,tests}/**/*.ts"
       run: npm run typecheck
     - name: biome
       root: web/

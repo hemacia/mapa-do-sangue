@@ -25,7 +25,7 @@ function texto(valor: string | null): string {
   return valor === null ? 'NULL' : `'${valor.replaceAll("'", "''")}'`
 }
 
-// SQL para `wrangler d1 execute --file`: o D1 não aceita parâmetros nesse modo,
+// SQL para o `psql` (make carregar-coleta): vai num arquivo, sem parâmetros,
 // então todo valor passa por texto(), mesmo os que vêm do domínio.
 export function gerarSQL(resultados: ResultadoFonte[], coletadoEm: Date): string {
   const quando = texto(coletadoEm.toISOString().replace(/\.\d{3}Z$/, 'Z'))
