@@ -34,8 +34,16 @@ test-api-docker: ## Testes da API em Docker com Postgres limpo
 	docker compose -f compose.test.yaml down -v; exit $$status
 
 .PHONY: test-e2e
-test-e2e: ## Testes end-to-end (Playwright)
+test-e2e: ## Testes end-to-end do site antigo (Vue)
 	npm run test:e2e
+
+E2E := docker compose -f compose.test.yaml --profile e2e
+
+.PHONY: test-e2e-web
+test-e2e-web: ## Testes end-to-end do site Next.js contra a API em Docker com dados fixos
+	$(E2E) up -d --build --wait postgres api
+	$(E2E) exec -T postgres psql -q -v ON_ERROR_STOP=1 -U postgres < web/tests/e2e/seed.sql
+	cd web && npx playwright test; status=$$?; cd .. && $(E2E) down -v; exit $$status
 
 .PHONY: lint
 lint: ## Lint da API

@@ -29,5 +29,18 @@ services:
       postgres:
         condition: service_healthy
 
+  # Só para o e2e do site: make test-e2e-web
+  api:
+    build: ./api
+    profiles: [e2e]
+    environment:
+      DATABASE_URL: postgres://postgres:postgres@postgres:5432/postgres?sslmode=disable
+      ALLOWED_ORIGIN: http://localhost:3301
+    ports:
+      - "127.0.0.1:18088:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
 volumes:
   go-mod:
