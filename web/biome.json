@@ -21,6 +21,9 @@
       "preset": "recommended",
       "complexity": {
         "useMathMinMax": "off"
+      },
+      "style": {
+        "noDescendingSpecificity": "off"
       }
     },
     "domains": {

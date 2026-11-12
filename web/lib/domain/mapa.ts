@@ -14,7 +14,9 @@ export function nivelPorUF(hemocentros: ComNivel[], tipo?: TipoSanguineo): Recor
   return Object.fromEntries(
     UFS.map((uf) => [
       uf,
-      nivelMaisGrave(hemocentros.flatMap((h) => (h.uf === uf && nivelDe(h) ? [nivelDe(h) as NivelEstoque] : []))),
+      nivelMaisGrave(
+        hemocentros.flatMap((h) => (h.uf === uf && nivelDe(h) ? [nivelDe(h) as NivelEstoque] : [])),
+      ),
     ]),
   ) as Record<UF, NivelEstoque | null>
 }

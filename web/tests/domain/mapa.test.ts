@@ -32,7 +32,11 @@ describe('nível de cada estado no mapa', () => {
 describe('nível de um tipo sanguíneo em cada estado', () => {
   it('usa o nível mais grave daquele tipo entre os hemocentros do estado', () => {
     const hemocentros = [
-      { uf: 'SP', nivelGeral: 'critico' as const, estoque: { 'A+': 'adequado' as const, 'O-': 'critico' as const } },
+      {
+        uf: 'SP',
+        nivelGeral: 'critico' as const,
+        estoque: { 'A+': 'adequado' as const, 'O-': 'critico' as const },
+      },
       { uf: 'SP', nivelGeral: 'alerta' as const, estoque: { 'A+': 'estavel' as const } },
     ]
 
