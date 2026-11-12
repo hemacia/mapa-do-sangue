@@ -5,3 +5,4 @@
 !internal/
 !migrations/
 **/*_test.go
+**/testdata
