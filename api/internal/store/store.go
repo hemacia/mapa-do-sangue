@@ -14,6 +14,7 @@ import (
 	"github.com/jackc/pgx/v5/stdlib"
 	"github.com/pressly/goose/v3"
 
+	"github.com/hemacia/mapa-do-sangue/api/internal/coleta"
 	"github.com/hemacia/mapa-do-sangue/api/internal/httpapi"
 	"github.com/hemacia/mapa-do-sangue/api/migrations"
 )
@@ -171,4 +172,26 @@ func (s *Store) ContarDoacoes(ctx context.Context, mes string) (int, error) {
 	err := s.pool.QueryRow(ctx,
 		`SELECT count(*) FROM doacoes_registradas WHERE to_char(data, 'YYYY-MM') = $1`, mes).Scan(&total)
 	return total, err
+}
+
+// GravarColeta grava as leituras das fontes que funcionaram e marca a última coleta boa de cada uma.
+// Tudo numa transação: ou entra a coleta inteira ou nada.
+func (s *Store) GravarColeta(ctx context.Context, resultados []coleta.Resultado, coletadoEm time.Time) error {
+	return pgx.BeginFunc(ctx, s.pool, func(tx pgx.Tx) error {
+		for _, r := range resultados {
+			if r.Erro != nil {
+				continue
+			}
+			for _, l := range r.Leituras {
+				if _, err := tx.Exec(ctx, `INSERT INTO leituras_estoque (hemocentro_id, tipo, nivel, atualizado_na_fonte, coletado_em)
+				  VALUES ($1, $2, $3, NULLIF($4, ''), $5)`, r.FonteID, l.Tipo, l.Nivel, r.AtualizadoNaFonte, coletadoEm); err != nil {
+					return fmt.Errorf("gravar leitura de %s: %w", r.FonteID, err)
+				}
+			}
+			if _, err := tx.Exec(ctx, `UPDATE fontes SET ultima_coleta_ok = $2 WHERE id = $1`, r.FonteID, coletadoEm); err != nil {
+				return err
+			}
+		}
+		return nil
+	})
 }

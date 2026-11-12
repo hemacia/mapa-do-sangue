@@ -2,6 +2,7 @@ package store
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"testing"
@@ -10,6 +11,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	openapi_types "github.com/oapi-codegen/runtime/types"
 
+	"github.com/hemacia/mapa-do-sangue/api/internal/coleta"
 	"github.com/hemacia/mapa-do-sangue/api/internal/httpapi"
 )
 
@@ -231,5 +233,55 @@ func TestRegistrarEContarDoacoesDoMes(t *testing.T) {
 	}
 	if total != 2 {
 		t.Errorf("total = %d, quero 2", total)
+	}
+}
+
+func TestGravarColetaGravaSoAsFontesQueFuncionaram(t *testing.T) {
+	s := bancoDeTeste(t)
+	ctx := context.Background()
+	resultados := []coleta.Resultado{
+		{FonteID: "hemoba", Leituras: []coleta.Leitura{{Tipo: "O-", Nivel: httpapi.Critico}, {Tipo: "A+", Nivel: httpapi.Estavel}}},
+		{FonteID: "hemominas", Leituras: []coleta.Leitura{{Tipo: "O+", Nivel: httpapi.Alerta}}, AtualizadoNaFonte: "2026-11-10T12:35"},
+		{FonteID: "hemosc", Erro: errors.New("HTTP 500")},
+	}
+
+	if err := s.GravarColeta(ctx, resultados, agoraFixo); err != nil {
+		t.Fatal(err)
+	}
+
+	estoque, err := s.EstoqueAtual(ctx, "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(estoque) != 2 || estoque[0].Id != "hemoba" || len(estoque[0].Estoque) != 2 {
+		t.Fatalf("estoque = %+v", estoque)
+	}
+	if estoque[1].AtualizadoNaFonte == nil || *estoque[1].AtualizadoNaFonte != "2026-11-10T12:35" || estoque[0].AtualizadoNaFonte != nil {
+		t.Errorf("atualizado na fonte: hemoba %v, hemominas %v", estoque[0].AtualizadoNaFonte, estoque[1].AtualizadoNaFonte)
+	}
+	var marcadas int
+	if err := s.pool.QueryRow(ctx, `SELECT count(*) FROM fontes WHERE ultima_coleta_ok = $1`, agoraFixo).Scan(&marcadas); err != nil {
+		t.Fatal(err)
+	}
+	if marcadas != 2 {
+		t.Errorf("fontes marcadas = %d, quero 2 (hemosc falhou)", marcadas)
+	}
+}
+
+func TestGravarColetaNaoGravaNadaQuandoUmaLeituraFalha(t *testing.T) {
+	s := bancoDeTeste(t)
+	ctx := context.Background()
+	resultados := []coleta.Resultado{
+		{FonteID: "hemoba", Leituras: []coleta.Leitura{{Tipo: "O-", Nivel: httpapi.Critico}}},
+		{FonteID: "nao-cadastrada", Leituras: []coleta.Leitura{{Tipo: "O-", Nivel: httpapi.Critico}}},
+	}
+
+	err := s.GravarColeta(ctx, resultados, agoraFixo)
+
+	if err == nil {
+		t.Fatal("aceitou leitura de hemocentro que não existe")
+	}
+	if estoque, _ := s.EstoqueAtual(ctx, ""); len(estoque) != 0 {
+		t.Errorf("gravou parte da coleta: %+v", estoque)
 	}
 }
