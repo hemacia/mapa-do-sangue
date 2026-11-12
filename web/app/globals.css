@@ -518,8 +518,7 @@ select {
   gap: 2px;
   padding: var(--space-2);
   border-radius: var(--radius);
-  background: var(--sunken);
-  border-top: 3px solid var(--nivel);
+  background: color-mix(in oklch, var(--nivel) 16%, var(--sunken));
 }
 
 .tipo strong {
@@ -696,9 +695,8 @@ select {
   margin-top: var(--space-4);
   padding: var(--space-4);
   border-radius: var(--radius-lg);
-  border: 1px solid var(--line);
-  border-left: 4px solid var(--nivel);
-  background: var(--surface);
+  border: 1px solid color-mix(in oklch, var(--nivel) 45%, var(--line));
+  background: color-mix(in oklch, var(--nivel) 10%, var(--surface));
 }
 
 .resultado ul {
