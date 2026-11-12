@@ -16,9 +16,6 @@ flags:
   web:
     paths: ["web/"]
     carryforward: true
-  coletor:
-    paths: ["src/"]
-    carryforward: true
   api:
     paths: ["api/"]
     carryforward: true

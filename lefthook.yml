@@ -1,4 +1,4 @@
-# Ganchos do git. Instalados pelo npm install (script prepare).
+# Ganchos do git. Instalados pelo npm install em web/ (script prepare).
 pre-commit:
   parallel: true
   jobs:
@@ -10,9 +10,6 @@ pre-commit:
       glob: "api/**/*.go"
       root: api/
       run: go vet ./...
-    - name: typecheck do coletor
-      glob: "{src,scripts,tests}/**/*.ts"
-      run: npm run typecheck
     - name: biome
       root: web/
       glob: "*.{ts,tsx,css,json}"

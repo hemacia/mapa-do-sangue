@@ -42,7 +42,7 @@ A arquitetura completa está em [docs/design](docs/design/).
 - **Next.js + TypeScript** (`web/`): site com as páginas geradas no servidor (SEO), mapa em SVG desenhado com `d3-geo` a partir da malha do IBGE e cliente da API tipado pelo contrato OpenAPI. As regras de negócio ficam em `web/lib/domain` como funções puras, separadas da tela, o que facilita testar
 - **Go** (`net/http`, `pgx`, em `api/`): API HTTP com contrato OpenAPI (`oapi-codegen`), erros no formato RFC 9457, CORS, cabeçalhos de segurança e limite de requisições
 - **PostgreSQL**: banco com migrations versionadas (`goose`)
-- **Coletor em TypeScript** (`src/coleta`): lê as seis fontes e gera o SQL das leituras (será portado para Go)
+- **Coletor em Go** (`api/cmd/coletor`, `goquery`): baixa as seis fontes ao mesmo tempo e grava as leituras numa transação. Uma fonte fora do ar não impede as outras
 - **Docker Compose**: ambiente local e testes de integração; imagem da API `distroless`
 - **Vitest + Testing Library**: testes de unidade e de componentes, com cobertura mínima de 80% configurada
 - **Playwright**: testes end-to-end no navegador, contra a API e o banco em Docker
@@ -96,11 +96,14 @@ Cada teste de banco cria um schema próprio, aplica as migrations e apaga o sche
 
 ### Coletor
 
-```bash
-npm ci
+Os testes do coletor rodam junto com os da API (`make test-api`). Cada leitor é testado com a página real salva em `api/internal/coleta/testdata`, então nenhum teste acessa a internet.
 
-# testes dos leitores de cada fonte, com as páginas salvas em tests/fixtures (nenhum teste acessa a internet)
-npm run test:coverage
+```bash
+# coleta o estoque de verdade agora e grava no Postgres local
+make carregar-coleta
+
+# regenera a migration de estatísticas a partir do CSV da Anvisa (Hemoprod)
+cd api && go run ./cmd/estatisticas caminho/hemoprod_nacional.csv 2024
 ```
 
 ### Boas práticas adotadas nos testes

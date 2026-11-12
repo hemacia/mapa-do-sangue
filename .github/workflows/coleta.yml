@@ -14,24 +14,29 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  # Enquanto a API não está no ar, a coleta grava num Postgres temporário: serve para
+  # avisar (anotação no resumo) quando uma fonte sai do ar ou muda o layout.
   coletar:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:18-alpine
+        env:
+          POSTGRES_USER: mapa
+          POSTGRES_PASSWORD: mapa
+          POSTGRES_DB: mapa
+        ports: ["5432:5432"]
+        options: --health-cmd "pg_isready -U mapa" --health-interval 2s --health-retries 20
     steps:
       - uses: actions/checkout@v7
 
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-go@v7
         with:
-          node-version-file: .nvmrc
-          cache: npm
-
-      - run: npm ci
+          go-version-file: api/go.mod
+          cache-dependency-path: api/go.sum
 
       - name: Coleta as fontes
-        run: npm run coletar -- coleta.sql
-
-      # Enquanto a API não estiver no ar, o SQL fica disponível como artefato.
-      - uses: actions/upload-artifact@v7
-        with:
-          name: coleta-${{ github.run_id }}
-          path: coleta.sql
-          retention-days: 30
+        working-directory: api
+        run: go run ./cmd/coletor
+        env:
+          DATABASE_URL: postgres://mapa:mapa@localhost:5432/mapa?sslmode=disable

@@ -27,9 +27,6 @@ dist-ssr
 coverage
 playwright-report
 test-results
-.wrangler
-coleta.sql
-.dev.vars
 .vscode
 
 # ambiente
