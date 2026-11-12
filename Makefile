@@ -9,6 +9,15 @@ help: ## Lista os comandos
 dev: ## Sobe Postgres e API com recarga automática
 	docker compose up --build --watch
 
+.PHONY: web
+web: ## Sobe o site Next.js (precisa da API: make dev em outro terminal)
+	cd web && npm run dev
+
+.PHONY: carregar-coleta
+carregar-coleta: ## Coleta o estoque de verdade agora e grava no Postgres local
+	npm run coletar
+	docker compose exec -T postgres sh -c 'psql -q -U "$$POSTGRES_USER" -d "$$POSTGRES_DB"' < coleta.sql
+
 .PHONY: down
 down: ## Para o ambiente local
 	docker compose down
@@ -21,8 +30,8 @@ db: ## Sobe só o Postgres (para rodar testes fora do Docker)
 test: test-web test-api ## Roda todos os testes de unidade
 
 .PHONY: test-web
-test-web: ## Testes do site (Vitest)
-	npm test
+test-web: ## Testes do site Next.js (Vitest)
+	cd web && npm test
 
 .PHONY: test-api
 test-api: ## Testes da API; os do banco usam DATABASE_URL_TEST (make db)

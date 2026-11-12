@@ -10,9 +10,17 @@ pre-commit:
       glob: "api/**/*.go"
       root: api/
       run: go vet ./...
-    - name: typecheck
-      glob: "*.{ts,vue}"
+    - name: typecheck do site antigo
+      glob: "{src,functions,tests}/**/*.{ts,vue}"
       run: npm run typecheck
+    - name: biome
+      root: web/
+      glob: "*.{ts,tsx,css,json}"
+      run: npx biome check --no-errors-on-unmatched {staged_files}
+    - name: typecheck do site
+      root: web/
+      glob: "*.{ts,tsx}"
+      run: npx tsc --noEmit
 
 commit-msg:
   jobs:
