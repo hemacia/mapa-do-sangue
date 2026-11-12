@@ -66,7 +66,7 @@ func relatar(resultados []coleta.Resultado, noActions bool) {
 		if r.Erro != nil {
 			if noActions {
 				// Anotação que aparece no resumo do GitHub Actions.
-				fmt.Printf("::warning title=Coleta %s::%v\n", r.FonteID, r.Erro)
+				fmt.Printf("::warning title=Coleta %s::%s\n", r.FonteID, escaparComando(r.Erro.Error()))
 			} else {
 				fmt.Printf("falha %-10s %v\n", r.FonteID, r.Erro)
 			}
@@ -83,3 +83,8 @@ func relatar(resultados []coleta.Resultado, noActions bool) {
 		fmt.Printf("ok    %-10s %s (fonte: %s)\n", r.FonteID, strings.Join(niveis, " "), data)
 	}
 }
+
+// O erro pode trazer texto da fonte: sem escapar, uma quebra de linha viraria outro comando do Actions.
+var escapeComando = strings.NewReplacer("%", "%25", "\r", "%0D", "\n", "%0A")
+
+func escaparComando(texto string) string { return escapeComando.Replace(texto) }
