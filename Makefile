@@ -15,8 +15,7 @@ web: ## Sobe o site Next.js (precisa da API: make dev em outro terminal)
 
 .PHONY: carregar-coleta
 carregar-coleta: ## Coleta o estoque de verdade agora e grava no Postgres local
-	npm run coletar
-	docker compose exec -T postgres sh -c 'psql -q -U "$$POSTGRES_USER" -d "$$POSTGRES_DB"' < coleta.sql
+	docker compose --profile coleta run --rm --build coletor
 
 .PHONY: down
 down: ## Para o ambiente local
@@ -27,18 +26,14 @@ db: ## Sobe só o Postgres (para rodar testes fora do Docker)
 	docker compose up -d --wait postgres
 
 .PHONY: test
-test: test-coletor test-web test-api ## Roda todos os testes de unidade
-
-.PHONY: test-coletor
-test-coletor: ## Testes do coletor (Vitest, com as páginas salvas em tests/fixtures)
-	npm test
+test: test-web test-api ## Roda todos os testes de unidade
 
 .PHONY: test-web
 test-web: ## Testes do site Next.js (Vitest)
 	cd web && npm test
 
 .PHONY: test-api
-test-api: ## Testes da API; os do banco usam DATABASE_URL_TEST (make db)
+test-api: ## Testes da API e do coletor; os do banco usam DATABASE_URL_TEST (make db)
 	cd api && go test -race -coverprofile=coverage.out ./...
 
 .PHONY: test-api-docker

@@ -36,5 +36,20 @@ services:
           action: rebuild
           ignore: ["**/*_test.go"]
 
+  # Roda uma vez e sai: make carregar-coleta (ou docker compose run --rm coletor)
+  coletor:
+    build:
+      context: ./api
+      args:
+        CMD: coletor
+    profiles: [coleta]
+    environment:
+      DATABASE_URL: postgres://${POSTGRES_USER:-mapa}:${POSTGRES_PASSWORD:-mapa}@postgres:5432/${POSTGRES_DB:-mapa}?sslmode=disable
+    healthcheck:
+      disable: true
+    depends_on:
+      postgres:
+        condition: service_healthy
+
 volumes:
   postgres:
