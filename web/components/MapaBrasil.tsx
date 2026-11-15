@@ -11,8 +11,9 @@ import { desenharEstados } from '@/lib/mapa/geografia'
 const LADO = 600
 // Estados pequenos demais para caber a sigla dentro.
 const SEM_SIGLA = new Set<UF>(['DF', 'SE', 'AL', 'PB', 'RN', 'ES', 'RJ'])
-// A placa vai à esquerda do estado; a do ES iria em cima da de MG, então vai para o mar.
-const PLACA_A_DIREITA = new Set<UF>(['ES'])
+// A placa vai à esquerda do estado. A do ES cairia em cima da de MG: com espaço, vai para o mar,
+// à direita; num palco estreito sobe para o vão entre BA e MG (posição em % do mapa).
+const PLACA_NO_MAR: Partial<Record<UF, { x: number; y: number }>> = { ES: { x: 67.6, y: 50.5 } }
 
 const TINTA_CLARA = '#ffffff'
 const TINTA_ESCURA = '#0b2235'
@@ -161,7 +162,8 @@ export function MapaBrasil({
               >
                 <title>{rotulo}</title>
                 <path d={d} />
-                {!SEM_SIGLA.has(uf) && (
+                {/* Quem tem placa já mostra a sigla nela; no mapa ficaria embaixo do ponto. */}
+                {!SEM_SIGLA.has(uf) && !ufsQuePublicam.has(uf) && (
                   <text x={centro[0]} y={centro[1]} textAnchor="middle" dominantBaseline="central">
                     {uf}
                   </text>
@@ -171,22 +173,43 @@ export function MapaBrasil({
           })}
         </svg>
 
+        {/* biome-ignore lint/a11y/noSvgWithoutTitle: só as linhas que ligam as placas aos estados */}
+        <svg className="placas-linhas" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+          {placas.map((placa) => {
+            const x = (placa.centro[0] / LADO) * 100
+            const y = (placa.centro[1] / LADO) * 100
+            const terra = PLACA_NO_MAR[placa.uf]
+            return terra ? (
+              <g key={placa.uf}>
+                <line className="linha-mar" x1={x} y1={y} x2={x + 6} y2={y} />
+                <line className="linha-terra" x1={terra.x} y1={terra.y} x2={x} y2={y} />
+              </g>
+            ) : (
+              <line key={placa.uf} x1={x - 6} y1={y} x2={x} y2={y} />
+            )
+          })}
+        </svg>
         <ul className="placas">
           {placas.map((placa) => {
             const x = (placa.centro[0] / LADO) * 100
             const y = (placa.centro[1] / LADO) * 100
-            const aDireita = PLACA_A_DIREITA.has(placa.uf)
+            const terra = PLACA_NO_MAR[placa.uf]
+            const posicao = terra
+              ? ({
+                  '--mar-esquerda': `${x + 6}%`,
+                  '--mar-topo': `${y}%`,
+                  '--terra-direita': `${100 - terra.x}%`,
+                  '--terra-topo': `${terra.y}%`,
+                } as CSSProperties)
+              : { right: `${106 - x}%`, top: `${y}%` }
             return (
               <li key={placa.uf}>
                 <span className="placa-ponto" style={{ left: `${x}%`, top: `${y}%` }} />
-                <span className="placa-linha" style={{ left: `${aDireita ? x : x - 6}%`, top: `${y}%` }} />
                 <Link
                   href={`/estado/${placa.uf.toLowerCase()}`}
-                  className="placa"
+                  className={terra ? 'placa placa-alternavel' : 'placa'}
                   aria-label={rotuloDaPlaca(placa)}
-                  style={
-                    aDireita ? { left: `${x + 6}%`, top: `${y}%` } : { right: `${106 - x}%`, top: `${y}%` }
-                  }
+                  style={posicao}
                 >
                   <PlacaConteudo placa={placa} />
                 </Link>

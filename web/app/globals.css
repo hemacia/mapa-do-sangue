@@ -681,6 +681,14 @@ h3 {
   list-style: none;
 }
 
+/* Com três colunas o mapa acompanha a rolagem, em vez de deixar um vão azul embaixo. */
+@media (min-width: 1280px) {
+  .palco .mapa {
+    position: sticky;
+    top: var(--topbar-height);
+  }
+}
+
 @media (max-width: 1279px) {
   .inicio {
     grid-template-columns: minmax(0, 1fr) 380px;
@@ -892,9 +900,9 @@ h3 {
 }
 
 .mapa {
+  position: relative;
   display: flex;
   flex-direction: column;
-  flex: 1;
   margin: 0;
   container-type: inline-size;
 }
@@ -961,10 +969,54 @@ h3 {
 }
 
 .mapa-area {
+  /* O mapa cresce com o palco, sem passar da altura da janela (cabe na primeira tela)
+     e deixando à direita o espaço da placa do ES, que fica no mar. */
+  --lado: min(100cqw - 2 * var(--space-4), max(480px, 100dvh - 300px), 640px);
   position: relative;
-  width: min(100% - 2 * var(--space-4), 520px);
-  /* Puxado para a esquerda: a placa do ES fica no mar, à direita do mapa. */
-  margin: var(--space-5) auto var(--space-5) max(var(--space-4), calc(50% - 330px));
+  width: var(--lado);
+  margin: var(--space-5) auto;
+}
+
+@container (min-width: 700px) {
+  .mapa-area {
+    --lado: min(100cqw - 240px, max(480px, 100dvh - 300px), 900px);
+    margin-left: max(var(--space-4), calc((100cqw - var(--lado) - 200px) / 2));
+  }
+}
+
+/* Palco largo: a legenda vira um quadro no mar, à direita do mapa, como na previsão do tempo,
+   e o mapa cresce até quase a altura da tela. */
+@container (min-width: 1000px) {
+  .mapa-area {
+    --lado: min(100cqw - 360px, max(480px, 100dvh - 190px), 900px);
+    margin-left: max(var(--space-4), calc((100cqw - var(--lado) - 320px) / 2));
+  }
+  .legenda-mapa {
+    position: absolute;
+    top: 96px;
+    right: var(--space-5);
+    width: 280px;
+    flex-direction: column;
+    gap: var(--space-4);
+    border: 0;
+    border-radius: var(--radius);
+    box-shadow: 0 2px 10px rgb(3 20 32 / 0.35);
+  }
+}
+
+/* Palco estreito: placas mais baixas para caberem nos vãos entre os estados. */
+@container (max-width: 699px) {
+  .mapa-area .placa {
+    gap: 6px;
+    padding: 3px 8px;
+  }
+  .mapa-area .placa strong {
+    font-size: var(--text-base);
+  }
+  .mapa-area .placa-tipos i {
+    width: 10px;
+    height: 16px;
+  }
 }
 
 .mapa-area svg {
@@ -1069,12 +1121,43 @@ h3 {
   background: #ffffff;
 }
 
-.placa-linha {
+.placas-linhas {
   position: absolute;
-  height: 2px;
-  margin-top: -1px;
-  width: 6%;
-  background: #ffffff;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.placas-linhas line {
+  stroke: #ffffff;
+  stroke-width: 2;
+  vector-effect: non-scaling-stroke;
+}
+
+/* Palco estreito: a placa alternável fica em terra; largo: vai para o mar. */
+.placas-linhas .linha-mar {
+  display: none;
+}
+
+.placa-alternavel {
+  right: var(--terra-direita);
+  top: var(--terra-topo);
+}
+
+@container (min-width: 700px) {
+  .placas-linhas .linha-mar {
+    display: inline;
+  }
+  .placas-linhas .linha-terra {
+    display: none;
+  }
+  .placa-alternavel {
+    right: auto;
+    left: var(--mar-esquerda);
+    top: var(--mar-topo);
+  }
 }
 
 .placa {
@@ -1212,7 +1295,6 @@ h3 {
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-4) var(--space-7);
-  margin-top: auto;
   padding: var(--space-4) var(--space-5);
   background: var(--superficie);
   color: var(--tinta);
