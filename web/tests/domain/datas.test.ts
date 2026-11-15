@@ -146,17 +146,11 @@ describe('formatarAtualizacao', () => {
 })
 
 describe('formatarColeta', () => {
-  const AGORA = new Date('2026-11-15T21:00:00Z')
-
-  it('diz "hoje" quando a coleta foi no mesmo dia de Brasília', () => {
-    expect(formatarColeta('2026-11-15T20:33:54Z', AGORA)).toBe('hoje às 17:33')
-  })
-
-  it('mostra dia e mês quando foi em outro dia', () => {
-    expect(formatarColeta('2026-11-14T18:00:00Z', AGORA)).toBe('14/11 às 15:00')
+  it('mostra dia, mês e hora de Brasília', () => {
+    expect(formatarColeta('2026-11-15T20:33:54Z')).toBe('15/11 às 17:33')
   })
 
   it('usa o dia de Brasília, não o de UTC', () => {
-    expect(formatarColeta('2026-11-16T01:30:00Z', new Date('2026-11-16T02:00:00Z'))).toBe('hoje às 22:30')
+    expect(formatarColeta('2026-11-16T01:30:00Z')).toBe('15/11 às 22:30')
   })
 })

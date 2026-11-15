@@ -67,7 +67,7 @@ async function Estoque() {
               {manchete.complemento} Os hemocentros que publicam ficam em {juntarTipos(ufs)}.
             </p>
           )}
-          {ultimaColeta && <p className="coleta">Coletado {formatarColeta(ultimaColeta, new Date())}</p>}
+          {ultimaColeta && <p className="coleta">Coletado em {formatarColeta(ultimaColeta)}</p>}
         </div>
         <div className="acoes">
           <Link href="/posso-doar" className="botao botao-primario">

@@ -83,15 +83,18 @@ export function idadeEmAnos(nascimento: Date, em: Date): number {
 
 const BRASILIA = 'America/Sao_Paulo'
 
-// "hoje às 17:33" ou "14/11 às 15:00", no horário de Brasília.
-export function formatarColeta(iso: string, agora: Date): string {
+// "15/11 às 17:33", no horário de Brasília. Sem "hoje": a página é pré-renderizada e o "hoje" envelheceria.
+export function formatarColeta(iso: string): string {
   const momento = new Date(iso)
-  const dia = (d: Date) =>
-    new Intl.DateTimeFormat('pt-BR', { timeZone: BRASILIA, day: '2-digit', month: '2-digit' }).format(d)
+  const dia = new Intl.DateTimeFormat('pt-BR', {
+    timeZone: BRASILIA,
+    day: '2-digit',
+    month: '2-digit',
+  }).format(momento)
   const hora = new Intl.DateTimeFormat('pt-BR', {
     timeZone: BRASILIA,
     hour: '2-digit',
     minute: '2-digit',
   }).format(momento)
-  return dia(momento) === dia(agora) ? `hoje às ${hora}` : `${dia(momento)} às ${hora}`
+  return `${dia} às ${hora}`
 }
