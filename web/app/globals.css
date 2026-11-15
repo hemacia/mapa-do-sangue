@@ -1218,7 +1218,8 @@ h3 {
 
 .placa {
   position: absolute;
-  transform: translateY(-50%);
+  /* --afastamento: quanto ArrumarPlacas desceu a placa para não bater na de cima. */
+  transform: translateY(calc(-50% + var(--afastamento, 0px)));
   display: flex;
   align-items: center;
   gap: var(--space-2);
@@ -1918,4 +1919,30 @@ h3 {
 
 .pontos-mais[open] summary {
   margin-bottom: var(--space-5);
+}
+
+/* Alerta noticiado: notícia oficial, nunca confundida com o estoque */
+
+.alerta-noticiado {
+  max-width: 64ch;
+  padding: var(--space-3) var(--space-4);
+  border-left: 4px solid var(--acento-casco);
+  background: rgb(255 255 255 / 0.06);
+}
+
+.faixa-casco .alerta-noticiado p {
+  margin: 0;
+  color: var(--casco-tinta);
+  font-size: var(--text-base);
+}
+
+.alerta-noticiado a {
+  color: inherit;
+}
+
+.alerta-noticiado small {
+  display: block;
+  margin-top: var(--space-1);
+  color: var(--casco-tinta-2);
+  font-size: var(--text-sm);
 }

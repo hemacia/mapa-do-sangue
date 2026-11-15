@@ -7,7 +7,7 @@ import { NIVEIS_ESTOQUE, type NivelEstoque, ROTULOS_NIVEL } from '@/lib/domain/n
 import { TIPOS_SANGUINEOS } from '@/lib/domain/tipos'
 import { NOMES_UF, type UF } from '@/lib/domain/ufs'
 import { desenharEstados } from '@/lib/mapa/geografia'
-import { EsconderSiglasCobertas } from './EsconderSiglasCobertas'
+import { ArrumarPlacas } from './ArrumarPlacas'
 
 const LADO = 600
 // Estados pequenos demais para caber a sigla dentro.
@@ -15,6 +15,8 @@ const SEM_SIGLA = new Set<UF>(['DF', 'SE', 'AL', 'PB', 'RN', 'ES', 'RJ'])
 // A placa vai à esquerda do estado. A do ES cairia em cima da de MG: com espaço, vai para o mar,
 // à direita; num palco estreito sobe para o vão entre BA e MG (posição em % do mapa).
 const PLACA_NO_MAR: Partial<Record<UF, { x: number; y: number }>> = { ES: { x: 67.6, y: 50.5 } }
+// O AC é a ponta oeste: à esquerda a placa sairia do mapa, então vai para a direita, sobre o sul do AM.
+const PLACA_A_DIREITA = new Set<UF>(['AC'])
 
 const TINTA_CLARA = '#ffffff'
 const TINTA_ESCURA = '#0b2235'
@@ -187,15 +189,42 @@ export function MapaBrasil({
             const terra = PLACA_NO_MAR[placa.uf]
             return terra ? (
               <g key={placa.uf}>
-                <line className="linha-mar" x1={x} y1={y} x2={x + 6} y2={y} />
-                <line className="linha-terra" x1={terra.x} y1={terra.y} x2={x} y2={y} />
+                <line
+                  className="linha-mar"
+                  data-uf={placa.uf}
+                  data-ponta="2"
+                  data-y={y}
+                  x1={x}
+                  y1={y}
+                  x2={x + 6}
+                  y2={y}
+                />
+                <line
+                  className="linha-terra"
+                  data-uf={placa.uf}
+                  data-ponta="1"
+                  data-y={terra.y}
+                  x1={terra.x}
+                  y1={terra.y}
+                  x2={x}
+                  y2={y}
+                />
               </g>
             ) : (
-              <line key={placa.uf} x1={x - 6} y1={y} x2={x} y2={y} />
+              <line
+                key={placa.uf}
+                data-uf={placa.uf}
+                data-ponta="1"
+                data-y={y}
+                x1={PLACA_A_DIREITA.has(placa.uf) ? x + 6 : x - 6}
+                y1={y}
+                x2={x}
+                y2={y}
+              />
             )
           })}
         </svg>
-        <EsconderSiglasCobertas />
+        <ArrumarPlacas />
         <ul className="placas">
           {placas.map((placa) => {
             const x = (placa.centro[0] / LADO) * 100
@@ -208,7 +237,9 @@ export function MapaBrasil({
                   '--terra-direita': `${100 - terra.x}%`,
                   '--terra-topo': `${terra.y}%`,
                 } as CSSProperties)
-              : { right: `${106 - x}%`, top: `${y}%` }
+              : PLACA_A_DIREITA.has(placa.uf)
+                ? { left: `${x + 6}%`, top: `${y}%` }
+                : { right: `${106 - x}%`, top: `${y}%` }
             return (
               <li key={placa.uf}>
                 <span className="placa-ponto" style={{ left: `${x}%`, top: `${y}%` }} />
@@ -216,6 +247,7 @@ export function MapaBrasil({
                   href={`/estado/${placa.uf.toLowerCase()}`}
                   className={terra ? 'placa placa-alternavel' : 'placa'}
                   aria-label={rotuloDaPlaca(placa)}
+                  data-uf={placa.uf}
                   style={posicao}
                 >
                   <PlacaConteudo placa={placa} />
