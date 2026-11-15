@@ -54,9 +54,7 @@ describe('PossoDoar: antes de verificar', () => {
   it('explica onde a resposta vai aparecer', () => {
     render(<PossoDoar hoje={HOJE} />)
 
-    expect(
-      screen.getByRole('heading', { name: 'Preencha os dados e toque em Verificar' }),
-    ).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'A resposta aparece aqui' })).toBeInTheDocument()
     expect(screen.queryByRole('status')).not.toBeInTheDocument()
   })
 })

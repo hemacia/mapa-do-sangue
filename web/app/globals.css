@@ -69,8 +69,6 @@
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     color-scheme: dark;
-    --casco: #061a28;
-    --palco: #0b2d44;
     --fundo: #0b1720;
     --superficie: #0e1f2b;
     --tinta: #e6eef3;
@@ -84,8 +82,6 @@
 
 :root[data-theme="dark"] {
   color-scheme: dark;
-  --casco: #061a28;
-  --palco: #0b2d44;
   --fundo: #0b1720;
   --superficie: #0e1f2b;
   --tinta: #e6eef3;
@@ -512,6 +508,52 @@ h3 {
   }
 }
 
+/* Placa do estado na faixa azul, como as do mapa: valor em fonte condensada e o rótulo depois. */
+
+.placa-estado {
+  display: flex;
+  flex-wrap: wrap;
+  align-self: flex-start;
+  margin: var(--space-2) 0;
+  background: #ffffff;
+  color: #0b2235;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgb(3 20 32 / 0.35);
+}
+
+.placa-estado > div {
+  display: flex;
+  flex-direction: row-reverse;
+  justify-content: flex-end;
+  align-items: baseline;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border-right: 1px solid #cfdae2;
+}
+
+.placa-estado > div.rotulo-antes {
+  flex-direction: row;
+  justify-content: flex-start;
+}
+
+.placa-estado > div:last-child {
+  border-right: 0;
+}
+
+.placa-estado dt {
+  color: #3d566b;
+  font-size: var(--text-md);
+}
+
+.placa-estado dd {
+  margin: 0;
+  font-family: var(--display);
+  font-size: 1.625rem;
+  font-weight: 800;
+  line-height: 1.1;
+  white-space: nowrap;
+}
+
 /* Fatos curtos do estado: rótulo em cima, valor em fonte condensada. */
 
 .fatos {
@@ -908,6 +950,8 @@ h3 {
 }
 
 .camadas {
+  /* fieldset não encolhe abaixo do conteúdo sem isto, e a linha de tipos estouraria a página. */
+  min-inline-size: 0;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -1283,13 +1327,32 @@ h3 {
 }
 
 @container (max-width: 560px) {
-  .placas,
-  .placas-linhas {
+  .mapa-area .placas,
+  .mapa-area .placas-linhas {
     display: none;
+  }
+  /* Sem as placas, as siglas dos estados que publicam voltam para o mapa. */
+  .mapa-area text.sigla-com-placa {
+    display: inline;
   }
   .lista-placas {
     display: block;
   }
+  /* Os tipos numa linha só, rolando de lado, para o mapa aparecer logo. */
+  .camadas {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: var(--space-1);
+  }
+  .camadas label,
+  .camadas .rotulo-tipos {
+    flex: none;
+  }
+}
+
+.mapa-area text.sigla-com-placa,
+.mapa-area text.coberta {
+  display: none;
 }
 
 .legenda-mapa {

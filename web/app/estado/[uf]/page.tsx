@@ -42,28 +42,21 @@ function formatarTaxa(valor: number) {
 
 function FatoColetas({ estatistica, posicao }: { estatistica?: EstatisticaUF; posicao: Posicao | null }) {
   const ano = estatistica?.ano ?? 2024
-  let valor = <>Sem dado</>
+  let valor = <>sem dado</>
   if (estatistica?.cobertura === 'incompleto') {
-    valor = (
-      <>
-        Envio incompleto <small>o estado não mandou todos os dados à Anvisa</small>
-      </>
-    )
+    valor = <>envio incompleto</>
   } else if (estatistica?.porMil != null) {
-    valor = (
-      <>
-        {formatarTaxa(estatistica.porMil)}
-        {posicao && (
-          <small>
-            {posicao.posicao}º de {posicao.total} estados; mediana {formatarTaxa(posicao.mediana)}
-          </small>
-        )}
-      </>
-    )
+    valor = <>{formatarTaxa(estatistica.porMil)}</>
   }
   return (
     <div>
-      <dt>Coletas por mil habitantes em {ano}</dt>
+      <dt>
+        {estatistica?.cobertura === 'incompleto'
+          ? `à Anvisa em ${ano}`
+          : posicao
+            ? `coletas por mil habitantes em ${ano} (${posicao.posicao}º de ${posicao.total}, mediana ${formatarTaxa(posicao.mediana)})`
+            : `coletas por mil habitantes em ${ano}`}
+      </dt>
       <dd>{valor}</dd>
     </div>
   )
@@ -108,6 +101,19 @@ async function ConteudoEstado({ params }: Pick<PageProps<'/estado/[uf]'>, 'param
             </nav>
             <h1>Estoque de sangue {noEstado(uf)}</h1>
             <p>{resumo}</p>
+            <dl className="placa-estado">
+              <div>
+                <dt>{publica ? 'tipos críticos hoje' : 'hoje'}</dt>
+                <dd>{publica ? `${criticos.length} de 8` : 'Estoque não publicado'}</dd>
+              </div>
+              <FatoColetas estatistica={estatistica} posicao={posicao} />
+              {hemocentros.length === 1 && (
+                <div className="rotulo-antes">
+                  <dt>atualizado pela fonte em</dt>
+                  <dd>{formatarAtualizacao(hemocentros[0].atualizadoNaFonte ?? null)}</dd>
+                </div>
+              )}
+            </dl>
             <div className="acoes">
               <Link href="/posso-doar" className="botao botao-primario">
                 Posso doar?
@@ -124,20 +130,6 @@ async function ConteudoEstado({ params }: Pick<PageProps<'/estado/[uf]'>, 'param
       </section>
 
       <div className="pagina">
-        <dl className="fatos">
-          <div>
-            <dt>{publica ? 'Tipos críticos hoje' : 'Estoque de hoje'}</dt>
-            <dd>{publica ? `${criticos.length} de 8` : 'Não publicado'}</dd>
-          </div>
-          <FatoColetas estatistica={estatistica} posicao={posicao} />
-          {hemocentros.length === 1 && (
-            <div>
-              <dt>Atualizado pela fonte</dt>
-              <dd>{formatarAtualizacao(hemocentros[0].atualizadoNaFonte ?? null)}</dd>
-            </div>
-          )}
-        </dl>
-
         {hemocentros.map((hemocentro) => (
           <section key={hemocentro.id} className="secao" aria-labelledby={`hemocentro-${hemocentro.id}`}>
             <h2 id={`hemocentro-${hemocentro.id}`}>

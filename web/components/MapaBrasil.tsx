@@ -7,6 +7,7 @@ import { NIVEIS_ESTOQUE, type NivelEstoque, ROTULOS_NIVEL } from '@/lib/domain/n
 import { TIPOS_SANGUINEOS } from '@/lib/domain/tipos'
 import { NOMES_UF, type UF } from '@/lib/domain/ufs'
 import { desenharEstados } from '@/lib/mapa/geografia'
+import { EsconderSiglasCobertas } from './EsconderSiglasCobertas'
 
 const LADO = 600
 // Estados pequenos demais para caber a sigla dentro.
@@ -162,9 +163,15 @@ export function MapaBrasil({
               >
                 <title>{rotulo}</title>
                 <path d={d} />
-                {/* Quem tem placa já mostra a sigla nela; no mapa ficaria embaixo do ponto. */}
-                {!SEM_SIGLA.has(uf) && !ufsQuePublicam.has(uf) && (
-                  <text x={centro[0]} y={centro[1]} textAnchor="middle" dominantBaseline="central">
+                {/* Quem tem placa já mostra a sigla nela; a do mapa só volta quando as placas viram lista. */}
+                {!SEM_SIGLA.has(uf) && (
+                  <text
+                    x={centro[0]}
+                    y={centro[1]}
+                    textAnchor="middle"
+                    dominantBaseline="central"
+                    className={ufsQuePublicam.has(uf) ? 'sigla-com-placa' : undefined}
+                  >
                     {uf}
                   </text>
                 )}
@@ -173,7 +180,6 @@ export function MapaBrasil({
           })}
         </svg>
 
-        {/* biome-ignore lint/a11y/noSvgWithoutTitle: só as linhas que ligam as placas aos estados */}
         <svg className="placas-linhas" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
           {placas.map((placa) => {
             const x = (placa.centro[0] / LADO) * 100
@@ -189,6 +195,7 @@ export function MapaBrasil({
             )
           })}
         </svg>
+        <EsconderSiglasCobertas />
         <ul className="placas">
           {placas.map((placa) => {
             const x = (placa.centro[0] / LADO) * 100

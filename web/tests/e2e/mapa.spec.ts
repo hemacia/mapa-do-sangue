@@ -37,7 +37,7 @@ test('estado que não publica o estoque explica isso e sugere doar', async ({ pa
   await page.goto('/estado/rj')
 
   await expect(page.getByText('ainda não publicam o estoque')).toBeVisible()
-  await expect(page.getByText('Não publicado')).toBeVisible()
+  await expect(page.getByText('Estoque não publicado')).toBeVisible()
   await expect(page.getByRole('main').getByRole('link', { name: 'Posso doar?' })).toHaveAttribute(
     'href',
     '/posso-doar',

@@ -101,8 +101,11 @@ export function PossoDoar({ hoje }: { hoje?: Date }) {
           </div>
         ) : (
           <>
-            <h2>Preencha os dados e toque em Verificar</h2>
-            <p>A resposta aparece aqui, com a próxima data em que você pode doar.</p>
+            <h2>A resposta aparece aqui</h2>
+            <p>
+              Preencha os dados e use o botão Verificar para saber se pode doar hoje e quando pode doar de
+              novo.
+            </p>
           </>
         )}
       </div>
