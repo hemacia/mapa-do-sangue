@@ -42,7 +42,7 @@ A arquitetura completa está em [docs/design](docs/design/).
 - **Next.js + TypeScript** (`web/`): site com as páginas geradas no servidor (SEO), mapa em SVG desenhado com `d3-geo` a partir da malha do IBGE e cliente da API tipado pelo contrato OpenAPI. As regras de negócio ficam em `web/lib/domain` como funções puras, separadas da tela, o que facilita testar
 - **Go** (`net/http`, `pgx`, em `api/`): API HTTP com contrato OpenAPI (`oapi-codegen`), erros no formato RFC 9457, CORS, cabeçalhos de segurança e limite de requisições
 - **PostgreSQL**: banco com migrations versionadas (`goose`)
-- **Coletor em Go** (`api/cmd/coletor`, `goquery`): baixa as 13 fontes ao mesmo tempo (páginas, JSON, gráficos do Google e um painel Qlik) e grava as leituras numa transação. Uma fonte fora do ar não impede as outras
+- **Coletor em Go** (`api/cmd/coletor`, `goquery`): baixa as 16 fontes de estoque de 9 estados ao mesmo tempo (páginas, JSON, gráficos do Google e um painel Qlik) e grava as leituras numa transação. Uma fonte fora do ar não impede as outras. Também lê as notícias de estoque baixo de 11 estados sem estoque publicado
 - **Docker Compose**: ambiente local e testes de integração; imagem da API `distroless`
 - **Vitest + Testing Library**: testes de unidade e de componentes, com cobertura mínima de 80% configurada
 - **Playwright**: testes end-to-end no navegador, contra a API e o banco em Docker

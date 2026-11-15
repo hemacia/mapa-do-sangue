@@ -40,6 +40,13 @@ const FONTES = [
     'Painel Qlik com bolsas e estoque estratégico',
     'O painel não mostra o excesso: quem atinge o estratégico vira Estável',
   ],
+  ['Hemoacre', 'Acre', 'Home do portal do governo do Acre', '"Estável" é o melhor nível lá e vira Adequado'],
+  [
+    'MT-Hemocentro',
+    'Mato Grosso',
+    'Página pública do agendamento, nível no nome da imagem',
+    '"Atenção" vira Crítico; "Estável" é o melhor nível lá e vira Adequado',
+  ],
 ]
 
 export default function PaginaSobre() {
@@ -91,9 +98,25 @@ export default function PaginaSobre() {
           </table>
         </div>
         <p className="nota">
-          Os outros 20 estados não publicam o estoque de um jeito que dê para ler automaticamente. O IHEBE,
-          banco de sangue privado de Belém, mostra percentuais no site, mas eles são os mesmos desde janeiro
-          de 2025 e por isso ficam de fora.
+          Os outros 18 estados não publicam o estoque de um jeito que dê para ler automaticamente. O IHEBE,
+          banco de sangue privado de Belém, e a rede GSH mostram percentuais nos sites, mas os números estão
+          parados há meses e ficam de fora. A Fundação Hemocentro de Brasília publica o estoque só como
+          imagem.
+        </p>
+      </section>
+
+      <section className="secao" aria-labelledby="alertas">
+        <h2 id="alertas">Alertas noticiados e onde doar</h2>
+        <p>
+          Em 11 estados sem estoque publicado, o coletor também lê as notícias dos sites oficiais do
+          hemocentro ou da secretaria de saúde e guarda as que falam de estoque baixo. A página do estado
+          mostra a mais recente do último mês como alerta noticiado, com o link. É uma notícia, não uma
+          leitura do estoque.
+        </p>
+        <p className="nota">
+          Os endereços de onde doar vêm do Cadastro Nacional de Estabelecimentos de Saúde (CNES), do
+          Ministério da Saúde: as unidades de hemoterapia ativas, sem agências transfusionais de hospital e
+          laboratórios.
         </p>
       </section>
 
