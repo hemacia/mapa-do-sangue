@@ -34,7 +34,7 @@ var cuboHemosul = map[string]any{
 	},
 }
 
-func obterHemosul(ctx context.Context) ([]byte, error) {
+func obterHemosul(ctx context.Context, _ Baixar) ([]byte, error) {
 	return consultarQlik(ctx, "wss://"+servidorHemosul+"/app/"+appHemosul, "https://"+servidorHemosul, appHemosul, cuboHemosul)
 }
 

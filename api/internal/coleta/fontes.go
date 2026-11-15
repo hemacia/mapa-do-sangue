@@ -41,7 +41,7 @@ type Fonte struct {
 	latin1 bool
 	ler    func(texto string, coletadoEm time.Time) (Resultado, error)
 	// Para fonte que não é uma página: substitui o download da URL.
-	obter func(ctx context.Context) ([]byte, error)
+	obter func(ctx context.Context, baixar Baixar) ([]byte, error)
 }
 
 var Fontes = []Fonte{
@@ -59,6 +59,7 @@ var Fontes = []Fonte{
 	{ID: "rp-taubate", URL: pubchartRP + "796405016", ler: lerPubchart},
 	{ID: "hemoacre", URL: "https://www.ac.gov.br/", ler: lerHemoacre},
 	{ID: "mthemocentro", URL: "https://mthemocentro.saude.mt.gov.br/estoque.consulta.publico.php", ler: lerMTHemocentro},
+	{ID: "fhb", URL: paginaFHB, ler: lerFHB, obter: obterFHB},
 	{ID: "hemosul", URL: "https://" + servidorHemosul + "/extensions/EstoqueHemosul/EstoqueHemosul.html", ler: lerHemosul, obter: obterHemosul},
 }
 

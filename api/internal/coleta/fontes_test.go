@@ -33,8 +33,11 @@ func ler(t *testing.T, id string) Resultado {
 }
 
 func (f Fonte) fixture() string {
-	if f.ID == "hemoes" || f.ID == "hemopi" || f.ID == "hemosul" {
+	switch f.ID {
+	case "hemoes", "hemopi", "hemosul":
 		return f.ID + ".json"
+	case "fhb":
+		return "fhb.dat" // o que obterFHB devolve: a data numa linha e o PNG em seguida
 	}
 	return f.ID + ".html"
 }
@@ -259,7 +262,7 @@ func TestMTHemocentroFalhaSemAsBolsas(t *testing.T) {
 
 func TestCadaFonteTemCadastroNaMigration(t *testing.T) {
 	var cadastros strings.Builder
-	for _, arquivo := range []string{"00002_fontes_iniciais.sql", "00004_fontes_sao_paulo.sql", "00005_hemosul.sql", "00011_hemoacre.sql", "00013_mthemocentro.sql"} {
+	for _, arquivo := range []string{"00002_fontes_iniciais.sql", "00004_fontes_sao_paulo.sql", "00005_hemosul.sql", "00011_hemoacre.sql", "00013_mthemocentro.sql", "00014_fhb.sql"} {
 		migration, err := os.ReadFile("../../migrations/" + arquivo)
 		if err != nil {
 			t.Fatal(err)

@@ -26,7 +26,7 @@ func fontesOffline(t *testing.T) []Fonte {
 	fontes := slices.Clone(Fontes)
 	for i, f := range fontes {
 		if f.obter != nil {
-			fontes[i].obter = func(context.Context) ([]byte, error) { return fixture(t, f.fixture()), nil }
+			fontes[i].obter = func(context.Context, Baixar) ([]byte, error) { return fixture(t, f.fixture()), nil }
 		}
 	}
 	return fontes
