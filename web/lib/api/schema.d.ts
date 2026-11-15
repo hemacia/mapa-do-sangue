@@ -127,6 +127,11 @@ export interface components {
             dias: number;
             diasCriticos: number;
         };
+        Bolsas: {
+            bolsas: number;
+            /** @description Quantidade a partir da qual a própria fonte considera o estoque fora de risco */
+            minimo: number;
+        };
         EstoqueHemocentro: {
             /** @example hemominas-bh */
             id: string;
@@ -146,6 +151,10 @@ export interface components {
             atualizadoNaFonte?: string | null;
             /** Format: date-time */
             coletadoEm: string;
+            /** @description Bolsas em estoque e mínimo por tipo, só nas fontes que publicam o número */
+            bolsas?: {
+                [key: string]: components["schemas"]["Bolsas"];
+            };
             /** @description Dias com leitura e dias em nível crítico nos últimos 30 dias, por tipo */
             historico: {
                 [key: string]: components["schemas"]["HistoricoTipo"];

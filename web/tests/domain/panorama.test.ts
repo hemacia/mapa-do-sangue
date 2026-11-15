@@ -3,6 +3,7 @@ import {
   juntarTipos,
   montarManchete,
   panoramaPorTipo,
+  resumoDasBolsas,
   tiposCriticos,
   tiposMaisEmFalta,
 } from '@/lib/domain/panorama'
@@ -95,5 +96,23 @@ describe('montarManchete', () => {
       titulo: 'Nenhum tipo está crítico nos 6 hemocentros que publicam',
       complemento: null,
     })
+  })
+})
+
+describe('resumoDasBolsas', () => {
+  it('lista só os tipos abaixo do mínimo, na ordem da grade', () => {
+    const bolsas = {
+      'O-': { bolsas: 25, minimo: 103 },
+      'A+': { bolsas: 1257, minimo: 364 },
+      'A-': { bolsas: 15, minimo: 49 },
+      'B+': { bolsas: 61, minimo: 61 },
+    }
+
+    expect(resumoDasBolsas(bolsas)).toBe('A- com 15 de 49 bolsas e O- com 25 de 103 bolsas')
+  })
+
+  it('fica vazio quando a fonte não publica bolsas ou nada está abaixo', () => {
+    expect(resumoDasBolsas(undefined)).toBe('')
+    expect(resumoDasBolsas({ 'O+': { bolsas: 400, minimo: 300 } })).toBe('')
   })
 })

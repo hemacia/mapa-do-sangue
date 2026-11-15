@@ -784,7 +784,8 @@ h3 {
   font-size: var(--text-md);
 }
 
-.hemocentro .criticos {
+.hemocentro .criticos,
+.hemocentro .bolsas {
   font-size: var(--text-md);
 }
 
@@ -846,6 +847,17 @@ h3 {
 
 .tipos-grandes span {
   font-weight: 600;
+}
+
+.tipos-grandes small:first-of-type {
+  margin-top: 2px;
+}
+
+.tipos-grandes small {
+  display: block;
+  font-size: var(--text-sm);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
 }
 
 @media (max-width: 899px) {

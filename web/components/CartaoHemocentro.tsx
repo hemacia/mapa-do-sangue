@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import type { EstoqueHemocentro } from '@/lib/api/cliente'
 import { formatarAtualizacao } from '@/lib/domain/datas'
-import { juntarTipos, tiposCriticos } from '@/lib/domain/panorama'
+import { juntarTipos, resumoDasBolsas, tiposCriticos } from '@/lib/domain/panorama'
 import type { TipoSanguineo } from '@/lib/domain/tipos'
 import { GradeTipos } from './GradeTipos'
 
@@ -23,6 +23,7 @@ export function CartaoHemocentro({
   comLinkDoEstado?: boolean
 }) {
   const criticos = tiposCriticos(hemocentro.estoque)
+  const bolsas = resumoDasBolsas(hemocentro.bolsas)
   const atualizacao = hemocentro.atualizadoNaFonte
     ? `Atualizado pela fonte em ${formatarAtualizacao(hemocentro.atualizadoNaFonte)}`
     : 'A fonte não informa quando atualizou'
@@ -50,6 +51,11 @@ export function CartaoHemocentro({
           </>
         )}
       </p>
+      {bolsas && (
+        <p className="bolsas">
+          <strong>Abaixo do mínimo:</strong> {bolsas}
+        </p>
+      )}
       <p className="fonte">{atualizacao}</p>
     </article>
   )

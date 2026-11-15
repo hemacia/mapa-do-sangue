@@ -75,3 +75,17 @@ export function montarManchete(panorama: PanoramaTipo[], hemocentros: number): M
         : `${juntarTipos(seguintes)} ${seguintes.length === 1 ? 'está crítico' : 'estão críticos'} em ${segundo} deles.`,
   }
 }
+
+export interface Contagem {
+  bolsas: number
+  minimo: number
+}
+
+// "O- com 25 de 103 bolsas e A- com 15 de 49": só os tipos abaixo do mínimo, na ordem da grade.
+export function resumoDasBolsas(bolsas: Partial<Record<string, Contagem>> | undefined): string {
+  const abaixo = TIPOS_SANGUINEOS.flatMap((tipo) => {
+    const c = bolsas?.[tipo]
+    return c && c.bolsas < c.minimo ? [`${tipo} com ${c.bolsas} de ${c.minimo} bolsas`] : []
+  })
+  return juntarTipos(abaixo)
+}

@@ -26,6 +26,33 @@ describe('CartaoHemocentro', () => {
     expect(within(grade).getByText('B-').parentElement).toHaveTextContent('Sem dado')
   })
 
+  it('diz quantas bolsas faltam quando a fonte publica o número', () => {
+    const bolsas = { 'O-': { bolsas: 25, minimo: 103 }, 'B+': { bolsas: 400, minimo: 127 } }
+    render(<CartaoHemocentro hemocentro={{ ...HEMOMINAS, bolsas }} />)
+
+    expect(screen.getByText(/Abaixo do mínimo:/).parentElement).toHaveTextContent(
+      'Abaixo do mínimo: O- com 25 de 103 bolsas',
+    )
+  })
+
+  it('não fala de bolsas quando a fonte só publica o nível', () => {
+    render(<CartaoHemocentro hemocentro={HEMOMINAS} />)
+
+    expect(screen.queryByText(/Abaixo do mínimo/)).not.toBeInTheDocument()
+  })
+
+  it('mostra bolsas e mínimo nos blocos grandes', () => {
+    render(
+      <GradeTipos
+        estoque={{ 'O-': 'critico' }}
+        bolsas={{ 'O-': { bolsas: 25, minimo: 103 } }}
+        variante="grande"
+      />,
+    )
+
+    expect(screen.getByText('O-').parentElement).toHaveTextContent('Crítico25 bolsasmínimo 103')
+  })
+
   it('lista os tipos críticos e diz quando ficaram assim em todo o histórico', () => {
     render(<CartaoHemocentro hemocentro={HEMOMINAS} />)
 
