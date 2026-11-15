@@ -16,3 +16,10 @@ export async function estatisticasPorUF() {
   cacheLife('hours')
   return api.estatisticas()
 }
+
+// O CNES muda pouco e só com uma migration nova.
+export async function pontosColeta(uf: string) {
+  'use cache'
+  cacheLife('days')
+  return api.pontosColeta(uf)
+}

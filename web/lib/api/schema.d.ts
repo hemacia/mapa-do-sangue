@@ -72,6 +72,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/pontos-coleta": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Unidades de hemoterapia do CNES que podem receber doador em um estado */
+        get: operations["listarPontosColeta"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/doacoes": {
         parameters: {
             query?: never;
@@ -169,6 +186,32 @@ export interface components {
             porMil: number | null;
             /** @enum {string} */
             cobertura: "completo" | "incompleto" | "sem-dado";
+            /** @description Coletas de todos os anos importados, do mais antigo ao mais recente */
+            serie?: components["schemas"]["AnoColetas"][];
+            /** @description Doadores aptos no ano (primeira_vez, repeticao, esporadico, espontanea, reposicao, feminino, masculino, ate_29_anos, acima_29_anos, tipo_A+ ... tipo_O-) e candidatos inaptos */
+            indicadores?: {
+                [key: string]: number;
+            };
+        };
+        PontoColeta: {
+            cnes: number;
+            nome: string;
+            uf: components["schemas"]["UF"];
+            cidade?: string | null;
+            endereco?: string | null;
+            bairro?: string | null;
+            telefone?: string | null;
+            /** Format: double */
+            latitude: number;
+            /** Format: double */
+            longitude: number;
+            publico: boolean;
+        };
+        AnoColetas: {
+            ano: number;
+            coletas: number | null;
+            /** Format: double */
+            porMil: number | null;
         };
         NovaDoacao: {
             uf: components["schemas"]["UF"];
@@ -294,6 +337,29 @@ export interface operations {
                     "application/json": components["schemas"]["EstatisticaUF"][];
                 };
             };
+        };
+    };
+    listarPontosColeta: {
+        parameters: {
+            query: {
+                uf: components["schemas"]["UF"];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Unidades públicas primeiro, depois por cidade e nome */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PontoColeta"][];
+                };
+            };
+            400: components["responses"]["Problema"];
         };
     };
     registrarDoacao: {

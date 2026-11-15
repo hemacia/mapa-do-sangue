@@ -19,6 +19,14 @@ describe('cliente da API', () => {
     expect(chamadas[0].url).toBe('http://api.teste/v1/estoque')
   })
 
+  it('busca os pontos de coleta do estado', async () => {
+    const chamadas: Request[] = []
+    const api = criarCliente('http://api.teste', fetchFalso(200, [{ cnes: 1 }], chamadas))
+
+    expect(await api.pontosColeta('AM')).toEqual([{ cnes: 1 }])
+    expect(chamadas[0].url).toBe('http://api.teste/v1/pontos-coleta?uf=AM')
+  })
+
   it('filtra o estoque por UF', async () => {
     const chamadas: Request[] = []
     const api = criarCliente('http://api.teste', fetchFalso(200, [], chamadas))
