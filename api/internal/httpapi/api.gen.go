@@ -99,6 +99,13 @@ func (e TipoSanguineo) Valid() bool {
 	}
 }
 
+// AnoColetas defines model for AnoColetas.
+type AnoColetas struct {
+	Ano     int      `json:"ano"`
+	Coletas *int     `json:"coletas"`
+	PorMil  *float64 `json:"porMil"`
+}
+
 // Bolsas defines model for Bolsas.
 type Bolsas struct {
 	Bolsas int `json:"bolsas"`
@@ -121,8 +128,14 @@ type EstatisticaUF struct {
 	Ano       int                    `json:"ano"`
 	Cobertura EstatisticaUFCobertura `json:"cobertura"`
 	Coletas   *int                   `json:"coletas"`
-	Populacao int                    `json:"populacao"`
-	PorMil    *float64               `json:"porMil"`
+
+	// Indicadores Doadores aptos no ano (primeira_vez, repeticao, esporadico, espontanea, reposicao, feminino, masculino, ate_29_anos, acima_29_anos, tipo_A+ ... tipo_O-) e candidatos inaptos
+	Indicadores *map[string]int `json:"indicadores,omitempty"`
+	Populacao   int             `json:"populacao"`
+	PorMil      *float64        `json:"porMil"`
+
+	// Serie Coletas de todos os anos importados, do mais antigo ao mais recente
+	Serie *[]AnoColetas `json:"serie,omitempty"`
 
 	// Uf Example: MG
 	Uf UF `json:"uf"`

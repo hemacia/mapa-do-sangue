@@ -197,7 +197,7 @@ func TestEstatisticasCalculaTaxaECoberturaOrdenadas(t *testing.T) {
 	}
 }
 
-func TestMigrationCarregaAs27UFsDe2024(t *testing.T) {
+func TestMigrationCarregaAs27UFsDe2025ComSerieEIndicadores(t *testing.T) {
 	s := bancoDeTeste(t)
 
 	estatisticas, err := s.Estatisticas(context.Background())
@@ -206,6 +206,36 @@ func TestMigrationCarregaAs27UFsDe2024(t *testing.T) {
 	}
 	if len(estatisticas) != 27 {
 		t.Errorf("UFs = %d, quero 27", len(estatisticas))
+	}
+	for _, e := range estatisticas {
+		if e.Uf == "RJ" && (e.Ano != 2025 || e.Coletas == nil || *e.Coletas < 200000 || len(*e.Serie) != 2) {
+			t.Errorf("RJ = %+v (a rede do RJ vem em linhas agregadas e não pode zerar)", e)
+		}
+		if e.Uf == "SP" && (e.Indicadores == nil || (*e.Indicadores)["tipo_O-"] == 0) {
+			t.Errorf("SP sem indicadores: %+v", e.Indicadores)
+		}
+	}
+}
+
+func TestEstatisticasMontaASerieEOsIndicadoresDoUltimoAno(t *testing.T) {
+	s := bancoDeTeste(t)
+	executar(t, s, `DELETE FROM indicadores_uf`)
+	executar(t, s, `DELETE FROM estatisticas_uf`)
+	executar(t, s, `INSERT INTO estatisticas_uf (uf, ano, coletas, populacao) VALUES
+	  ('MG', 2024, 280000, 20000000), ('MG', 2025, 300000, 20000000)`)
+	executar(t, s, `INSERT INTO indicadores_uf (uf, ano, indicador, valor) VALUES
+	  ('MG', 2025, 'primeira_vez', 90000), ('MG', 2024, 'primeira_vez', 1)`)
+
+	estatisticas, err := s.Estatisticas(context.Background())
+	if err != nil {
+		t.Fatal(err)
+	}
+	mg := estatisticas[0]
+	if serie := *mg.Serie; len(serie) != 2 || serie[0].Ano != 2024 || *serie[0].PorMil != 14 || *serie[1].PorMil != 15 {
+		t.Errorf("série = %+v", serie)
+	}
+	if mg.Indicadores == nil || (*mg.Indicadores)["primeira_vez"] != 90000 {
+		t.Errorf("indicadores = %v, quero os de 2025", mg.Indicadores)
 	}
 }
 

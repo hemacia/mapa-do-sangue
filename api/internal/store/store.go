@@ -133,32 +133,82 @@ func (s *Store) anexarHistorico(ctx context.Context, lista []httpapi.EstoqueHemo
 // quase certamente deixou de enviar dados à Anvisa (caso de MA, PI e DF em 2024).
 const minimoPlausivel = 5
 
+func taxaPorMil(coletas *int, populacao int) *float64 {
+	if coletas == nil {
+		return nil
+	}
+	porMil := math.Round(float64(*coletas)/float64(populacao)*10_000) / 10
+	return &porMil
+}
+
+// Estatisticas devolve o ano mais recente de cada UF, com a série de todos os anos e os indicadores
+// dos doadores daquele ano.
 func (s *Store) Estatisticas(ctx context.Context) ([]httpapi.EstatisticaUF, error) {
-	linhas, err := s.pool.Query(ctx, `
-	  SELECT uf, ano, coletas, populacao FROM estatisticas_uf
-	  WHERE ano = (SELECT max(ano) FROM estatisticas_uf)`)
+	linhas, err := s.pool.Query(ctx, `SELECT uf, ano, coletas, populacao FROM estatisticas_uf ORDER BY ano`)
 	if err != nil {
 		return nil, fmt.Errorf("consultar estatísticas: %w", err)
 	}
-	lista, err := pgx.CollectRows(linhas, func(linha pgx.CollectableRow) (httpapi.EstatisticaUF, error) {
+	todas, err := pgx.CollectRows(linhas, func(linha pgx.CollectableRow) (httpapi.EstatisticaUF, error) {
 		var e httpapi.EstatisticaUF
 		err := linha.Scan(&e.Uf, &e.Ano, &e.Coletas, &e.Populacao)
-		e.Cobertura = httpapi.SemDado
-		if e.Coletas != nil {
-			porMil := math.Round(float64(*e.Coletas)/float64(e.Populacao)*10_000) / 10
-			e.PorMil = &porMil
-			e.Cobertura = httpapi.Completo
-			if porMil < minimoPlausivel {
-				e.Cobertura = httpapi.Incompleto
-			}
-		}
+		e.PorMil = taxaPorMil(e.Coletas, e.Populacao)
 		return e, err
 	})
 	if err != nil {
 		return nil, err
 	}
+	ultimoAno := 0
+	series := map[httpapi.UF][]httpapi.AnoColetas{}
+	for _, e := range todas {
+		ultimoAno = max(ultimoAno, e.Ano)
+		series[e.Uf] = append(series[e.Uf], httpapi.AnoColetas{Ano: e.Ano, Coletas: e.Coletas, PorMil: e.PorMil})
+	}
+	indicadores, err := s.indicadores(ctx, ultimoAno)
+	if err != nil {
+		return nil, err
+	}
+	var lista []httpapi.EstatisticaUF
+	for _, e := range todas {
+		if e.Ano != ultimoAno {
+			continue
+		}
+		e.Cobertura = httpapi.SemDado
+		if e.PorMil != nil {
+			e.Cobertura = httpapi.Completo
+			if *e.PorMil < minimoPlausivel {
+				e.Cobertura = httpapi.Incompleto
+			}
+		}
+		serie := series[e.Uf]
+		e.Serie = &serie
+		if ind, ok := indicadores[string(e.Uf)]; ok {
+			e.Indicadores = &ind
+		}
+		lista = append(lista, e)
+	}
 	sort.SliceStable(lista, func(a, b int) bool { return valor(lista[a].PorMil) > valor(lista[b].PorMil) })
 	return lista, nil
+}
+
+func (s *Store) indicadores(ctx context.Context, ano int) (map[string]map[string]int, error) {
+	linhas, err := s.pool.Query(ctx, `SELECT uf, indicador, valor FROM indicadores_uf WHERE ano = $1`, ano)
+	if err != nil {
+		return nil, fmt.Errorf("consultar indicadores: %w", err)
+	}
+	defer linhas.Close()
+	porUF := map[string]map[string]int{}
+	for linhas.Next() {
+		var uf, indicador string
+		var v int
+		if err := linhas.Scan(&uf, &indicador, &v); err != nil {
+			return nil, err
+		}
+		if porUF[uf] == nil {
+			porUF[uf] = map[string]int{}
+		}
+		porUF[uf][indicador] = v
+	}
+	return porUF, linhas.Err()
 }
 
 func valor(p *float64) float64 {
