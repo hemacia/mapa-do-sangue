@@ -2,6 +2,7 @@
 package coleta
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -39,6 +40,8 @@ type Fonte struct {
 	URL    string
 	latin1 bool
 	ler    func(texto string, coletadoEm time.Time) (Resultado, error)
+	// Para fonte que não é uma página: substitui o download da URL.
+	obter func(ctx context.Context) ([]byte, error)
 }
 
 var Fontes = []Fonte{
@@ -54,6 +57,7 @@ var Fontes = []Fonte{
 	{ID: "rp-fernandopolis", URL: pubchartRP + "1071427317", ler: lerPubchart},
 	{ID: "rp-prudente", URL: pubchartRP + "2092834388", ler: lerPubchart},
 	{ID: "rp-taubate", URL: pubchartRP + "796405016", ler: lerPubchart},
+	{ID: "hemosul", URL: "https://" + servidorHemosul + "/extensions/EstoqueHemosul/EstoqueHemosul.html", ler: lerHemosul, obter: obterHemosul},
 }
 
 // Gráficos do Google Planilhas que a página de estoque do Hemocentro de Ribeirão Preto embute, um por cidade.

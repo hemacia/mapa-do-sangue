@@ -33,7 +33,7 @@ func ler(t *testing.T, id string) Resultado {
 }
 
 func (f Fonte) fixture() string {
-	if f.ID == "hemoes" || f.ID == "hemopi" {
+	if f.ID == "hemoes" || f.ID == "hemopi" || f.ID == "hemosul" {
 		return f.ID + ".json"
 	}
 	return f.ID + ".html"
@@ -226,7 +226,7 @@ func TestRibeiraoPretoFalhaSemOGrafico(t *testing.T) {
 
 func TestCadaFonteTemCadastroNaMigration(t *testing.T) {
 	var cadastros strings.Builder
-	for _, arquivo := range []string{"00002_fontes_iniciais.sql", "00004_fontes_sao_paulo.sql"} {
+	for _, arquivo := range []string{"00002_fontes_iniciais.sql", "00004_fontes_sao_paulo.sql", "00005_hemosul.sql"} {
 		migration, err := os.ReadFile("../../migrations/" + arquivo)
 		if err != nil {
 			t.Fatal(err)

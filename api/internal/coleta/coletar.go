@@ -31,7 +31,13 @@ func ColetarTodas(ctx context.Context, fontes []Fonte, baixar Baixar, coletadoEm
 }
 
 func coletar(ctx context.Context, fonte Fonte, baixar Baixar, coletadoEm time.Time) (Resultado, error) {
-	corpo, err := baixar(ctx, fonte.URL)
+	var corpo []byte
+	var err error
+	if fonte.obter != nil {
+		corpo, err = fonte.obter(ctx)
+	} else {
+		corpo, err = baixar(ctx, fonte.URL)
+	}
 	if err != nil {
 		return Resultado{}, err
 	}

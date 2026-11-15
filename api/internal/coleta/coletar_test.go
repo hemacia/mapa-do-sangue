@@ -5,6 +5,7 @@ import (
 	"errors"
 	"net/http"
 	"net/http/httptest"
+	"slices"
 	"strings"
 	"testing"
 )
@@ -20,8 +21,19 @@ func baixarFixtures(t *testing.T) Baixar {
 	}
 }
 
+// Fontes com as conexões próprias (Qlik) trocadas pelo arquivo salvo.
+func fontesOffline(t *testing.T) []Fonte {
+	fontes := slices.Clone(Fontes)
+	for i, f := range fontes {
+		if f.obter != nil {
+			fontes[i].obter = func(context.Context) ([]byte, error) { return fixture(t, f.fixture()), nil }
+		}
+	}
+	return fontes
+}
+
 func TestColetarTodasLeTodasAsFontesNaOrdem(t *testing.T) {
-	resultados := ColetarTodas(context.Background(), Fontes, baixarFixtures(t), coletadoEm)
+	resultados := ColetarTodas(context.Background(), fontesOffline(t), baixarFixtures(t), coletadoEm)
 
 	total := 0
 	for i, r := range resultados {
@@ -44,7 +56,7 @@ func TestColetarTodasContinuaQuandoUmaFonteFalha(t *testing.T) {
 		return baixar(ctx, url)
 	}
 
-	resultados := ColetarTodas(context.Background(), Fontes, comFalha, coletadoEm)
+	resultados := ColetarTodas(context.Background(), fontesOffline(t), comFalha, coletadoEm)
 
 	ok := 0
 	for _, r := range resultados {
