@@ -218,6 +218,20 @@ func valor(p *float64) float64 {
 	return *p
 }
 
+func (s *Store) PontosColeta(ctx context.Context, uf string) ([]httpapi.PontoColeta, error) {
+	linhas, err := s.pool.Query(ctx, `
+	  SELECT cnes, nome, uf, cidade, endereco, bairro, telefone, latitude, longitude, publico
+	  FROM pontos_coleta WHERE uf = $1 ORDER BY publico DESC, cidade, nome`, uf)
+	if err != nil {
+		return nil, fmt.Errorf("consultar pontos de coleta: %w", err)
+	}
+	return pgx.CollectRows(linhas, func(linha pgx.CollectableRow) (httpapi.PontoColeta, error) {
+		var p httpapi.PontoColeta
+		err := linha.Scan(&p.Cnes, &p.Nome, &p.Uf, &p.Cidade, &p.Endereco, &p.Bairro, &p.Telefone, &p.Latitude, &p.Longitude, &p.Publico)
+		return p, err
+	})
+}
+
 func (s *Store) RegistrarDoacao(ctx context.Context, d httpapi.Doacao) error {
 	_, err := s.pool.Exec(ctx, `INSERT INTO doacoes_registradas (uf, tipo, data) VALUES ($1, $2, $3)`,
 		d.Uf, d.Tipo, d.Data.Time)

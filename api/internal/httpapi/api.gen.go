@@ -190,6 +190,22 @@ type NovaDoacao struct {
 	Uf UF `json:"uf"`
 }
 
+// PontoColeta defines model for PontoColeta.
+type PontoColeta struct {
+	Bairro    *string `json:"bairro,omitempty"`
+	Cidade    *string `json:"cidade,omitempty"`
+	Cnes      int     `json:"cnes"`
+	Endereco  *string `json:"endereco,omitempty"`
+	Latitude  float64 `json:"latitude"`
+	Longitude float64 `json:"longitude"`
+	Nome      string  `json:"nome"`
+	Publico   bool    `json:"publico"`
+	Telefone  *string `json:"telefone,omitempty"`
+
+	// Uf Example: MG
+	Uf UF `json:"uf"`
+}
+
 // Problema RFC 9457 Problem Details
 type Problema struct {
 	Detail *string `json:"detail,omitempty"`
@@ -222,6 +238,11 @@ type ListarEstoqueParams struct {
 	Uf *UF `form:"uf,omitempty" json:"uf,omitempty"`
 }
 
+// ListarPontosColetaParams defines parameters for ListarPontosColeta.
+type ListarPontosColetaParams struct {
+	Uf UF `form:"uf" json:"uf"`
+}
+
 // RegistrarDoacaoJSONRequestBody defines body for RegistrarDoacao for application/json ContentType.
 type RegistrarDoacaoJSONRequestBody = NovaDoacao
 
@@ -245,6 +266,9 @@ type ServerInterface interface {
 	// ListarEstoque Estoque atual de cada hemocentro
 	// (GET /v1/estoque)
 	ListarEstoque(w http.ResponseWriter, r *http.Request, params ListarEstoqueParams)
+	// ListarPontosColeta Unidades de hemoterapia do CNES que podem receber doador em um estado
+	// (GET /v1/pontos-coleta)
+	ListarPontosColeta(w http.ResponseWriter, r *http.Request, params ListarPontosColetaParams)
 }
 
 // ServerInterfaceWrapper converts contexts to parameters.
@@ -350,6 +374,39 @@ func (siw *ServerInterfaceWrapper) ListarEstoque(w http.ResponseWriter, r *http.
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.ListarEstoque(w, r, params)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// ListarPontosColeta operation middleware
+func (siw *ServerInterfaceWrapper) ListarPontosColeta(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params ListarPontosColetaParams
+
+	// ------------- Required query parameter "uf" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", true, true, "uf", r.URL.Query(), &params.Uf, runtime.BindQueryParameterOptions{Type: "string", Format: ""})
+	if err != nil {
+		var requiredError *runtime.RequiredParameterError
+		if errors.As(err, &requiredError) {
+			siw.ErrorHandlerFunc(w, r, &RequiredParamError{ParamName: "uf"})
+		} else {
+			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "uf", Err: err})
+		}
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.ListarPontosColeta(w, r, params)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -483,6 +540,7 @@ func HandlerWithOptions(si ServerInterface, options StdHTTPServerOptions) http.H
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/readyz", wrapper.VerificarProntidao)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/estoque", wrapper.ListarEstoque)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/estatisticas", wrapper.ListarEstatisticas)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/pontos-coleta", wrapper.ListarPontosColeta)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/doacoes", wrapper.RegistrarDoacao)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/doacoes/mes", wrapper.ContarDoacoesDoMes)
 
@@ -681,6 +739,44 @@ func (response ListarEstoque400ApplicationProblemPlusJSONResponse) VisitListarEs
 	return err
 }
 
+type ListarPontosColetaRequestObject struct {
+	Params ListarPontosColetaParams
+}
+
+type ListarPontosColetaResponseObject interface {
+	VisitListarPontosColetaResponse(w http.ResponseWriter) error
+}
+
+type ListarPontosColeta200JSONResponse []PontoColeta
+
+func (response ListarPontosColeta200JSONResponse) VisitListarPontosColetaResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type ListarPontosColeta400ApplicationProblemPlusJSONResponse struct {
+	ProblemaApplicationProblemPlusJSONResponse
+}
+
+func (response ListarPontosColeta400ApplicationProblemPlusJSONResponse) VisitListarPontosColetaResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(400)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
 // StrictServerInterface represents all server handlers.
 type StrictServerInterface interface {
 	// VerificarSaude O processo está no ar
@@ -701,6 +797,9 @@ type StrictServerInterface interface {
 	// ListarEstoque Estoque atual de cada hemocentro
 	// (GET /v1/estoque)
 	ListarEstoque(ctx context.Context, request ListarEstoqueRequestObject) (ListarEstoqueResponseObject, error)
+	// ListarPontosColeta Unidades de hemoterapia do CNES que podem receber doador em um estado
+	// (GET /v1/pontos-coleta)
+	ListarPontosColeta(ctx context.Context, request ListarPontosColetaRequestObject) (ListarPontosColetaResponseObject, error)
 }
 
 type StrictHandlerFunc func(ctx context.Context, w http.ResponseWriter, r *http.Request, request any) (any, error)
@@ -888,6 +987,32 @@ func (sh *strictHandler) ListarEstoque(w http.ResponseWriter, r *http.Request, p
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
 	} else if validResponse, ok := response.(ListarEstoqueResponseObject); ok {
 		if err := validResponse.VisitListarEstoqueResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// ListarPontosColeta operation middleware
+func (sh *strictHandler) ListarPontosColeta(w http.ResponseWriter, r *http.Request, params ListarPontosColetaParams) {
+	var request ListarPontosColetaRequestObject
+
+	request.Params = params
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.ListarPontosColeta(ctx, request.(ListarPontosColetaRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "ListarPontosColeta")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(ListarPontosColetaResponseObject); ok {
+		if err := validResponse.VisitListarPontosColetaResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {

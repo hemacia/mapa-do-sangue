@@ -344,3 +344,23 @@ func TestGravarColetaNaoGravaNadaQuandoUmaLeituraFalha(t *testing.T) {
 		t.Errorf("gravou parte da coleta: %+v", estoque)
 	}
 }
+
+func TestPontosColetaDaMigrationCobremOs27EstadosComOsPublicosPrimeiro(t *testing.T) {
+	s := bancoDeTeste(t)
+	ctx := context.Background()
+
+	var ufs int
+	if err := s.pool.QueryRow(ctx, `SELECT count(DISTINCT uf) FROM pontos_coleta`).Scan(&ufs); err != nil {
+		t.Fatal(err)
+	}
+	if ufs != 27 {
+		t.Errorf("UFs com ponto de coleta = %d, quero 27", ufs)
+	}
+	pontos, err := s.PontosColeta(ctx, "MG")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(pontos) == 0 || !pontos[0].Publico || pontos[len(pontos)-1].Publico {
+		t.Errorf("MG: %d pontos, primeiro público %v, último público %v", len(pontos), pontos[0].Publico, pontos[len(pontos)-1].Publico)
+	}
+}

@@ -59,6 +59,24 @@ paths:
               schema:
                 type: array
                 items: { $ref: "#/components/schemas/EstatisticaUF" }
+  /v1/pontos-coleta:
+    get:
+      operationId: listarPontosColeta
+      summary: Unidades de hemoterapia do CNES que podem receber doador em um estado
+      parameters:
+        - name: uf
+          in: query
+          required: true
+          schema: { $ref: "#/components/schemas/UF" }
+      responses:
+        "200":
+          description: Unidades públicas primeiro, depois por cidade e nome
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/PontoColeta" }
+        "400": { $ref: "#/components/responses/Problema" }
   /v1/doacoes:
     post:
       operationId: registrarDoacao
@@ -174,6 +192,20 @@ components:
             Doadores aptos no ano (primeira_vez, repeticao, esporadico, espontanea, reposicao, feminino,
             masculino, ate_29_anos, acima_29_anos, tipo_A+ ... tipo_O-) e candidatos inaptos
           additionalProperties: { type: integer }
+    PontoColeta:
+      type: object
+      required: [cnes, nome, uf, latitude, longitude, publico]
+      properties:
+        cnes: { type: integer }
+        nome: { type: string }
+        uf: { $ref: "#/components/schemas/UF" }
+        cidade: { type: string, nullable: true }
+        endereco: { type: string, nullable: true }
+        bairro: { type: string, nullable: true }
+        telefone: { type: string, nullable: true }
+        latitude: { type: number, format: double }
+        longitude: { type: number, format: double }
+        publico: { type: boolean }
     AnoColetas:
       type: object
       required: [ano, coletas, porMil]

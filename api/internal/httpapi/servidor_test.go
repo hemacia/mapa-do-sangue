@@ -22,6 +22,12 @@ type repositorioFalso struct {
 	mesPedido    string
 	totalDoMes   int
 	estatisticas []EstatisticaUF
+	pontos       []PontoColeta
+}
+
+func (r *repositorioFalso) PontosColeta(_ context.Context, uf string) ([]PontoColeta, error) {
+	r.ufPedida = uf
+	return r.pontos, r.erro
 }
 
 func (r *repositorioFalso) Ping(context.Context) error { return r.erroPing }
@@ -320,5 +326,29 @@ func TestRegistrarDoacaoRecusaCorpoGrandeDemais(t *testing.T) {
 	}
 	if len(repo.doacoes) != 0 {
 		t.Error("não deveria gravar")
+	}
+}
+
+func TestListarPontosColetaPedeAUFEmMaiusculas(t *testing.T) {
+	repo := &repositorioFalso{pontos: []PontoColeta{{Cnes: 1, Nome: "Hemoam", Uf: "AM", Publico: true}}}
+	h := novoServidor(repo)
+
+	resp := requisitar(h, http.MethodGet, "/v1/pontos-coleta?uf=am", "")
+
+	if resp.Code != http.StatusOK || repo.ufPedida != "AM" {
+		t.Fatalf("status = %d, uf = %q", resp.Code, repo.ufPedida)
+	}
+	if pontos := decodificar[[]PontoColeta](t, resp); len(pontos) != 1 || pontos[0].Nome != "Hemoam" {
+		t.Errorf("pontos = %+v", pontos)
+	}
+}
+
+func TestListarPontosColetaExigeUFValida(t *testing.T) {
+	h := novoServidor(&repositorioFalso{})
+
+	for _, caminho := range []string{"/v1/pontos-coleta", "/v1/pontos-coleta?uf=XX"} {
+		if resp := requisitar(h, http.MethodGet, caminho, ""); resp.Code != http.StatusBadRequest {
+			t.Errorf("%s: status = %d, quero 400", caminho, resp.Code)
+		}
 	}
 }
