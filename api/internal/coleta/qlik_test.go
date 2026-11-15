@@ -42,8 +42,13 @@ func servidorQlik(t *testing.T, respostas map[string]string) string {
 			var pedido struct {
 				ID     int    `json:"id"`
 				Method string `json:"method"`
+				Params []any  `json:"params"`
 			}
 			if websocket.JSON.Receive(ws, &pedido) != nil {
+				return
+			}
+			if pedido.Params == nil {
+				_ = websocket.Message.Send(ws, `{"jsonrpc":"2.0","id":0,"error":{"message":"JSON parse error"}}`)
 				return
 			}
 			corpo, _ := json.Marshal(pedido.ID)

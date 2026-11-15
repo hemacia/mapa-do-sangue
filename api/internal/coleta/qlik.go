@@ -68,6 +68,9 @@ func consultarQlik(ctx context.Context, url, origem, app string, cubo any) ([]by
 	id := 0
 	chamar := func(handle int, metodo string, params ...any) (json.RawMessage, error) {
 		id++
+		if params == nil {
+			params = []any{} // o motor recusa "params": null
+		}
 		pedido := map[string]any{"jsonrpc": "2.0", "id": id, "handle": handle, "method": metodo, "params": params}
 		if err := websocket.JSON.Send(conexao, pedido); err != nil {
 			return nil, err
