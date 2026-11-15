@@ -111,3 +111,21 @@ func TestClienteHTTPConfiaNaCAIntermediariaDoHemosc(t *testing.T) {
 		t.Error("cliente sem a CA do Hemosc ou sem verificação TLS")
 	}
 }
+
+func TestColetarTentaDeNovoQuandoODownloadFalha(t *testing.T) {
+	tentativas := 0
+	baixar := func(_ context.Context, _ string) ([]byte, error) {
+		tentativas++
+		if tentativas == 1 {
+			return nil, errors.New("tempo esgotado")
+		}
+		return fixture(t, "hemoba.html"), nil
+	}
+	fonte := Fontes[slices.IndexFunc(Fontes, func(f Fonte) bool { return f.ID == "hemoba" })]
+
+	r := ColetarTodas(context.Background(), []Fonte{fonte}, baixar, coletadoEm)[0]
+
+	if r.Erro != nil || tentativas != 2 {
+		t.Errorf("erro = %v, tentativas = %d", r.Erro, tentativas)
+	}
+}

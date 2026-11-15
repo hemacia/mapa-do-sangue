@@ -35,7 +35,8 @@ func coletar(ctx context.Context, fonte Fonte, baixar Baixar, coletadoEm time.Ti
 	var err error
 	if fonte.obter != nil {
 		corpo, err = fonte.obter(ctx)
-	} else {
+	} else if corpo, err = baixar(ctx, fonte.URL); err != nil && ctx.Err() == nil {
+		// Site do governo que demora a responder costuma voltar na segunda tentativa.
 		corpo, err = baixar(ctx, fonte.URL)
 	}
 	if err != nil {
