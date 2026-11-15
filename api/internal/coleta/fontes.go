@@ -58,6 +58,7 @@ var Fontes = []Fonte{
 	{ID: "rp-prudente", URL: pubchartRP + "2092834388", ler: lerPubchart},
 	{ID: "rp-taubate", URL: pubchartRP + "796405016", ler: lerPubchart},
 	{ID: "hemoacre", URL: "https://www.ac.gov.br/", ler: lerHemoacre},
+	{ID: "mthemocentro", URL: "https://mthemocentro.saude.mt.gov.br/estoque.consulta.publico.php", ler: lerMTHemocentro},
 	{ID: "hemosul", URL: "https://" + servidorHemosul + "/extensions/EstoqueHemosul/EstoqueHemosul.html", ler: lerHemosul, obter: obterHemosul},
 }
 
@@ -388,4 +389,24 @@ func lerHemoacre(html string, _ time.Time) (Resultado, error) {
 		}
 	})
 	return comLeituras("Hemoacre", leituras, "")
+}
+
+// No MT-Hemocentro o nível está no nome da imagem da bolsa: O-1.png. As imagens dizem
+// 1 Atenção, 2 Alerta, 3 Adequado e 4 Estável, com Estável no topo como na Hemominas.
+var (
+	bolsaMT  = regexp.MustCompile(`img/bolsas/(AB|A|B|O)([+-])([1-4])\.png`)
+	escalaMT = map[string]httpapi.Nivel{"1": httpapi.Critico, "2": httpapi.Alerta, "3": httpapi.Estavel, "4": httpapi.Adequado}
+)
+
+func lerMTHemocentro(html string, _ time.Time) (Resultado, error) {
+	var leituras []Leitura
+	vistos := map[httpapi.TipoSanguineo]bool{}
+	for _, m := range bolsaMT.FindAllStringSubmatch(html, -1) {
+		tipo := httpapi.TipoSanguineo(m[1] + m[2])
+		if !vistos[tipo] {
+			vistos[tipo] = true
+			leituras = append(leituras, Leitura{tipo, escalaMT[m[3]]})
+		}
+	}
+	return comLeituras("MT-Hemocentro", leituras, extrairDataBR(html[strings.Index(html, "tima atualiza")+1:]))
 }

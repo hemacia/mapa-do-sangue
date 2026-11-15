@@ -240,9 +240,26 @@ func TestHemoacreFalhaSemOBlocoDeEstoque(t *testing.T) {
 	}
 }
 
+func TestMTHemocentroLeONivelPeloNumeroDaImagem(t *testing.T) {
+	r := ler(t, "mthemocentro")
+
+	querLeituras(t, r, 8, Leitura{"O-", httpapi.Critico}, Leitura{"A-", httpapi.Critico}, Leitura{"O+", httpapi.Adequado})
+	if r.AtualizadoNaFonte != "2026-10-29" {
+		t.Errorf("data = %q", r.AtualizadoNaFonte)
+	}
+}
+
+func TestMTHemocentroFalhaSemAsBolsas(t *testing.T) {
+	_, err := lerMTHemocentro("<html>Sistema em manutenção</html>", coletadoEm)
+
+	if err == nil || !strings.Contains(err.Error(), "MT-Hemocentro") {
+		t.Errorf("erro = %v", err)
+	}
+}
+
 func TestCadaFonteTemCadastroNaMigration(t *testing.T) {
 	var cadastros strings.Builder
-	for _, arquivo := range []string{"00002_fontes_iniciais.sql", "00004_fontes_sao_paulo.sql", "00005_hemosul.sql", "00011_hemoacre.sql"} {
+	for _, arquivo := range []string{"00002_fontes_iniciais.sql", "00004_fontes_sao_paulo.sql", "00005_hemosul.sql", "00011_hemoacre.sql", "00013_mthemocentro.sql"} {
 		migration, err := os.ReadFile("../../migrations/" + arquivo)
 		if err != nil {
 			t.Fatal(err)
