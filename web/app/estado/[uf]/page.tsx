@@ -5,8 +5,10 @@ import { Suspense } from 'react'
 import { DiasCriticos } from '@/components/DiasCriticos'
 import { GradeTipos } from '@/components/GradeTipos'
 import { MapaDestaque } from '@/components/MapaDestaque'
+import { PerfilDoadores } from '@/components/PerfilDoadores'
+import { PontosColeta } from '@/components/PontosColeta'
 import type { EstatisticaUF } from '@/lib/api/cliente'
-import { estatisticasPorUF, estoqueAtual } from '@/lib/api/dados'
+import { estatisticasPorUF, estoqueAtual, pontosColeta } from '@/lib/api/dados'
 import { formatarAtualizacao } from '@/lib/domain/datas'
 import { type Posicao, posicaoNoRanking } from '@/lib/domain/estatisticas'
 import { nivelPorUF } from '@/lib/domain/mapa'
@@ -40,7 +42,7 @@ function formatarTaxa(valor: number) {
 }
 
 function FatoColetas({ estatistica, posicao }: { estatistica?: EstatisticaUF; posicao: Posicao | null }) {
-  const ano = estatistica?.ano ?? 2024
+  const ano = estatistica?.ano ?? 2025
   let valor = 'sem dado'
   if (estatistica?.cobertura === 'incompleto') {
     valor = 'envio incompleto'
@@ -64,7 +66,11 @@ function FatoColetas({ estatistica, posicao }: { estatistica?: EstatisticaUF; po
 async function ConteudoEstado({ params }: Pick<PageProps<'/estado/[uf]'>, 'params'>) {
   const uf = ufDoParametro((await params).uf)
   if (!uf) notFound()
-  const [todos, estatisticas] = await Promise.all([estoqueAtual(), estatisticasPorUF().catch(() => [])])
+  const [todos, estatisticas, pontos] = await Promise.all([
+    estoqueAtual(),
+    estatisticasPorUF().catch(() => []),
+    pontosColeta(uf).catch(() => []),
+  ])
   const hemocentros = todos.filter((h) => h.uf === uf)
   const estatistica = estatisticas.find((e) => e.uf === uf)
   const posicao = posicaoNoRanking(estatisticas, uf)
@@ -147,6 +153,9 @@ async function ConteudoEstado({ params }: Pick<PageProps<'/estado/[uf]'>, 'param
             </div>
           </section>
         ))}
+
+        <PontosColeta uf={uf} pontos={pontos} />
+        <PerfilDoadores uf={uf} estatistica={estatistica} />
 
         {!publica && (
           <section className="caixa secao" aria-labelledby="sugerir">

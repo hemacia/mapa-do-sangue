@@ -65,3 +65,34 @@ export function doEstado(uf: UF): string {
   const artigo = ARTIGO[uf]
   return `${artigo === 'na' ? 'da' : artigo === 'no' ? 'do' : 'de'} ${NOMES_UF[uf]}`
 }
+
+// Nome como o IBGE escreve, para casar com a cidade do CNES.
+export const CAPITAIS: Record<UF, string> = {
+  AC: 'Rio Branco',
+  AL: 'Maceió',
+  AM: 'Manaus',
+  AP: 'Macapá',
+  BA: 'Salvador',
+  CE: 'Fortaleza',
+  DF: 'Brasília',
+  ES: 'Vitória',
+  GO: 'Goiânia',
+  MA: 'São Luís',
+  MG: 'Belo Horizonte',
+  MS: 'Campo Grande',
+  MT: 'Cuiabá',
+  PA: 'Belém',
+  PB: 'João Pessoa',
+  PE: 'Recife',
+  PI: 'Teresina',
+  PR: 'Curitiba',
+  RJ: 'Rio de Janeiro',
+  RN: 'Natal',
+  RO: 'Porto Velho',
+  RR: 'Boa Vista',
+  RS: 'Porto Alegre',
+  SC: 'Florianópolis',
+  SE: 'Aracaju',
+  SP: 'São Paulo',
+  TO: 'Palmas',
+}

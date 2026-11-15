@@ -101,7 +101,7 @@ export default function PaginaSobre() {
         <section className="secao" aria-labelledby="anvisa">
           <h2 id="anvisa">Coletas por mil habitantes</h2>
           <p>
-            A cor de fundo dos estados no mapa vem do Hemoprod 2024, da Anvisa: o total de coletas de sangue
+            A cor de fundo dos estados no mapa vem do Hemoprod 2025, da Anvisa: o total de coletas de sangue
             total e por aférese dividido pela população estimada pelo IBGE. As faixas do mapa mudam a cada{' '}
             {LIMITES_FAIXAS[1] - LIMITES_FAIXAS[0]} coletas, de até {LIMITES_FAIXAS[0]} a{' '}
             {LIMITES_FAIXAS.at(-1)} ou mais.

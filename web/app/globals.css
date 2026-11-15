@@ -1775,3 +1775,147 @@ h3 {
     transition: none;
   }
 }
+
+/* Quem doa no estado (Anvisa) */
+
+.perfil-fatos {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 180px), 1fr));
+  gap: 1px;
+  margin: 0;
+  background: var(--linha);
+  border: 1px solid var(--linha);
+}
+
+.perfil-fatos div {
+  display: flex;
+  flex-direction: column-reverse;
+  justify-content: flex-end;
+  gap: var(--space-1);
+  padding: var(--space-4);
+  background: var(--superficie);
+}
+
+.perfil-fatos dd {
+  margin: 0;
+  font-family: var(--display);
+  font-size: var(--text-2xl);
+  font-weight: 800;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.perfil-fatos dt {
+  color: var(--tinta-2);
+  font-size: var(--text-md);
+}
+
+.tipos-doadores {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr));
+  gap: var(--space-3) var(--space-6);
+  padding: 0;
+  list-style: none;
+}
+
+.tipos-doadores li {
+  display: grid;
+  grid-template-columns: 44px 1fr 3.5ch;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.tipos-doadores strong {
+  font-family: var(--display);
+  font-size: 1.375rem;
+}
+
+.tipos-doadores .barra {
+  height: 12px;
+  background: var(--linha);
+}
+
+.tipos-doadores .barra span {
+  display: block;
+  height: 100%;
+  background: var(--faixa-4);
+}
+
+.tipos-doadores small {
+  color: var(--tinta-2);
+  font-size: var(--text-md);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+/* Onde doar (CNES) */
+
+.pontos-cidades {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
+  gap: var(--space-5);
+}
+
+.pontos-cidade h3 {
+  margin-bottom: var(--space-2);
+  font-family: var(--display);
+  font-size: var(--text-xl);
+}
+
+.pontos-cidade ul {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding: 0;
+  list-style: none;
+  background: var(--linha);
+  border: 1px solid var(--linha);
+}
+
+.pontos-cidade li {
+  padding: var(--space-3) var(--space-4);
+  background: var(--superficie);
+}
+
+.pontos-cidade li p {
+  margin: var(--space-1) 0 0;
+  color: var(--tinta-2);
+  font-size: var(--text-md);
+}
+
+.etiqueta-publico {
+  margin-left: var(--space-2);
+  padding: 1px 6px;
+  border: 1px solid var(--faixa-4);
+  color: var(--tinta);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.pontos-acoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-4);
+}
+
+.pontos-acoes a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+}
+
+.pontos-mais summary {
+  display: inline-flex;
+  align-items: center;
+  min-height: 48px;
+  padding: 0 var(--space-4);
+  border: 1px solid var(--linha);
+  background: var(--superficie);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.pontos-mais[open] summary {
+  margin-bottom: var(--space-5);
+}
