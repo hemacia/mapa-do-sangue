@@ -1,73 +1,251 @@
 import Link from 'next/link'
 import type { CSSProperties } from 'react'
-import { type NivelEstoque, ROTULOS_NIVEL } from '@/lib/domain/nivel'
+import type { EstatisticaUF, EstoqueHemocentro } from '@/lib/api/cliente'
+import { faixaDeColetas, LIMITES_FAIXAS } from '@/lib/domain/estatisticas'
+import { nivelPorUF } from '@/lib/domain/mapa'
+import { NIVEIS_ESTOQUE, type NivelEstoque, ROTULOS_NIVEL } from '@/lib/domain/nivel'
+import { TIPOS_SANGUINEOS } from '@/lib/domain/tipos'
 import { NOMES_UF, type UF } from '@/lib/domain/ufs'
 import { desenharEstados } from '@/lib/mapa/geografia'
 
 const LADO = 600
 // Estados pequenos demais para caber a sigla dentro.
 const SEM_SIGLA = new Set<UF>(['DF', 'SE', 'AL', 'PB', 'RN', 'ES', 'RJ'])
+// A placa vai à esquerda do estado; a do ES iria em cima da de MG, então vai para o mar.
+const PLACA_A_DIREITA = new Set<UF>(['ES'])
 
-export interface Camada {
-  rotulo: string
-  niveis: Record<UF, NivelEstoque | null>
+const TINTA_CLARA = '#ffffff'
+const TINTA_ESCURA = '#0b2235'
+
+function formatarTaxa(valor: number) {
+  return valor.toLocaleString('pt-BR', { maximumFractionDigits: 1 })
+}
+
+function descreverColetas(estatistica: EstatisticaUF | undefined): string {
+  if (!estatistica || estatistica.cobertura === 'sem-dado' || estatistica.porMil === null) {
+    return 'sem dado da Anvisa'
+  }
+  if (estatistica.cobertura === 'incompleto') return 'envio incompleto à Anvisa'
+  return `${formatarTaxa(estatistica.porMil)} coletas por mil habitantes`
+}
+
+interface Placa {
+  uf: UF
+  niveis: (NivelEstoque | null)[]
+  criticos: number
+}
+
+function contarCriticos(niveis: (NivelEstoque | null)[]) {
+  return niveis.filter((nivel) => nivel === 'critico').length
 }
 
 // Cada estado leva a cor de todas as camadas em variáveis CSS (--f0, --f1...). O botão marcado
-// escolhe qual variável vale, por CSS (:has), então trocar de tipo não precisa de JavaScript.
-function coresDasCamadas(camadas: Camada[], uf: UF): CSSProperties {
-  return Object.fromEntries(
-    camadas.flatMap(({ niveis }, i) => {
-      const nivel = niveis[uf]
-      return [
-        [`--f${i}`, `var(--${nivel ?? 'sem-dado'})`],
-        [`--x${i}`, nivel ? '#fff' : 'var(--ink)'],
-      ]
-    }),
+// escolhe qual variável vale, por CSS (:has), então trocar de camada não precisa de JavaScript.
+function coresDoEstado(
+  estatistica: EstatisticaUF | undefined,
+  niveis: (NivelEstoque | null)[],
+): CSSProperties {
+  const faixa = estatistica ? faixaDeColetas(estatistica.porMil, estatistica.cobertura) : null
+  const geral =
+    typeof faixa === 'number'
+      ? { '--f0': `var(--faixa-${faixa})`, '--x0': faixa >= 3 ? TINTA_CLARA : TINTA_ESCURA }
+      : { '--f0': 'url(#hachura-incompleto)', '--x0': TINTA_ESCURA }
+  const porTipo = niveis.flatMap((nivel, i) => [
+    [`--f${i + 1}`, nivel ? `var(--${nivel})` : 'url(#hachura-sem-estoque)'],
+    [`--x${i + 1}`, nivel === 'alerta' ? 'var(--sobre-alerta)' : nivel ? TINTA_CLARA : '#9fbdd2'],
+  ])
+  return { ...geral, ...Object.fromEntries(porTipo) }
+}
+
+function PlacaConteudo({ placa }: { placa: Placa }) {
+  return (
+    <>
+      <strong>{placa.uf}</strong>
+      <span className="placa-tipos" aria-hidden="true">
+        {placa.niveis.map((nivel, i) => (
+          <i key={TIPOS_SANGUINEOS[i]} className={`nivel-${nivel ?? 'sem-dado'}`} />
+        ))}
+      </span>
+      <span className="placa-resumo">
+        {placa.criticos} crítico{placa.criticos === 1 ? '' : 's'}
+      </span>
+      {placa.niveis.map((nivel, i) => (
+        <span key={TIPOS_SANGUINEOS[i]} className="placa-nivel" data-camada={i + 1}>
+          {nivel ? ROTULOS_NIVEL[nivel] : 'Sem dado'}
+        </span>
+      ))}
+    </>
   )
 }
 
-export function MapaBrasil({ camadas }: { camadas: Camada[] }) {
+function rotuloDaPlaca(placa: Placa) {
+  return `Estoque de ${NOMES_UF[placa.uf]}: ${placa.criticos} de 8 tipos críticos hoje`
+}
+
+export function MapaBrasil({
+  estatisticas,
+  hemocentros,
+}: {
+  estatisticas: EstatisticaUF[]
+  hemocentros: Pick<EstoqueHemocentro, 'uf' | 'nivelGeral' | 'estoque'>[]
+}) {
   const estados = desenharEstados(LADO, LADO)
-  const [geral] = camadas
+  const porTipo = TIPOS_SANGUINEOS.map((tipo) => nivelPorUF(hemocentros, tipo))
+  const ufsQuePublicam = new Set(hemocentros.map((h) => h.uf as UF))
+  const ano = estatisticas[0]?.ano
+  const placas: (Placa & { centro: [number, number] })[] = estados
+    .filter(({ uf }) => ufsQuePublicam.has(uf))
+    .map(({ uf, centro }) => {
+      const niveis = porTipo.map((niveisDoTipo) => niveisDoTipo[uf])
+      return { uf, centro, niveis, criticos: contarCriticos(niveis) }
+    })
+    .sort((a, b) => b.criticos - a.criticos)
+
   return (
     <figure className="mapa">
       <fieldset className="camadas">
         <legend className="visualmente-oculto">Ver no mapa</legend>
-        {camadas.map((camada, i) => (
-          <label key={camada.rotulo}>
-            <input type="radio" name="camada" value={i} defaultChecked={i === 0} />
-            {camada.rotulo}
+        <label className="camada-geral">
+          <input type="radio" name="camada" value={0} defaultChecked />
+          Doações por estado
+        </label>
+        <span className="rotulo-tipos" aria-hidden="true">
+          Estoque de hoje do tipo
+        </span>
+        {TIPOS_SANGUINEOS.map((tipo, i) => (
+          <label key={tipo}>
+            <input type="radio" name="camada" value={i + 1} aria-label={`Estoque de hoje do tipo ${tipo}`} />
+            {tipo}
           </label>
         ))}
       </fieldset>
-      {/* biome-ignore lint/a11y/useSemanticElements: grupo de links dentro do SVG; fieldset não existe em SVG */}
-      <svg
-        viewBox={`0 0 ${LADO} ${LADO}`}
-        role="group"
-        aria-label="Mapa do Brasil com o nível de estoque por estado"
-      >
-        {estados.map(({ uf, d, centro }) => {
-          const nivel = geral.niveis[uf]
-          const rotulo = `${NOMES_UF[uf]}: ${nivel ? `pior nível ${ROTULOS_NIVEL[nivel].toLowerCase()}` : 'não publica o estoque'}`
-          return (
-            <Link
-              key={uf}
-              href={`/estado/${uf.toLowerCase()}`}
-              aria-label={rotulo}
-              style={coresDasCamadas(camadas, uf)}
+
+      <div className="mapa-area">
+        {/* biome-ignore lint/a11y/useSemanticElements: grupo de links dentro do SVG; fieldset não existe em SVG */}
+        <svg viewBox={`0 0 ${LADO} ${LADO}`} role="group" aria-label="Mapa do Brasil por estado">
+          <defs>
+            <pattern
+              id="hachura-incompleto"
+              width="7"
+              height="7"
+              patternUnits="userSpaceOnUse"
+              patternTransform="rotate(45)"
             >
-              <title>{rotulo}</title>
-              <path d={d} />
-              {!SEM_SIGLA.has(uf) && (
-                <text x={centro[0]} y={centro[1]} textAnchor="middle" dominantBaseline="central">
-                  {uf}
-                </text>
-              )}
-            </Link>
-          )
-        })}
-      </svg>
+              <rect width="7" height="7" style={{ fill: 'var(--hachura-a)' }} />
+              <rect width="2.5" height="7" style={{ fill: 'var(--hachura-b)' }} />
+            </pattern>
+            <pattern
+              id="hachura-sem-estoque"
+              width="7"
+              height="7"
+              patternUnits="userSpaceOnUse"
+              patternTransform="rotate(45)"
+            >
+              <rect width="7" height="7" style={{ fill: 'var(--sem-estoque-a)' }} />
+              <rect width="2" height="7" style={{ fill: 'var(--sem-estoque-b)' }} />
+            </pattern>
+          </defs>
+          {estados.map(({ uf, d, centro }) => {
+            const estatistica = estatisticas.find((e) => e.uf === uf)
+            const niveis = porTipo.map((niveisDoTipo) => niveisDoTipo[uf])
+            const estoque = ufsQuePublicam.has(uf)
+              ? `${contarCriticos(niveis)} de 8 tipos críticos hoje`
+              : 'o hemocentro não publica o estoque'
+            const rotulo = `${NOMES_UF[uf]}: ${descreverColetas(estatistica)}; ${estoque}`
+            return (
+              <Link
+                key={uf}
+                href={`/estado/${uf.toLowerCase()}`}
+                aria-label={rotulo}
+                style={coresDoEstado(estatistica, niveis)}
+              >
+                <title>{rotulo}</title>
+                <path d={d} />
+                {!SEM_SIGLA.has(uf) && (
+                  <text x={centro[0]} y={centro[1]} textAnchor="middle" dominantBaseline="central">
+                    {uf}
+                  </text>
+                )}
+              </Link>
+            )
+          })}
+        </svg>
+
+        <ul className="placas">
+          {placas.map((placa) => {
+            const x = (placa.centro[0] / LADO) * 100
+            const y = (placa.centro[1] / LADO) * 100
+            const aDireita = PLACA_A_DIREITA.has(placa.uf)
+            return (
+              <li key={placa.uf}>
+                <span className="placa-ponto" style={{ left: `${x}%`, top: `${y}%` }} />
+                <span className="placa-linha" style={{ left: `${aDireita ? x : x - 6}%`, top: `${y}%` }} />
+                <Link
+                  href={`/estado/${placa.uf.toLowerCase()}`}
+                  className="placa"
+                  aria-label={rotuloDaPlaca(placa)}
+                  style={
+                    aDireita ? { left: `${x + 6}%`, top: `${y}%` } : { right: `${106 - x}%`, top: `${y}%` }
+                  }
+                >
+                  <PlacaConteudo placa={placa} />
+                </Link>
+              </li>
+            )
+          })}
+        </ul>
+      </div>
+
+      <div className="lista-placas">
+        <h2>Estoque nos estados que publicam</h2>
+        <ul>
+          {placas.map((placa) => (
+            <li key={placa.uf}>
+              <Link href={`/estado/${placa.uf.toLowerCase()}`} aria-label={rotuloDaPlaca(placa)}>
+                <PlacaConteudo placa={placa} />
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <figcaption className="legenda-mapa">
+        <div className="legenda-grupo legenda-coletas">
+          <strong>Coletas de sangue por mil habitantes{ano ? `, ${ano}` : ''}</strong>
+          <ul className="legenda-itens">
+            {LIMITES_FAIXAS.map((limite, i) => (
+              <li key={limite}>
+                <span className="amostra amostra-faixa" style={{ background: `var(--faixa-${i})` }} />
+                {i === 0 ? `até ${limite}` : `${LIMITES_FAIXAS[i - 1]} a ${limite}`}
+              </li>
+            ))}
+            <li>
+              <span className="amostra amostra-faixa" style={{ background: 'var(--faixa-4)' }} />
+              {LIMITES_FAIXAS.at(-1)} ou mais
+            </li>
+            <li>
+              <span className="amostra amostra-hachura" />
+              envio incompleto à Anvisa
+            </li>
+          </ul>
+        </div>
+        <div className="legenda-grupo">
+          <strong>Estoque de hoje</strong>
+          <ul className="legenda-itens">
+            {NIVEIS_ESTOQUE.map((nivel) => (
+              <li key={nivel} className={`nivel-${nivel}`}>
+                <span className="amostra" />
+                {ROTULOS_NIVEL[nivel]}
+              </li>
+            ))}
+            <li className="legenda-estoque-tipo">
+              <span className="amostra amostra-sem-estoque" />
+              não publica o estoque
+            </li>
+            <li className="legenda-coletas">nas placas, na ordem A+ A- B+ B- AB+ AB- O+ O-</li>
+          </ul>
+        </div>
+      </figcaption>
     </figure>
   )
 }
