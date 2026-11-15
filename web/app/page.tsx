@@ -1,13 +1,12 @@
+import Link from 'next/link'
 import { Suspense } from 'react'
 import { CartaoHemocentro } from '@/components/CartaoHemocentro'
 import { EuDoei } from '@/components/EuDoei'
-import { Legenda } from '@/components/Legenda'
 import { MapaBrasil } from '@/components/MapaBrasil'
 import { PanoramaTipos } from '@/components/PanoramaTipos'
-import { estoqueAtual } from '@/lib/api/dados'
-import { nivelPorUF } from '@/lib/domain/mapa'
-import { panoramaPorTipo, tiposMaisEmFalta } from '@/lib/domain/panorama'
-import { TIPOS_SANGUINEOS } from '@/lib/domain/tipos'
+import { estatisticasPorUF, estoqueAtual } from '@/lib/api/dados'
+import { formatarColeta } from '@/lib/domain/datas'
+import { juntarTipos, montarManchete, panoramaPorTipo, tiposCriticos } from '@/lib/domain/panorama'
 import { SITE } from '@/lib/site'
 
 const jsonLd = {
@@ -29,77 +28,91 @@ async function Estoque() {
     hemocentros = await estoqueAtual()
   } catch {
     return (
-      <div className="coluna">
-        <div className="vazio" role="alert">
-          <p>Não foi possível carregar o estoque agora.</p>
-          <p className="nota">A API pode estar fora do ar. Tente de novo em alguns minutos.</p>
+      <div className="manchete-painel" role="alert">
+        <div className="manchete">
+          <h1>Não foi possível carregar o estoque agora</h1>
+          <p>A API pode estar fora do ar. Tente de novo em alguns minutos.</p>
         </div>
       </div>
     )
   }
+  const estatisticas = await estatisticasPorUF().catch(() => [])
   const panorama = panoramaPorTipo(hemocentros)
-  const emFalta = tiposMaisEmFalta(panorama)
+  const manchete = montarManchete(panorama, hemocentros.length)
+  const ultimaColeta = hemocentros
+    .map((h) => h.coletadoEm)
+    .sort()
+    .at(-1)
+  const ordenados = [...hemocentros].sort(
+    (a, b) => tiposCriticos(b.estoque).length - tiposCriticos(a.estoque).length,
+  )
+  const [primeiro, ...resto] = manchete.tipos
+  const ufs = [...new Set(hemocentros.map((h) => h.uf))].sort()
   return (
     <>
-      <div className="coluna coluna-panorama">
-        <section className="secao" aria-labelledby="titulo-panorama">
-          <h2 id="titulo-panorama" className="titulo-secao">
-            Panorama por tipo sanguíneo
-          </h2>
-          {emFalta.length > 0 && (
-            <p style={{ marginBottom: 'var(--space-4)' }}>
-              Mais em falta agora: <strong>{emFalta.join(', ')}</strong>
+      <section className="manchete-painel" aria-labelledby="manchete">
+        <div className="manchete">
+          <h1 id="manchete">
+            {primeiro ? (
+              <>
+                <span className="tipo">{juntarTipos([primeiro, ...resto])}</span>
+                {manchete.titulo.slice(juntarTipos(manchete.tipos).length)}
+              </>
+            ) : (
+              manchete.titulo
+            )}
+          </h1>
+          {manchete.complemento && (
+            <p>
+              {manchete.complemento} Os hemocentros que publicam ficam em {juntarTipos(ufs)}.
             </p>
           )}
-          <PanoramaTipos panorama={panorama} />
-          <p className="nota" style={{ marginTop: 'var(--space-3)' }}>
-            Quanto mais cheia a barra, melhor o estoque somando os {hemocentros.length} hemocentros que
-            publicam.
-          </p>
-        </section>
-        <EuDoei />
-      </div>
-      <div className="coluna coluna-mapa">
-        <MapaBrasil
-          camadas={[
-            { rotulo: 'Pior nível', niveis: nivelPorUF(hemocentros) },
-            ...TIPOS_SANGUINEOS.map((tipo) => ({ rotulo: tipo, niveis: nivelPorUF(hemocentros, tipo) })),
-          ]}
-        />
-        <Legenda />
-        <p className="nota" style={{ textAlign: 'center', marginTop: 'var(--space-3)' }}>
-          Em “Pior nível”, cada estado mostra o tipo mais em falta entre os seus hemocentros. Clique num
-          estado para ver os detalhes.
+          {ultimaColeta && <p className="coleta">Coletado {formatarColeta(ultimaColeta, new Date())}</p>}
+        </div>
+        <div className="acoes">
+          <Link href="/posso-doar" className="botao botao-primario">
+            Posso doar?
+          </Link>
+          <a href="#hemocentros" className="botao botao-contorno">
+            Ver os hemocentros
+          </a>
+        </div>
+        <PanoramaTipos panorama={panorama} hemocentros={hemocentros.length} />
+      </section>
+      <section className="palco" aria-label="Mapa do Brasil">
+        <MapaBrasil estatisticas={estatisticas} hemocentros={hemocentros} />
+      </section>
+      <aside id="hemocentros" className="painel-hemocentros" aria-labelledby="titulo-hemocentros">
+        <h2 id="titulo-hemocentros">Hemocentros que publicam</h2>
+        <p>
+          {hemocentros.length} hemocentros em {ufs.length} estados, do mais crítico para o menos
         </p>
-      </div>
-      <div className="coluna coluna-lista">
-        <h2 className="titulo-secao">Hemocentros que publicam o estoque</h2>
-        <ul className="lista">
-          {hemocentros.map((hemocentro) => (
+        <ul className="lista-hemocentros">
+          {ordenados.map((hemocentro) => (
             <li key={hemocentro.id}>
               <CartaoHemocentro hemocentro={hemocentro} />
             </li>
           ))}
         </ul>
-      </div>
+      </aside>
     </>
   )
 }
 
 export default function Home() {
   return (
-    <div className="area">
+    <>
       <script
         type="application/ld+json"
         // biome-ignore lint/security/noDangerouslySetInnerHtml: JSON-LD montado no servidor com dados fixos
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, '\\u003c') }}
       />
-      <h1 className="visualmente-oculto">Estoque de sangue dos hemocentros do Brasil</h1>
-      <div className="colunas">
-        <Suspense fallback={<p className="coluna nota">Carregando o estoque</p>}>
+      <div className="inicio">
+        <Suspense fallback={<p className="manchete-painel">Carregando o estoque</p>}>
           <Estoque />
         </Suspense>
       </div>
-    </div>
+      <EuDoei />
+    </>
   )
 }

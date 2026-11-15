@@ -963,8 +963,9 @@ h3 {
 
 .mapa-area {
   position: relative;
-  width: min(100%, 600px);
-  margin: var(--space-5) auto;
+  width: min(100%, 520px);
+  /* Puxado para a esquerda: a placa do ES fica no mar, à direita do mapa. */
+  margin: var(--space-5) auto var(--space-5) max(var(--space-4), calc(50% - 330px));
 }
 
 .mapa-area svg {

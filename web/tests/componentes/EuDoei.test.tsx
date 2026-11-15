@@ -16,7 +16,19 @@ describe('EuDoei', () => {
   it('mostra quantas doações foram registradas no mês', async () => {
     montar()
 
-    expect(await screen.findByTestId('total-mes')).toHaveTextContent('41')
+    expect(await screen.findByTestId('total-mes')).toHaveTextContent('41 doações registradas este mês')
+  })
+
+  it('troca o zero por uma frase', async () => {
+    montar(undefined, 0)
+    expect(await screen.findByTestId('total-mes')).toHaveTextContent(
+      'Ninguém registrou doação este mês ainda.',
+    )
+  })
+
+  it('usa o singular quando há uma doação só', async () => {
+    montar(undefined, 1)
+    expect(await screen.findByTestId('total-mes')).toHaveTextContent('1 doação registrada este mês')
   })
 
   it('registra a doação com UF e tipo e soma no contador', async () => {

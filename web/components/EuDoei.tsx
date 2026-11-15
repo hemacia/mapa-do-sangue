@@ -44,22 +44,26 @@ export function EuDoei({ registrar = api.registrarDoacao, totalDoMes = api.total
   }
 
   return (
-    <section className="secao" aria-labelledby="titulo-eu-doei">
-      <h2 id="titulo-eu-doei" className="titulo-secao">
-        Eu doei hoje!
-      </h2>
-      {total !== null && (
-        <p className="destaque" data-testid="total-mes">
-          <span className="numero">{total.toLocaleString('pt-BR')}</span>
-          doações registradas pelo Mapa do Sangue este mês
+    <section className="eu-doei" aria-labelledby="titulo-eu-doei">
+      <div className="eu-doei-texto">
+        <h2 id="titulo-eu-doei">Doou sangue hoje? Conte para o mapa</h2>
+        <p>
+          Guardamos só o estado e o tipo, sem nome nem e-mail.{' '}
+          {total !== null && (
+            <span data-testid="total-mes" data-total={total}>
+              {total === 0
+                ? 'Ninguém registrou doação este mês ainda.'
+                : `${total.toLocaleString('pt-BR')} ${total === 1 ? 'doação registrada' : 'doações registradas'} este mês.`}
+            </span>
+          )}
         </p>
-      )}
-      <form className="formulario" onSubmit={enviar} style={{ marginTop: 'var(--space-4)' }}>
+      </div>
+      <form onSubmit={enviar}>
         <label className="campo">
           Estado
           <select name="uf" required defaultValue="">
             <option value="" disabled>
-              Escolha
+              Escolha o estado
             </option>
             {UFS.map((uf) => (
               <option key={uf} value={uf}>
@@ -69,7 +73,7 @@ export function EuDoei({ registrar = api.registrarDoacao, totalDoMes = api.total
           </select>
         </label>
         <label className="campo">
-          Tipo sanguíneo (opcional)
+          Tipo sanguíneo
           <select name="tipo" defaultValue="">
             <option value="">Prefiro não dizer</option>
             {TIPOS_SANGUINEOS.map((tipo) => (
@@ -79,19 +83,16 @@ export function EuDoei({ registrar = api.registrarDoacao, totalDoMes = api.total
             ))}
           </select>
         </label>
-        <button type="submit" className="botao" disabled={enviando}>
+        <button type="submit" className="botao botao-escuro" disabled={enviando}>
           Registrar minha doação
         </button>
+        {mensagem && <p role="status">{mensagem}</p>}
+        {erro && (
+          <p role="alert" className="erro">
+            {erro}
+          </p>
+        )}
       </form>
-      <p className="nota" style={{ marginTop: 'var(--space-2)' }}>
-        Não guardamos nome, e-mail nem nenhum dado pessoal.
-      </p>
-      {mensagem && <p role="status">{mensagem}</p>}
-      {erro && (
-        <p role="alert" className="erro">
-          {erro}
-        </p>
-      )}
     </section>
   )
 }
