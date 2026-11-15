@@ -99,6 +99,14 @@ func (e TipoSanguineo) Valid() bool {
 	}
 }
 
+// Bolsas defines model for Bolsas.
+type Bolsas struct {
+	Bolsas int `json:"bolsas"`
+
+	// Minimo Quantidade a partir da qual a própria fonte considera o estoque fora de risco
+	Minimo int `json:"minimo"`
+}
+
 // Doacao defines model for Doacao.
 type Doacao struct {
 	Data openapi_types.Date `json:"data"`
@@ -126,9 +134,12 @@ type EstatisticaUFCobertura string
 // EstoqueHemocentro defines model for EstoqueHemocentro.
 type EstoqueHemocentro struct {
 	// AtualizadoNaFonte AAAA-MM-DD ou AAAA-MM-DDTHH:MM, no horário da fonte
-	AtualizadoNaFonte *string   `json:"atualizadoNaFonte,omitempty"`
-	Cidade            string    `json:"cidade"`
-	ColetadoEm        time.Time `json:"coletadoEm"`
+	AtualizadoNaFonte *string `json:"atualizadoNaFonte,omitempty"`
+
+	// Bolsas Bolsas em estoque e mínimo por tipo, só nas fontes que publicam o número
+	Bolsas     *map[string]Bolsas `json:"bolsas,omitempty"`
+	Cidade     string             `json:"cidade"`
+	ColetadoEm time.Time          `json:"coletadoEm"`
 
 	// Estoque Nível por tipo sanguíneo (só os tipos que a fonte publica)
 	Estoque map[string]Nivel `json:"estoque"`

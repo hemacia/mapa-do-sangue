@@ -116,6 +116,14 @@ components:
       properties:
         dias: { type: integer }
         diasCriticos: { type: integer }
+    Bolsas:
+      type: object
+      required: [bolsas, minimo]
+      properties:
+        bolsas: { type: integer }
+        minimo:
+          type: integer
+          description: Quantidade a partir da qual a própria fonte considera o estoque fora de risco
     EstoqueHemocentro:
       type: object
       required: [id, nome, uf, cidade, nivelGeral, estoque, coletadoEm, historico]
@@ -136,6 +144,10 @@ components:
           nullable: true
           description: AAAA-MM-DD ou AAAA-MM-DDTHH:MM, no horário da fonte
         coletadoEm: { type: string, format: date-time }
+        bolsas:
+          type: object
+          description: Bolsas em estoque e mínimo por tipo, só nas fontes que publicam o número
+          additionalProperties: { $ref: "#/components/schemas/Bolsas" }
         historico:
           type: object
           description: Dias com leitura e dias em nível crítico nos últimos 30 dias, por tipo

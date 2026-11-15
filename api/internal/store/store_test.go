@@ -268,6 +268,35 @@ func TestGravarColetaGravaSoAsFontesQueFuncionaram(t *testing.T) {
 	}
 }
 
+func TestGravarColetaGuardaAsBolsasSoDasFontesQueInformam(t *testing.T) {
+	s := bancoDeTeste(t)
+	ctx := context.Background()
+	resultados := []coleta.Resultado{
+		{FonteID: "prosangue", Leituras: []coleta.Leitura{{Tipo: "O-", Nivel: httpapi.Critico}},
+			Bolsas: map[httpapi.TipoSanguineo]coleta.Contagem{"O-": {Bolsas: 25, Minimo: 103}}},
+		{FonteID: "hemoba", Leituras: []coleta.Leitura{{Tipo: "O-", Nivel: httpapi.Critico}}},
+	}
+
+	if err := s.GravarColeta(ctx, resultados, agoraFixo); err != nil {
+		t.Fatal(err)
+	}
+
+	estoque, err := s.EstoqueAtual(ctx, "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	porID := map[string]httpapi.EstoqueHemocentro{}
+	for _, h := range estoque {
+		porID[h.Id] = h
+	}
+	if b := porID["prosangue"].Bolsas; b == nil || (*b)["O-"] != (httpapi.Bolsas{Bolsas: 25, Minimo: 103}) {
+		t.Errorf("bolsas da Pró-Sangue = %v", b)
+	}
+	if b := porID["hemoba"].Bolsas; b != nil {
+		t.Errorf("Hemoba não publica bolsas, veio %v", *b)
+	}
+}
+
 func TestGravarColetaNaoGravaNadaQuandoUmaLeituraFalha(t *testing.T) {
 	s := bancoDeTeste(t)
 	ctx := context.Background()

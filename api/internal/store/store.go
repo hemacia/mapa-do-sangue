@@ -49,7 +49,7 @@ func (s *Store) Ping(ctx context.Context) error { return s.pool.Ping(ctx) }
 // Última leitura de cada hemocentro, com o histórico de 30 dias de cada tipo.
 const consultaEstoqueAtual = `
   SELECT h.id, h.nome, h.uf, h.cidade, h.latitude, h.longitude,
-         l.tipo::text, l.nivel::text, l.atualizado_na_fonte, l.coletado_em
+         l.tipo::text, l.nivel::text, l.atualizado_na_fonte, l.coletado_em, l.bolsas, l.bolsas_minimo
   FROM leituras_estoque l
   JOIN hemocentros h ON h.id = l.hemocentro_id
   WHERE l.coletado_em = (SELECT max(coletado_em) FROM leituras_estoque WHERE hemocentro_id = l.hemocentro_id)
@@ -79,8 +79,9 @@ func (s *Store) EstoqueAtual(ctx context.Context, uf string) ([]httpapi.EstoqueH
 		var h httpapi.EstoqueHemocentro
 		var tipo string
 		var nivel httpapi.Nivel
+		var bolsas, minimo *int
 		if err := linhas.Scan(&h.Id, &h.Nome, &h.Uf, &h.Cidade, &h.Latitude, &h.Longitude,
-			&tipo, &nivel, &h.AtualizadoNaFonte, &h.ColetadoEm); err != nil {
+			&tipo, &nivel, &h.AtualizadoNaFonte, &h.ColetadoEm, &bolsas, &minimo); err != nil {
 			return nil, err
 		}
 		i, existe := indice[h.Id]
@@ -93,6 +94,12 @@ func (s *Store) EstoqueAtual(ctx context.Context, uf string) ([]httpapi.EstoqueH
 			indice[h.Id] = i
 		}
 		lista[i].Estoque[tipo] = nivel
+		if bolsas != nil && minimo != nil {
+			if lista[i].Bolsas == nil {
+				lista[i].Bolsas = &map[string]httpapi.Bolsas{}
+			}
+			(*lista[i].Bolsas)[tipo] = httpapi.Bolsas{Bolsas: *bolsas, Minimo: *minimo}
+		}
 		if gravidade[nivel] < gravidade[lista[i].NivelGeral] {
 			lista[i].NivelGeral = nivel
 		}
@@ -183,8 +190,12 @@ func (s *Store) GravarColeta(ctx context.Context, resultados []coleta.Resultado,
 				continue
 			}
 			for _, l := range r.Leituras {
-				if _, err := tx.Exec(ctx, `INSERT INTO leituras_estoque (hemocentro_id, tipo, nivel, atualizado_na_fonte, coletado_em)
-				  VALUES ($1, $2, $3, NULLIF($4, ''), $5)`, r.FonteID, l.Tipo, l.Nivel, r.AtualizadoNaFonte, coletadoEm); err != nil {
+				var bolsas, minimo *int
+				if c, ok := r.Bolsas[l.Tipo]; ok {
+					bolsas, minimo = &c.Bolsas, &c.Minimo
+				}
+				if _, err := tx.Exec(ctx, `INSERT INTO leituras_estoque (hemocentro_id, tipo, nivel, atualizado_na_fonte, coletado_em, bolsas, bolsas_minimo)
+				  VALUES ($1, $2, $3, NULLIF($4, ''), $5, $6, $7)`, r.FonteID, l.Tipo, l.Nivel, r.AtualizadoNaFonte, coletadoEm, bolsas, minimo); err != nil {
 					return fmt.Errorf("gravar leitura de %s: %w", r.FonteID, err)
 				}
 			}
