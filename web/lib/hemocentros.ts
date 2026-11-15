@@ -6,4 +6,7 @@ export const SITES_HEMOCENTROS: Record<string, string> = {
   hemosc: 'https://www.hemosc.org.br/',
   hemoba: 'https://www.ba.gov.br/hemoba/',
   hemopi: 'https://www.hemopi.pi.gov.br/',
+  hemosul: 'https://www.hemosul.ms.gov.br/',
+  prosangue: 'https://www.prosangue.sp.gov.br/',
+  'rp-ribeirao': 'https://www.hemocentro.fmrp.usp.br/',
 }

@@ -10,7 +10,7 @@ import { estatisticasPorUF, estoqueAtual } from '@/lib/api/dados'
 import { formatarAtualizacao } from '@/lib/domain/datas'
 import { type Posicao, posicaoNoRanking } from '@/lib/domain/estatisticas'
 import { nivelPorUF } from '@/lib/domain/mapa'
-import { juntarTipos, tiposCriticos } from '@/lib/domain/panorama'
+import { juntarTipos } from '@/lib/domain/panorama'
 import { TIPOS_SANGUINEOS } from '@/lib/domain/tipos'
 import { doEstado, NOMES_UF, noEstado, type UF, UFS } from '@/lib/domain/ufs'
 import { SITES_HEMOCENTROS } from '@/lib/hemocentros'
@@ -72,9 +72,13 @@ async function ConteudoEstado({ params }: Pick<PageProps<'/estado/[uf]'>, 'param
   const publica = hemocentros.length > 0
   const criticos = TIPOS_SANGUINEOS.filter((tipo) => nivelPorUF(hemocentros, tipo)[uf] === 'critico')
   const site = hemocentros.map((h) => SITES_HEMOCENTROS[h.id]).find(Boolean)
-  const outros = todos
-    .filter((h) => h.uf !== uf)
-    .map((h) => ({ uf: h.uf as UF, criticos: tiposCriticos(h.estoque).length }))
+  // Um item por estado: SP tem sete hemocentros e apareceria sete vezes.
+  const outros = ufsQuePublicam
+    .filter((outra) => outra !== uf)
+    .map((outra) => ({
+      uf: outra as UF,
+      criticos: TIPOS_SANGUINEOS.filter((tipo) => nivelPorUF(todos, tipo)[outra as UF] === 'critico').length,
+    }))
     .sort((a, b) => b.criticos - a.criticos)
 
   let resumo: string
@@ -134,7 +138,7 @@ async function ConteudoEstado({ params }: Pick<PageProps<'/estado/[uf]'>, 'param
             <h2 id={`hemocentro-${hemocentro.id}`}>
               {hemocentro.nome}, {hemocentro.cidade}
             </h2>
-            <GradeTipos estoque={hemocentro.estoque} variante="grande" />
+            <GradeTipos estoque={hemocentro.estoque} bolsas={hemocentro.bolsas} variante="grande" />
             <div className="caixa secao">
               <h3 className="titulo" style={{ fontSize: 'var(--text-xl)' }}>
                 Dias em nível crítico
