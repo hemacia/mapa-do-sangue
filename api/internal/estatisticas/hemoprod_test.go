@@ -90,18 +90,76 @@ func TestSiglaDaUF(t *testing.T) {
 	}
 }
 
-func TestGerarMigrationTemAs27UFsENullParaQuemNaoEnviou(t *testing.T) {
-	populacao := map[string]int{}
+func TestGerarMigrationTemAs27UFsPorAnoENullParaQuemNaoEnviou(t *testing.T) {
+	populacao := map[int]map[string]int{2024: {}, 2025: {}}
 	for _, uf := range UFs {
-		populacao[uf] = 1000
+		populacao[2024][uf], populacao[2025][uf] = 1000, 1100
 	}
+	totais := Totais{2025: {"SP": {"coletas": 50, "primeira_vez": 20}}}
 
-	sql := GerarMigration(2024, map[string]int{"SP": 50}, populacao)
+	sql := GerarMigration(totais, populacao)
 
-	if !strings.HasPrefix(sql, "-- +goose Up\n") || !strings.Contains(sql, "-- +goose Down\nDELETE FROM estatisticas_uf WHERE ano = 2024;") {
+	if !strings.HasPrefix(sql, "-- +goose Up\n") || !strings.Contains(sql, "-- +goose Down\nDELETE FROM indicadores_uf WHERE ano IN (2024, 2025);") {
 		t.Errorf("sql sem goose up/down:\n%s", sql)
 	}
-	if strings.Count(sql, "  ('") != 27 || !strings.Contains(sql, "('SP', 2024, 50, 1000)") || !strings.Contains(sql, "('RJ', 2024, NULL, 1000)") {
-		t.Errorf("valores errados:\n%s", sql)
+	for _, trecho := range []string{"('SP', 2025, 50, 1100)", "('SP', 2024, NULL, 1000)", "('SP', 2025, 'primeira_vez', 20)", "ON CONFLICT (uf, ano) DO UPDATE"} {
+		if !strings.Contains(sql, trecho) {
+			t.Errorf("faltou %s:\n%s", trecho, sql)
+		}
 	}
+	if strings.Count(sql, "', 202") != 54+1 {
+		t.Errorf("quero 54 linhas de coletas e 1 de indicador:\n%s", sql)
+	}
+}
+
+func TestAgregarPorUFSomaCadaIndicadorPorAno(t *testing.T) {
+	cabecalho := "Data de envio;Ano de referência;Período de referência;Razão Social - Nome Fantasia;CNPJ;Unidade Federativa;" +
+		"2.2 Total de candidatos quanto ao tipo de doador  [Primeira vez][Aptos];4.2 Imunohematologia [O-][Doador]"
+	csv := strings.Join([]string{cabecalho,
+		"2025-02-01;2025;Janeiro;Hemo A;1;Bahia;10;3",
+		"2025-03-01;2025;Fevereiro;Hemo A;1;Bahia;5;",
+		"2024-02-01;2024;Janeiro;Hemo A;1;Bahia;7;1",
+	}, "\n")
+
+	totais, err := AgregarPorUF(strings.NewReader(csv), []int{2024, 2025},
+		map[string][]string{"primeira_vez": {"[Primeira vez][Aptos]"}, "tipo_O-": {"[O-][Doador]"}})
+
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := totais[2025]["BA"]; got["primeira_vez"] != 15 || got["tipo_O-"] != 3 {
+		t.Errorf("2025 = %v", got)
+	}
+	if got := totais[2024]["BA"]["primeira_vez"]; got != 7 {
+		t.Errorf("2024 = %d", got)
+	}
+}
+
+func TestAgregarPorUFRecusaTrechoQueCasaDuasColunas(t *testing.T) {
+	cabecalho := "Data de envio;Ano de referência;Período de referência;Razão Social - Nome Fantasia;CNPJ;Unidade Federativa;2.2 [A][Aptos];2.3 [A][Aptos]"
+
+	_, err := AgregarPorUF(strings.NewReader(cabecalho), []int{2025}, map[string][]string{"x": {"[A][Aptos]"}})
+
+	if err == nil || !strings.Contains(err.Error(), "mais de uma coluna") {
+		t.Errorf("erro = %v", err)
+	}
+}
+
+func TestSomaCadaLinhaAgregadaDaAnvisaSemDeduplicar(t *testing.T) {
+	cabecalho := "ID da resposta;Data de envio;Ano de referência;Período de referência;Razão Social - Nome Fantasia;CNPJ;Unidade Federativa;" +
+		"3.3\u00a0Total de coletas [Sangue total];3.3\u00a0Total de coletas [Por aférese]"
+	csv := strings.Join([]string{cabecalho,
+		"0;0;2025;Consolidado;Rede de serviços;0;Rio de Janeiro;80327;0",
+		"0;0;2025;Consolidado;Rede de serviços;0;Rio de Janeiro;76055;10",
+		"7;2026-01-10;2025;Consolidado;Hemo B;1;Rio de Janeiro;5;0",
+		"8;2026-02-10;2025;Consolidado;Hemo B;1;Rio de Janeiro;6;0",
+	}, "\n")
+
+	got, err := AgregarColetasPorUF(strings.NewReader(csv), 2025)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+	// As duas linhas de ID 0 somam; o Hemo B reenviou e vale só o último envio.
+	quero(t, got, map[string]int{"RJ": 80327 + 76055 + 10 + 6})
 }

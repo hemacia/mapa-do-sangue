@@ -6,6 +6,7 @@ import (
 	"encoding/csv"
 	"fmt"
 	"io"
+	"maps"
 	"slices"
 	"strconv"
 	"strings"
@@ -41,6 +42,7 @@ func SiglaDaUF(nome string) string {
 
 // Colunas do CSV, localizadas pelo nome. Nas de coletas, o espaço depois de "3.3" é um NBSP.
 const (
+	colID          = "ID da resposta"
 	colEnvio       = "Data de envio"
 	colAno         = "Ano de referência"
 	colPeriodo     = "Período de referência"
@@ -51,7 +53,66 @@ const (
 	colUF          = "Unidade Federativa"
 )
 
+// Indicadores por UF: cada um soma as colunas cujo nome contém um dos trechos (um trecho, uma coluna).
+// Os doadores contam só os candidatos aptos, que são os que de fato doaram.
+var Indicadores = map[string][]string{
+	"coletas":       {colSangueTotal, colAferese},
+	"primeira_vez":  {"[Primeira vez][Aptos]"},
+	"repeticao":     {"[Repetição][Aptos]"},
+	"esporadico":    {"[Esporádico][Aptos]"},
+	"espontanea":    {"[Espontânea][Aptos]"},
+	"reposicao":     {"[Reposição][Aptos]"},
+	"feminino":      {"[Feminino][Aptos]"},
+	"masculino":     {"[Masculino][Aptos]"},
+	"ate_29_anos":   {"[Menor de 18 anos][Aptos]", "[18 até 29 anos][Aptos]"},
+	"acima_29_anos": {"[Acima de 29 anos][Aptos]"},
+	"inaptos":       {"[Primeira vez][Inaptos]", "[Repetição][Inaptos]", "[Esporádico][Inaptos]"},
+	"tipo_A+":       {"Imunohematologia [A+][Doador]"},
+	"tipo_A-":       {"Imunohematologia [A-][Doador]"},
+	"tipo_B+":       {"Imunohematologia [B+][Doador]"},
+	"tipo_B-":       {"Imunohematologia [B-][Doador]"},
+	"tipo_AB+":      {"Imunohematologia [AB+][Doador]"},
+	"tipo_AB-":      {"Imunohematologia [AB-][Doador]"},
+	"tipo_O+":       {"Imunohematologia [O+][Doador]"},
+	"tipo_O-":       {"Imunohematologia [O-][Doador]"},
+}
+
+// Totais por ano, UF e indicador. Uma UF só aparece no ano em que algum estabelecimento dela enviou dados.
+type Totais map[int]map[string]map[string]int
+
 func AgregarColetasPorUF(r io.Reader, ano int) (map[string]int, error) {
+	totais, err := AgregarPorUF(r, []int{ano}, map[string][]string{"coletas": Indicadores["coletas"]})
+	if err != nil {
+		return nil, err
+	}
+	coletas := map[string]int{}
+	for uf, ind := range totais[ano] {
+		coletas[uf] = ind["coletas"]
+	}
+	return coletas, nil
+}
+
+func localizarColuna(cabecalho []string, trecho string) (int, error) {
+	// "Razão Social - Nome Fantasia" também é o começo de "Razão Social - Nome Fantasia  [Outros]".
+	if i := slices.Index(cabecalho, trecho); i >= 0 {
+		return i, nil
+	}
+	encontrada := -1
+	for i, nome := range cabecalho {
+		if strings.Contains(nome, trecho) {
+			if encontrada >= 0 {
+				return 0, fmt.Errorf("mais de uma coluna com %q", trecho)
+			}
+			encontrada = i
+		}
+	}
+	if encontrada < 0 {
+		return 0, fmt.Errorf("coluna não encontrada: %s", trecho)
+	}
+	return encontrada, nil
+}
+
+func AgregarPorUF(r io.Reader, anos []int, indicadores map[string][]string) (Totais, error) {
 	leitor := bufio.NewReader(r)
 	if bom, _ := leitor.Peek(3); string(bom) == "\xef\xbb\xbf" {
 		_, _ = leitor.Discard(3)
@@ -67,29 +128,46 @@ func AgregarColetasPorUF(r io.Reader, ano int) (map[string]int, error) {
 		return nil, fmt.Errorf("CSV vazio")
 	}
 	col := map[string]int{}
-	for _, nome := range []string{colEnvio, colAno, colPeriodo, colNome, colCNPJ, colSangueTotal, colAferese, colUF} {
-		i := slices.Index(linhas[0], nome)
-		if i < 0 {
-			return nil, fmt.Errorf("coluna não encontrada: %s", nome)
+	for _, nome := range []string{colEnvio, colAno, colPeriodo, colNome, colCNPJ, colUF} {
+		if col[nome], err = localizarColuna(linhas[0], nome); err != nil {
+			return nil, err
 		}
-		col[nome] = i
 	}
-	campo := func(linha []string, nome string) string {
-		if col[nome] < len(linha) {
-			return linha[col[nome]]
+	col[colID] = slices.Index(linhas[0], colID) // opcional: os testes antigos não têm
+	colunasDe := map[string][]int{}
+	for indicador, trechos := range indicadores {
+		for _, trecho := range trechos {
+			i, err := localizarColuna(linhas[0], trecho)
+			if err != nil {
+				return nil, err
+			}
+			colunasDe[indicador] = append(colunasDe[indicador], i)
+		}
+	}
+	campo := func(linha []string, i int) string {
+		if i < len(linha) {
+			return linha[i]
 		}
 		return ""
 	}
-	estabelecimento := func(linha []string) string { return campo(linha, colCNPJ) + "|" + campo(linha, colNome) }
+	estabelecimento := func(linha []string) string {
+		return campo(linha, col[colAno]) + "|" + campo(linha, col[colCNPJ]) + "|" + campo(linha, col[colNome])
+	}
 
 	// Retificações e duplicatas: vale o envio mais recente de cada estabelecimento e período.
 	ultimoEnvio := map[string][]string{}
-	for _, linha := range linhas[1:] {
-		if campo(linha, colAno) != strconv.Itoa(ano) {
+	for n, linha := range linhas[1:] {
+		ano, _ := strconv.Atoi(campo(linha, col[colAno]))
+		if !slices.Contains(anos, ano) {
 			continue
 		}
-		chave := estabelecimento(linha) + "|" + campo(linha, colPeriodo)
-		if anterior, ok := ultimoEnvio[chave]; !ok || campo(linha, colEnvio) > campo(anterior, colEnvio) {
+		chave := estabelecimento(linha) + "|" + campo(linha, col[colPeriodo])
+		// ID 0 é linha agregada pela própria Anvisa (o RJ manda a rede inteira assim, 18 linhas com o
+		// mesmo nome "Rede de serviços"): não é reenvio, então cada linha vale por si.
+		if col[colID] >= 0 && campo(linha, col[colID]) == "0" {
+			chave += "|linha " + strconv.Itoa(n)
+		}
+		if anterior, ok := ultimoEnvio[chave]; !ok || campo(linha, col[colEnvio]) > campo(anterior, col[colEnvio]) {
 			ultimoEnvio[chave] = linha
 		}
 	}
@@ -97,44 +175,75 @@ func AgregarColetasPorUF(r io.Reader, ano int) (map[string]int, error) {
 	// SP, RJ e MG mandam um "Consolidado" anual: quando existe, os meses são ignorados.
 	comConsolidado := map[string]bool{}
 	for _, linha := range ultimoEnvio {
-		if campo(linha, colPeriodo) == "Consolidado" {
+		if campo(linha, col[colPeriodo]) == "Consolidado" {
 			comConsolidado[estabelecimento(linha)] = true
 		}
 	}
 
-	total := map[string]int{}
+	totais := Totais{}
 	for _, linha := range ultimoEnvio {
-		if comConsolidado[estabelecimento(linha)] && campo(linha, colPeriodo) != "Consolidado" {
+		if comConsolidado[estabelecimento(linha)] && campo(linha, col[colPeriodo]) != "Consolidado" {
 			continue
 		}
-		uf := SiglaDaUF(campo(linha, colUF))
+		uf := SiglaDaUF(campo(linha, col[colUF]))
 		if uf == "" {
 			continue
 		}
-		sangue, _ := strconv.Atoi(strings.TrimSpace(campo(linha, colSangueTotal))) // vazio conta como zero
-		aferese, _ := strconv.Atoi(strings.TrimSpace(campo(linha, colAferese)))
-		total[uf] += sangue + aferese
+		ano, _ := strconv.Atoi(campo(linha, col[colAno]))
+		if totais[ano] == nil {
+			totais[ano] = map[string]map[string]int{}
+		}
+		if totais[ano][uf] == nil {
+			totais[ano][uf] = map[string]int{}
+		}
+		for indicador, colunas := range colunasDe {
+			for _, i := range colunas {
+				n, _ := strconv.Atoi(strings.TrimSpace(campo(linha, i))) // vazio conta como zero
+				totais[ano][uf][indicador] += n
+			}
+		}
 	}
-	return total, nil
+	return totais, nil
 }
 
-// GerarMigration monta a migration goose com uma linha por UF; NULL = estado sem nenhum envio no ano.
-func GerarMigration(ano int, coletas, populacao map[string]int) string {
+// GerarMigration monta a migration goose com as coletas e a população de cada UF em cada ano
+// (NULL = estado sem nenhum envio) e os indicadores dos doadores. Reaplicar atualiza os valores.
+func GerarMigration(totais Totais, populacao map[int]map[string]int) string {
+	anos := slices.Sorted(maps.Keys(populacao))
+	listaAnos := strings.Trim(strings.Join(strings.Fields(fmt.Sprint(anos)), ", "), "[]")
 	var sql strings.Builder
-	fmt.Fprintf(&sql, "-- +goose Up\n-- Coletas (sangue total + aférese): Anvisa, Hemoprod %d. População: IBGE, estimativa %d.\n", ano, ano)
+	fmt.Fprintf(&sql, "-- +goose Up\n-- Anvisa, Hemoprod %s, e população estimada pelo IBGE.\n", listaAnos)
 	sql.WriteString("-- Gerado por api/cmd/estatisticas. NULL = estado sem nenhum envio no ano.\n")
 	sql.WriteString("INSERT INTO estatisticas_uf (uf, ano, coletas, populacao) VALUES\n")
-	for i, uf := range UFs {
-		valor := "NULL"
-		if c, ok := coletas[uf]; ok {
-			valor = strconv.Itoa(c)
+	var linhas []string
+	for _, ano := range anos {
+		for _, uf := range UFs {
+			valor := "NULL"
+			if ind, ok := totais[ano][uf]; ok {
+				valor = strconv.Itoa(ind["coletas"])
+			}
+			linhas = append(linhas, fmt.Sprintf("  ('%s', %d, %s, %d)", uf, ano, valor, populacao[ano][uf]))
 		}
-		separador := ",\n"
-		if i == len(UFs)-1 {
-			separador = ";\n"
-		}
-		fmt.Fprintf(&sql, "  ('%s', %d, %s, %d)%s", uf, ano, valor, populacao[uf], separador)
 	}
-	fmt.Fprintf(&sql, "\n-- +goose Down\nDELETE FROM estatisticas_uf WHERE ano = %d;\n", ano)
+	sql.WriteString(strings.Join(linhas, ",\n"))
+	sql.WriteString("\nON CONFLICT (uf, ano) DO UPDATE SET coletas = EXCLUDED.coletas, populacao = EXCLUDED.populacao;\n\n")
+
+	linhas = nil
+	for _, ano := range anos {
+		for _, uf := range UFs {
+			ind := totais[ano][uf]
+			for _, nome := range slices.Sorted(maps.Keys(ind)) {
+				if nome != "coletas" {
+					linhas = append(linhas, fmt.Sprintf("  ('%s', %d, '%s', %d)", uf, ano, nome, ind[nome]))
+				}
+			}
+		}
+	}
+	if len(linhas) > 0 {
+		sql.WriteString("INSERT INTO indicadores_uf (uf, ano, indicador, valor) VALUES\n")
+		sql.WriteString(strings.Join(linhas, ",\n"))
+		sql.WriteString(";\n")
+	}
+	fmt.Fprintf(&sql, "\n-- +goose Down\nDELETE FROM indicadores_uf WHERE ano IN (%s);\nDELETE FROM estatisticas_uf WHERE ano IN (%s);\n", listaAnos, listaAnos)
 	return sql.String()
 }

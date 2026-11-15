@@ -1,7 +1,7 @@
-// Comando estatisticas: gera migrations/00003_estatisticas_<ano>.sql com as coletas da Anvisa
-// (Hemoprod) e a população do IBGE.
+// Comando estatisticas: gera uma migration com as coletas e os indicadores dos doadores
+// da Anvisa (Hemoprod) e a população do IBGE, para os anos pedidos.
 //
-// Uso: go run ./cmd/estatisticas caminho/hemoprod_nacional.csv [ano]
+// Uso: go run ./cmd/estatisticas caminho/hemoprod_nacional.csv migrations/<arquivo>.sql 2023 2024 2025
 // CSV: https://www.gov.br/anvisa/pt-br/centraisdeconteudo/publicacoes/sangue-tecidos-celulas-e-orgaos/producao-e-avaliacao-de-servicos-de-hemoterapia/dados-brutos-de-producao-hemoterapica
 package main
 
@@ -26,35 +26,37 @@ func main() {
 }
 
 func executar(args []string) error {
-	if len(args) == 0 {
-		return errors.New("informe o caminho do CSV do Hemoprod")
+	if len(args) < 3 {
+		return errors.New("uso: estatisticas hemoprod_nacional.csv migrations/00008_estatisticas.sql 2023 2024 2025")
 	}
-	ano := 2024
-	if len(args) > 1 {
-		var err error
-		if ano, err = strconv.Atoi(args[1]); err != nil {
-			return fmt.Errorf("ano inválido: %s", args[1])
+	var anos []int
+	for _, a := range args[2:] {
+		ano, err := strconv.Atoi(a)
+		if err != nil {
+			return fmt.Errorf("ano inválido: %s", a)
 		}
+		anos = append(anos, ano)
 	}
 	arquivo, err := os.Open(args[0]) //nolint:gosec // ferramenta local: o caminho vem de quem roda
 	if err != nil {
 		return err
 	}
 	defer func() { _ = arquivo.Close() }()
-	coletas, err := estatisticas.AgregarColetasPorUF(arquivo, ano)
+	totais, err := estatisticas.AgregarPorUF(arquivo, anos, estatisticas.Indicadores)
 	if err != nil {
 		return err
 	}
-	populacao, err := populacaoIBGE(ano)
-	if err != nil {
-		return fmt.Errorf("população do IBGE: %w", err)
+	populacao := map[int]map[string]int{}
+	for _, ano := range anos {
+		if populacao[ano], err = populacaoIBGE(ano); err != nil {
+			return fmt.Errorf("população do IBGE em %d: %w", ano, err)
+		}
 	}
-	destino := fmt.Sprintf("migrations/00003_estatisticas_%d.sql", ano)
-	if err := os.WriteFile(destino, //nolint:gosec // destino fixo em migrations/
-		[]byte(estatisticas.GerarMigration(ano, coletas, populacao)), 0o600); err != nil {
+	if err := os.WriteFile(args[1], //nolint:gosec // ferramenta local: o destino vem de quem roda
+		[]byte(estatisticas.GerarMigration(totais, populacao)), 0o600); err != nil {
 		return err
 	}
-	fmt.Println("gravado em", destino)
+	fmt.Println("gravado em", args[1])
 	return nil
 }
 
