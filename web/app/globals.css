@@ -1283,7 +1283,8 @@ h3 {
 }
 
 @container (max-width: 560px) {
-  .placas {
+  .placas,
+  .placas-linhas {
     display: none;
   }
   .lista-placas {
