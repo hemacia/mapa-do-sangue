@@ -57,6 +57,7 @@ var Fontes = []Fonte{
 	{ID: "rp-fernandopolis", URL: pubchartRP + "1071427317", ler: lerPubchart},
 	{ID: "rp-prudente", URL: pubchartRP + "2092834388", ler: lerPubchart},
 	{ID: "rp-taubate", URL: pubchartRP + "796405016", ler: lerPubchart},
+	{ID: "hemoacre", URL: "https://www.ac.gov.br/", ler: lerHemoacre},
 	{ID: "hemosul", URL: "https://" + servidorHemosul + "/extensions/EstoqueHemosul/EstoqueHemosul.html", ler: lerHemosul, obter: obterHemosul},
 }
 
@@ -369,4 +370,22 @@ func desescaparJS(texto string) string {
 func atoi(texto string) int {
 	n, _ := strconv.Atoi(texto) // só recebe dígitos casados pela regex
 	return n
+}
+
+// O estoque do Hemoacre fica na home do portal do governo do Acre, sem data.
+// A legenda põe "Estável" acima de "Adequado", como na Hemominas.
+func lerHemoacre(html string, _ time.Time) (Resultado, error) {
+	doc, err := documento(html)
+	if err != nil {
+		return Resultado{}, err
+	}
+	var leituras []Leitura
+	doc.Find(".hemocentro-estoque .col").Each(func(_ int, cartao *goquery.Selection) {
+		tipo, okTipo := normalizarTipo(cartao.Find(".fw-bold").First().Text())
+		nivel, okNivel := normalizarNivel(cartao.Find(".nivel .badge small").Text(), escalaHemominas)
+		if okTipo && okNivel {
+			leituras = append(leituras, Leitura{tipo, nivel})
+		}
+	})
+	return comLeituras("Hemoacre", leituras, "")
 }

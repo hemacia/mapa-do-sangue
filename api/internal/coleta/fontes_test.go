@@ -224,9 +224,25 @@ func TestRibeiraoPretoFalhaSemOGrafico(t *testing.T) {
 	}
 }
 
+func TestHemoacreLeOsOitoTiposComAEscalaInvertida(t *testing.T) {
+	r := ler(t, "hemoacre")
+
+	// Na legenda do Acre, Estável é o melhor nível e Adequado vem logo abaixo.
+	querLeituras(t, r, 8, Leitura{"O-", httpapi.Critico}, Leitura{"A-", httpapi.Alerta},
+		Leitura{"AB-", httpapi.Adequado}, Leitura{"B+", httpapi.Estavel})
+}
+
+func TestHemoacreFalhaSemOBlocoDeEstoque(t *testing.T) {
+	_, err := lerHemoacre("<html><body>Portal do Acre</body></html>", coletadoEm)
+
+	if err == nil || !strings.Contains(err.Error(), "Hemoacre") {
+		t.Errorf("erro = %v", err)
+	}
+}
+
 func TestCadaFonteTemCadastroNaMigration(t *testing.T) {
 	var cadastros strings.Builder
-	for _, arquivo := range []string{"00002_fontes_iniciais.sql", "00004_fontes_sao_paulo.sql", "00005_hemosul.sql"} {
+	for _, arquivo := range []string{"00002_fontes_iniciais.sql", "00004_fontes_sao_paulo.sql", "00005_hemosul.sql", "00011_hemoacre.sql"} {
 		migration, err := os.ReadFile("../../migrations/" + arquivo)
 		if err != nil {
 			t.Fatal(err)

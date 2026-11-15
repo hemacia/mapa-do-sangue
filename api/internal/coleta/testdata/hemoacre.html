@@ -1,0 +1,1875 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/png" href="https://www.ac.gov.br/assets/images/brasao.png">
+    <meta name="viewport" content="width=device-width, user-scalable=no">
+    <meta name="csrf-token" content="FnQnvaDw6I2rkDaEnEEMvPfbzO4XjtTnPWj87zu1">
+    <meta name="max-snippet:-1" content="max-snippet:-1">
+
+            <title>Portal de Serviços do Estado do Acre</title>
+        <meta name="title" content="Portal de Serviços do Estado do Acre">
+    
+            <meta name="description" content="Portal de Serviços do Governo do Estado do Acre">
+    
+    
+    
+    <link href="https://www.ac.gov.br/assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://www.ac.gov.br/assets/vendor/animate/animate.min.css">
+    <link rel="stylesheet" href="https://www.ac.gov.br/assets/css/all.css">
+    <link rel="stylesheet" href="https://www.ac.gov.br/assets/css/ghost.css">
+
+    <link rel="stylesheet" href="https://www.ac.gov.br/assets/css/jquery.flexdatalist.min.css">
+    <link rel="stylesheet" href=" https://www.ac.gov.br/assets/css/lista_servicos.css ">
+    <link rel="stylesheet" href=" https://www.ac.gov.br/assets/css/nav.css ">
+    <link rel="stylesheet" href="https://www.ac.gov.br/assets/css/layout.css?v=0.0.3">
+    <link rel="stylesheet" href="https://www.ac.gov.br/assets/css/asb.css">
+    <base href="https://www.ac.gov.br/">
+        <link rel="stylesheet" href="https://www.ac.gov.br/assets/css/simplifique/avaliacao-simplifique.css">
+        <link rel="stylesheet" href="https://www.ac.gov.br/assets/css/inicio.css">
+    <style>
+        /* Adicionar foco e hover aos links FOCO EM TUDO ACESSIBILIDADE */
+        a:focus, a:hover {
+            border: 1px solid rgba(255, 255, 255, 0) !important;
+        }
+
+        #input_pesquisa {
+            position: relative;
+        }
+
+        .satisfacao-usuario-botao {
+            border-radius: 999px;
+            color: #fff;
+            padding: 0.65rem 1.35rem;
+            background-color: transparent;
+            border-width: 1px;
+            font-weight: 600;
+        }
+
+        a.satisfacao-usuario-botao:hover,
+        a.satisfacao-usuario-botao:focus-visible {
+            background-color: #fff;
+            color: var(--cor-principal) !important;
+            border-color: #fff !important;
+        }
+    </style>
+        <link rel="stylesheet" href="https://www.ac.gov.br/assets/css/hemocentro/estoque.css">
+    
+    <link rel="stylesheet" href="https://www.ac.gov.br/assets/css/central/notificacoes.css">
+
+</head>
+
+<body class="bg-white  ">
+<noscript>
+    <div class="container-app">
+        <div class="container app-table-app">
+            <div class="text-center text-danger">
+                <span hidden>.</span>
+                <i class="fad fa-exclamation display-1">.</i>
+            </div>
+            <span class="text-center text-danger">
+                    Seu navegador não suporta JavaScript<br>ou está com o JavaScript desabilitado.
+                </span>
+            <p class="text-center pt-5">
+                Clique sobre o ícone do seu navegador e veja como habilitar JavaScript
+            </p>
+            <div class="row justify-content-center">
+                <div class="col-md-6">
+                    <div class="row text-center">
+                        <div class="col-6 col-md-4">
+                            <a>
+                                <i class="fab fa-chrome display-3">.</i>
+                                <span>Google Chrome</span>
+                            </a>
+                        </div>
+                        <div class="col-6 col-md-4">
+                            <a href="https://support.mozilla.org/pt-BR/kb/configuracoes-de-javascript-em-paginas-interativas#w_permita-ou-bloqueie-javascript-em-determinados-sites">
+                                <i class="fab fa-firefox-browser display-3">.</i>
+                                <div>Mozilla Firefox</div>
+                            </a>
+                        </div>
+                        <div class="col-6 col-md-4">
+                            <a href="https://aboutjavascript.com/pt-PT/how-to-enable-javascript-in-opera.html">
+                                <i class="fab fa-opera display-3">.</i>
+                                <div>Opera</div>
+                            </a>
+                        </div>
+                        <div class="col-6 col-md-4">
+                            <a href="https://aboutjavascript.com/pt-PT/how-to-enable-javascript-in-safari.html">
+                                <i class="fab fa-safari display-3">.</i>
+                                <div>Safari</div>
+                            </a>
+                        </div>
+                        <div class="col-6 col-md-4">
+                            <a href="https://support.microsoft.com/pt-br/office/habilitar-javascript-7bb9ee74-6a9e-4dd1-babf-b0a1bb136361#__toc325669868"
+                               alt="microsoft edge">
+                                <i class="fab fa-edge display-3">.</i>
+                                <div>Microsoft Edge</div>
+                            </a>
+                        </div>
+                        <div class="col-6 col-md-4">
+                            <a href="https://support.microsoft.com/pt-br/office/habilitar-javascript-7bb9ee74-6a9e-4dd1-babf-b0a1bb136361"
+                               alt="microsoft explore">
+                                <i class="fab fa-edge-legacy display-3">.</i>
+                                <div>Internet Explorer</div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</noscript>
+
+
+
+<header class="top_bar">
+    <div class="container">
+        <div class="top_menu">
+            <div class="top_logo">
+                
+                ac.gov.br
+            </div>
+            <div class="nav_top">
+                <div class="brasao-seplag">
+                    <ul>
+                                                <li>
+                            <a class="abrir-em-nova-aba" href="https://www.ac.gov.br/">SERVIÇOS</a>
+                            <div id="https://www.ac.gov.br/" hidden></div>
+                        </li>
+                                                <li>
+                            <a class="abrir-em-nova-aba" href="http://esic.ac.gov.br/">ACESSO À INFORMAÇÃO</a>
+                            <div id="http://esic.ac.gov.br/" hidden></div>
+                        </li>
+                                                <li>
+                            <a class="abrir-em-nova-aba" href="http://www.diario.ac.gov.br/">DIÁRIO OFICIAL</a>
+                            <div id="http://www.diario.ac.gov.br/" hidden></div>
+                        </li>
+                                                <li>
+                            <a class="abrir-em-nova-aba" href="http://www.legis.ac.gov.br/">LEGIS</a>
+                            <div id="http://www.legis.ac.gov.br/" hidden></div>
+                        </li>
+                                                <li>
+                            <a class="abrir-em-nova-aba" href="http://estado.ac.gov.br/orgao-entidades/">ÓRGÃOS E ENTIDADES</a>
+                            <div id="http://estado.ac.gov.br/orgao-entidades/" hidden></div>
+                        </li>
+                                                <li>
+                            <a class="abrir-em-nova-aba" href="http://transparencia.ac.gov.br/">PORTAL DA TRANSPARÊNCIA</a>
+                            <div id="http://transparencia.ac.gov.br/" hidden></div>
+                        </li>
+                                            </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <div class="container">
+        <div class="d-flex align-items-center">
+            <div class="dropdown">
+                <a class="navbar-brand d-flex px-0 py-0 dropdown-toggle" id="actionMenuTop"
+                   data-bs-toggle="dropdown" aria-expanded="false" role="button"
+                   aria-controls="offcanvasExample" aria-label="Menu do sistema">
+                    <span hidden>Menu do sistema</span>
+                    <i class="fa-solid fa-bars" aria-hidden="true"></i>
+                </a>
+                <ul class="dropdown-menu accordion accordion-flush menu-header-lateral" id="accordion-menu-top">
+                                            <li class="accordion-item">
+                            <a class="accordion-button collapsed "
+                               class=&quot;abrir-em-nova-aba&quot;
+                               href="http://estado.ac.gov.br"
+                                    >
+                                Portal do Governo
+                            </a>
+                                                    </li>
+                                            <li class="accordion-item">
+                            <a class="accordion-button collapsed has-sub"
+                               
+                               href="javascript:void(0)"
+                                    data-bs-toggle="collapse" data-bs-target="#menuprincipal-9" aria-expanded="false" aria-controls="menuprincipal-9">
+                                Serviços
+                            </a>
+                                                            <div id="menuprincipal-9" class="accordion-collapse collapse"
+                                     data-bs-parent="#accordion-menu-top">
+                                                                            <a href="http://www.ac.gov.br/modalidades/servicos"
+                                            class="accordion-button">Por Modalidade</a>
+                                                                            <a href="http://www.ac.gov.br/categorias"
+                                            class="accordion-button">Por Categoria</a>
+                                                                    </div>
+                                                    </li>
+                                            <li class="accordion-item">
+                            <a class="accordion-button collapsed has-sub"
+                               
+                               href="#!"
+                                    data-bs-toggle="collapse" data-bs-target="#menuprincipal-16" aria-expanded="false" aria-controls="menuprincipal-16">
+                                Documentação
+                            </a>
+                                                            <div id="menuprincipal-16" class="accordion-collapse collapse"
+                                     data-bs-parent="#accordion-menu-top">
+                                                                            <a href="https://legis.ac.gov.br/detalhar/5997"
+                                           class="abrir-em-nova-aba accordion-button" class="accordion-button">Estratégia de Governo Digital - EGD</a>
+                                                                            <a href="https://estado.ac.gov.br/wp-content/uploads/2025/04/Painel-de-Monitoramento-da-Estrategia-de-Governo-Digital-2024–2027.pdf"
+                                           class="abrir-em-nova-aba accordion-button" class="accordion-button">Monitoramento da Estratégia de Governo Digital</a>
+                                                                            <a href="https://estado.ac.gov.br/wp-content/uploads/2025/05/Manual_de_Carta_de_Servicos.pdf"
+                                           class="abrir-em-nova-aba accordion-button" class="accordion-button">Manual de Produção da Carta de Serviços</a>
+                                                                            <a href="https://estado.ac.gov.br/wp-content/uploads/2025/07/guia_linguagem_simples_acre_digital.pdf"
+                                           class="abrir-em-nova-aba accordion-button" class="accordion-button">Guia de Linguagem Simples</a>
+                                                                            <a href="https://estado.ac.gov.br/wp-content/uploads/2026/04/Manual-de-Mapeamento-de-Servicos.pdf"
+                                           class="abrir-em-nova-aba accordion-button" class="accordion-button">Guia de Mapeamento de Serviços</a>
+                                                                    </div>
+                                                    </li>
+                                            <li class="accordion-item">
+                            <a class="accordion-button collapsed "
+                               
+                               href="https://www.ac.gov.br/oca"
+                                    >
+                                OCA
+                            </a>
+                                                    </li>
+                                            <li class="accordion-item">
+                            <a class="accordion-button collapsed "
+                               
+                               href="https://www.ac.gov.br/cass"
+                                    >
+                                CASS
+                            </a>
+                                                    </li>
+                                            <li class="accordion-item">
+                            <a class="accordion-button collapsed "
+                               
+                               href="/conteudo/aplicativo"
+                                    >
+                                Aplicativo Meu Ac
+                            </a>
+                                                    </li>
+                                            <li class="accordion-item">
+                            <a class="accordion-button collapsed "
+                               
+                               href="/termo-de-uso"
+                                    >
+                                Termos de Uso
+                            </a>
+                                                    </li>
+                                            <li class="accordion-item">
+                            <a class="accordion-button collapsed "
+                               
+                               href="/conteudo/sobre-o-acgov"
+                                    >
+                                Sobre o ac.gov.br
+                            </a>
+                                                    </li>
+                                    </ul>
+            </div>
+            <a class="navbar-brand ms-0" href="https://www.ac.gov.br">
+                <img class="img-fluid" width="150px" src="https://www.ac.gov.br/assets/images/logo_ext.png" alt="Início do sistema">
+            </a>
+        </div>
+        <div class="collapse navbar-collapse" id="navbarsExample07">
+            <ul class="navbar-nav pt-2 mb-2 mb-lg-0 align-items-center">
+                                    <li class="nav-item">
+                        <a class="nav-link link_header" href="https://estado.ac.gov.br/" >Portal do Governo</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link link_header" href="#modalidades">Serviços por Modalidade</a>
+                    </li>
+                    <li class="nav-item me-5">
+                        <a class="nav-link link_header" href="#categorias-navegar">
+                            Serviços por Categoria
+                        </a>
+                    </li>
+                
+
+                                        <li class="nav-item">
+                                                            <a href="https://acl.ac.gov.br/login/ecidadao"
+                                   class="nav-link btn btn-primary text-white">
+                                    Entrar <i class="ms-2 fa-solid fa-circle-user" aria-hidden="true"><span hidden> no sistema</span></i>
+                                </a>
+                                                    </li>
+                            </ul>
+        </div>
+    </div>
+</nav>
+
+
+<div class="container principal ">
+                        <div class="back_top"><span hidden>Voltar ao topo</span></div>
+    <div class="container container_geral" data-dev-status="concluido">
+        <div class="row position-relative marging-top-mobile pt-4">
+            <div class="col-md-12 col-sm-12 d-md-block position-relative">
+                <div class="row justify-content-center text-center" id="titulo_pesquisa">
+                    <h1 class="fonte-32" id="titulo_principal" alt="Título do sistema"
+                        aria-labelledby="titulo_principal">Serviços on-line ao cidadão em um só lugar</h1>
+                </div>
+                <div class="row mb-3">
+                    
+                </div>
+
+                <div class="col-7 mx-auto justify-content-center">
+                    <form action="https://www.ac.gov.br/modalidades/servicos" method="GET" id="form_pesquisa_servico"
+                          autocomplete="off">
+                        <fieldset>
+                            <legend class="visually-hidden">Pesquisa de serviços</legend>
+
+                            <div class="input-group mb-3 position-relative" id="input_pesquisa">
+                                <label for="campo_pesquisa" class="visually-hidden">Pesquisar</label>
+
+                                <input
+                                    type="text"
+                                    name="s"
+                                    id="campo_pesquisa"
+                                    class="form-control pesquisa_servico"
+                                    placeholder="Pesquise serviços aqui..."
+                                    aria-label="Pesquise serviços aqui..."
+                                >
+
+                                <button type="submit" class="input-group-text lupa_pesquisa" accesskey="i">
+                                    <i class="fa-solid fa-magnifying-glass fa-lg">
+                                        <span hidden>pesquisa</span>
+                                    </i>
+                                </button>
+
+                                <div id="resultado-pesquisa" class="dropdown-pesquisa d-none"></div>
+                            </div>
+                        </fieldset>
+                    </form>
+                </div>
+
+            </div>
+            <!-- Imagem de fundo na direita -->
+            <div
+                class="bg-image position-absolute end-0 top-50 translate-middle-y d-none d-md-block img-banner-pesquisa">
+                <span hidden>banner pesquisa</span>
+            </div>
+        </div>
+    </div>
+
+    <div id="modalidades" class="row mb-5 mt-5 ">
+        <div class="col pt-1">
+            <div class="d-flex flex-row align-items-center">
+                <span class="titulos fw-bold fonte-20">Serviços Disponíveis</span>
+                <div class="ms-3 linha_titulo_inicio"><span hidden>linha</span></div>
+            </div>
+            <p class="text-secondary">Encontre o serviço ideal para você.</p>
+        </div>
+        <div class="row row-cols-2 row-cols-md-3 row-cols-lg-5 g-3 pt-3 mx-0 p-0">
+
+            <div class="col">
+                <div class="card card_all card_modalidade h-100">
+                    <a href="https://www.ac.gov.br/oca" class="h-100 d-flex flex-column mb-1" alt="pagina da OCA">
+                        <span class="text-center pt-3 fw-bold text-white">Serviços Disponíveis na OCA</span>
+                        <div class="card-body d-flex align-items-center justify-content-center">
+                            <div class="d-flex justify-content-center pt-2">
+                                <div class="circle-bg-maior"><span hidden>circulo maior</span></div>
+                                <div class="circle-bg"><span hidden>circulo menor</span></div>
+                                <img class="position-relative img-banner-servico img-banner-servico-oca"
+                                     src="https://www.ac.gov.br/assets/images/img_modalidade/oca.svg"
+                                     alt="banner oca" width="600">
+                            </div>
+                        </div>
+                        <div class="d-flex row-flex justify-content-end align-items-end pt-4">
+                            <div class="ms-2 arrow_modalidade d-flex align-items-center justify-content-center me-2">
+                                <div class="text-white pe-1">Acessar</div>
+                                <i class="fa-solid fa-angle-right p-0"><span hidden>seta</span></i>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+
+                            <div class="col">
+                    <div class="card presencial card_modalidade h-100">
+                        <a href="https://www.ac.gov.br/modalidades/servicos/presencial"
+                           class="h-100 d-flex flex-column mb-1">
+                    <span class="text-center pt-3 fw-bold text-white">
+                        Serviços Presenciais
+                    </span>
+
+                            <div class="card-body d-flex align-items-center justify-content-center">
+                                <div class="d-flex justify-content-center pt-2">
+                                    <div class="circle-bg-maior"><span hidden>circulo maior</span></div>
+                                    <div class="circle-bg"><span hidden>circulo maior</span></div>
+                                    <img class="position-relative img-banner-servico"
+                                         src="https://www.ac.gov.br/assets/images/img_modalidade/servicos_presencias.png"
+                                         alt="banner modalidade Serviços Presenciais">
+                                </div>
+                            </div>
+
+                            <div class="d-flex row-flex justify-content-end align-items-end pt-4">
+                                <div
+                                    class="ms-2 arrow_modalidade d-flex align-items-center justify-content-center me-2">
+                                    <div class="text-white pe-1">Acessar</div>
+                                    <i class="fa-solid fa-angle-right p-0"><span hidden>seta</span></i>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+                            <div class="col">
+                    <div class="card digital card_modalidade h-100">
+                        <a href="https://www.ac.gov.br/modalidades/servicos/digital"
+                           class="h-100 d-flex flex-column mb-1">
+                    <span class="text-center pt-3 fw-bold text-white">
+                        Serviços Digitais
+                    </span>
+
+                            <div class="card-body d-flex align-items-center justify-content-center">
+                                <div class="d-flex justify-content-center pt-2">
+                                    <div class="circle-bg-maior"><span hidden>circulo maior</span></div>
+                                    <div class="circle-bg"><span hidden>circulo maior</span></div>
+                                    <img class="position-relative img-banner-servico"
+                                         src="https://www.ac.gov.br/assets/images/img_modalidade/servicos_digitais.png"
+                                         alt="banner modalidade Serviços Digitais">
+                                </div>
+                            </div>
+
+                            <div class="d-flex row-flex justify-content-end align-items-end pt-4">
+                                <div
+                                    class="ms-2 arrow_modalidade d-flex align-items-center justify-content-center me-2">
+                                    <div class="text-white pe-1">Acessar</div>
+                                    <i class="fa-solid fa-angle-right p-0"><span hidden>seta</span></i>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+                            <div class="col">
+                    <div class="card agendaveis card_modalidade h-100">
+                        <a href="https://www.ac.gov.br/modalidades/servicos/agendaveis"
+                           class="h-100 d-flex flex-column mb-1">
+                    <span class="text-center pt-3 fw-bold text-white">
+                        Serviços Agendáveis
+                    </span>
+
+                            <div class="card-body d-flex align-items-center justify-content-center">
+                                <div class="d-flex justify-content-center pt-2">
+                                    <div class="circle-bg-maior"><span hidden>circulo maior</span></div>
+                                    <div class="circle-bg"><span hidden>circulo maior</span></div>
+                                    <img class="position-relative img-banner-servico"
+                                         src="https://www.ac.gov.br/assets/images/img_modalidade/servicos_agendaveis.png"
+                                         alt="banner modalidade Serviços Agendáveis">
+                                </div>
+                            </div>
+
+                            <div class="d-flex row-flex justify-content-end align-items-end pt-4">
+                                <div
+                                    class="ms-2 arrow_modalidade d-flex align-items-center justify-content-center me-2">
+                                    <div class="text-white pe-1">Acessar</div>
+                                    <i class="fa-solid fa-angle-right p-0"><span hidden>seta</span></i>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            
+            <div class="col">
+                <div class="card card-cass card_modalidade h-100">
+                    <a href="https://www.ac.gov.br/cass" class="h-100 d-flex flex-column mb-1" alt="pagina da CASS">
+                        <span class="text-center pt-3 fw-bold text-white">Serviços Disponíveis no CASS</span>
+                        <div class="card-body d-flex align-items-center justify-content-center">
+                            <div class="d-flex justify-content-center pt-2">
+                                <div class="circle-bg-maior"><span hidden>circulo maior</span></div>
+                                <div class="circle-bg"><span hidden>circulo menor</span></div>
+                                <img class="position-relative img-banner-servico img-banner-servico-cass"
+                                     src="https://www.ac.gov.br/assets/images/img_modalidade/cass.png"
+                                     alt="banner oca" width="600">
+                            </div>
+                        </div>
+                        <div class="d-flex row-flex justify-content-end align-items-end pt-4">
+                            <div class="ms-2 arrow_modalidade d-flex align-items-center justify-content-center me-2">
+                                <div class="text-white pe-1">Acessar</div>
+                                <i class="fa-solid fa-angle-right p-0"><span hidden>seta</span></i>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+
+    <div class="row mb-5">
+        <div class="col">
+            <div class="d-flex flex-row align-items-center">
+                <span class="titulos fw-bold fonte-20">Tudo o que você precisa, de forma rápida</span>
+                <div class="ms-3 linha_titulo_inicio"><span hidden>linha</span></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row headline">
+
+        <div class="col-xs-12 col-sm-6 col-md-4 col-lg-4 mb-4">
+            <div class="card card_recomendados mb-3">
+                <div class="card-body">
+                                            <span class="card-title text-center d-block fonte-20">
+                                <i class="fa-solid fa-podcast"><span hidden>icone</span></i> Serviços Recentes
+                         </span>
+                                        <div class="linha_card"><span hidden>linha</span></div>
+                    <ul class="list-group list-group-flush  lista-servicos-recomendados pt-4">
+                                                    <li class="list-group-item pb-2">
+                                <div class="pt-2 ps-2">
+                                    <span class="nome_servico ssc-head-line  abrir-nova-aba">
+                                        </span>
+                                </div>
+                            </li>
+                                                    <li class="list-group-item pb-2">
+                                <div class="pt-2 ps-2">
+                                    <span class="nome_servico ssc-head-line  abrir-nova-aba">
+                                        </span>
+                                </div>
+                            </li>
+                                                    <li class="list-group-item pb-2">
+                                <div class="pt-2 ps-2">
+                                    <span class="nome_servico ssc-head-line  abrir-nova-aba">
+                                        </span>
+                                </div>
+                            </li>
+                                                    <li class="list-group-item pb-2">
+                                <div class="pt-2 ps-2">
+                                    <span class="nome_servico ssc-head-line  abrir-nova-aba">
+                                        </span>
+                                </div>
+                            </li>
+                                                    <li class="list-group-item pb-2">
+                                <div class="pt-2 ps-2">
+                                    <span class="nome_servico ssc-head-line  abrir-nova-aba">
+                                        </span>
+                                </div>
+                            </li>
+                                            </ul>
+                </div>
+                <div class="card-footer">
+                    <div class="row mt-2">
+                        <div class="col d-flex justify-content-end arrow_card_servico">
+                            <div class="col d-flex justify-content-end arrow_card_servico">
+                            <span class="me-2 mais_servicos">
+                                <a href="https://www.ac.gov.br/modalidades/servicos" class="d-flex align-items-center">
+                                    Mais Serviços
+                                    <i class="fa-solid fa-angle-right ms-2 text-white rounded-circle d-flex align-items-center justify-content-center icone-mais-servicos"><span
+                                            hidden>icone</span></i>
+                                </a>
+                            </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-12 col-md-4 col-lg-4 mb-4">
+            <div class="card card_recomendados mb-3">
+                <div class="card-body">
+                    <span class="card-title text-center d-block fonte-20"><i class="fa-solid fa-fire-flame-curved"><span
+                                hidden>icone mais acessados</span></i> Mais acessados
+                    </span>
+                    <div class="linha_card"><span hidden>linha</span></div>
+                    <ul class="list-group list-group-flush lista-servicos-mais-acessados pt-4">
+                                                    <li class="list-group-item  d-flex flex-row pb-1">
+                                <div>
+                                    <span class="posicao">1°</span>
+                                </div>
+                                <div class="pt-1 ps-2 w-100">
+                                        <span class="nome_servico ssc-head-line abrir-nova-aba">
+                                        </span>
+                                </div>
+                            </li>
+                                                    <li class="list-group-item  d-flex flex-row pb-1">
+                                <div>
+                                    <span class="posicao">2°</span>
+                                </div>
+                                <div class="pt-1 ps-2 w-100">
+                                        <span class="nome_servico ssc-head-line abrir-nova-aba">
+                                        </span>
+                                </div>
+                            </li>
+                                                    <li class="list-group-item  d-flex flex-row pb-1">
+                                <div>
+                                    <span class="posicao">3°</span>
+                                </div>
+                                <div class="pt-1 ps-2 w-100">
+                                        <span class="nome_servico ssc-head-line abrir-nova-aba">
+                                        </span>
+                                </div>
+                            </li>
+                                                    <li class="list-group-item  d-flex flex-row pb-1">
+                                <div>
+                                    <span class="posicao">4°</span>
+                                </div>
+                                <div class="pt-1 ps-2 w-100">
+                                        <span class="nome_servico ssc-head-line abrir-nova-aba">
+                                        </span>
+                                </div>
+                            </li>
+                                                    <li class="list-group-item  d-flex flex-row pb-1">
+                                <div>
+                                    <span class="posicao">5°</span>
+                                </div>
+                                <div class="pt-1 ps-2 w-100">
+                                        <span class="nome_servico ssc-head-line abrir-nova-aba">
+                                        </span>
+                                </div>
+                            </li>
+                                            </ul>
+
+                </div>
+                <div class="card-footer">
+                    <div class="row mt-2">
+                        <div class="col d-flex justify-content-end arrow_card_servico">
+                            <span class="me-2 mais_servicos">
+                                <a href="https://www.ac.gov.br/modalidades/servicos" class="d-flex align-items-center">
+                                    Mais Serviços
+                                    <i class="fa-solid fa-angle-right ms-2 text-white rounded-circle d-flex align-items-center justify-content-center icone-mais-servicos"><span
+                                            hidden>icone</span></i>
+                                </a>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-12 col-md-4 col-lg-4 mb-4">
+            <div class="card card_recomendados mb-3">
+                <div class="card-body">
+                    <span class="card-title text-center d-block fonte-20"><i class="fa-solid fa-star"><span hidden>Destaques</span></i> Destaques</span>
+                    <div class="linha_card"><span hidden>linha</span></div>
+                    <ul class="list-group list-group-flush lista-servicos-destaque pt-4">
+                                                    <li class="list-group-item pb-2">
+                                <div class="pt-2 ps-2">
+                                    <span class="nome_servico  abrir-nova-aba">
+                                    </span>
+                                </div>
+                            </li>
+                                                    <li class="list-group-item pb-2">
+                                <div class="pt-2 ps-2">
+                                    <span class="nome_servico  abrir-nova-aba">
+                                    </span>
+                                </div>
+                            </li>
+                                                    <li class="list-group-item pb-2">
+                                <div class="pt-2 ps-2">
+                                    <span class="nome_servico  abrir-nova-aba">
+                                    </span>
+                                </div>
+                            </li>
+                                                    <li class="list-group-item pb-2">
+                                <div class="pt-2 ps-2">
+                                    <span class="nome_servico  abrir-nova-aba">
+                                    </span>
+                                </div>
+                            </li>
+                                                    <li class="list-group-item pb-2">
+                                <div class="pt-2 ps-2">
+                                    <span class="nome_servico  abrir-nova-aba">
+                                    </span>
+                                </div>
+                            </li>
+                                            </ul>
+                </div>
+                <div class="card-footer">
+                    <div class="row mt-2">
+                        <div class="col d-flex justify-content-end arrow_card_servico">
+                            <span class="me-2 mais_servicos">
+                                <a href="https://www.ac.gov.br/modalidades/servicos" class="d-flex align-items-center">
+                                    Mais Serviços
+                                    <i class="fa-solid fa-angle-right ms-2 text-white rounded-circle d-flex align-items-center justify-content-center icone-mais-servicos"><span
+                                            hidden>icone</span></i>
+                                </a>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-5 publicidade-home">
+        <div class="col">
+            <div id="carouselPublicidadeHome" class="carousel slide carousel-fade" data-bs-ride="carousel">
+                <div class="carousel-inner">
+                    <span hidden>banner</span>
+                                    </div>
+                <button class="carousel-control-prev" type="button" data-bs-target="#carouselPublicidadeHome"
+                        data-bs-slide="prev">
+                    <span class="carousel-control-prev-icon" aria-hidden="true">Anterior</span>
+                    <span class="visually-hidden">Anterior</span>
+                </button>
+                <button class="carousel-control-next" type="button" data-bs-target="#carouselPublicidadeHome"
+                        data-bs-slide="next">
+                    <span class="carousel-control-next-icon" aria-hidden="true">Próximo</span>
+                    <span class="visually-hidden">Próximo</span>
+                </button>
+            </div>
+        </div>
+    </div>
+    </div>
+
+
+    <div class="main">
+        <div class="container" id="categorias-navegar">
+
+
+            <div class="col pt-5">
+                <div class="d-flex flex-row align-items-center">
+                    <span class="titulos fw-bold fonte-20">Serviços por Categorias</span>
+                    <div class="ms-3 linha_titulo_inicio"><span hidden>linha</span></div>
+                </div>
+                <p class="text-secondary">
+                    Navegue pelos serviços de forma intuitiva, organizados por categorias.
+                </p>
+            </div>
+
+            <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 row-cols-xxl-6 g-2 padding-bottom-card pt-3">
+                                    <div class="col">
+                        <div class="card card-categorias text-end rounded-3 border border-light-subtle shadow-sm h-100">
+                            <!-- Adicionado h-100 -->
+                            <a href="https://www.ac.gov.br/categorias/administracao-publica">
+                                <div class="card-body d-flex flex-column">
+                                    <!-- Garantindo que o conteúdo preencha a altura do card -->
+                                    <span class="card-title pb-2 text-center text-cor-default font-weight-600">
+                                        Administração Pública
+                                    </span>
+                                    <img src="https://www.ac.gov.br/storage/img_categoria/1678972188-administracao.png"
+                                         alt="imagem da categoria Administração Pública"
+                                         class="img-fluid d-block mx-auto pt-1 pb-4 img-categorias-home">
+                                    <div
+                                        class="card-footer-categorias text-end text-black pt-2 mt-auto d-flex align-items-center">
+                                        <!-- mt-auto faz o footer ficar no fim -->
+                                        Acessar
+                                        <div
+                                            class="rounded-circle shadow-sm bg-white border border-light-subtle d-flex justify-content-center align-items-center ms-2 icone">
+                                            <i class="fa-solid fa-angle-right text-primary fonte-10"> <span hidden>acessar</span></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                                    <div class="col">
+                        <div class="card card-categorias text-end rounded-3 border border-light-subtle shadow-sm h-100">
+                            <!-- Adicionado h-100 -->
+                            <a href="https://www.ac.gov.br/categorias/agricultura-e-pecuaria">
+                                <div class="card-body d-flex flex-column">
+                                    <!-- Garantindo que o conteúdo preencha a altura do card -->
+                                    <span class="card-title pb-2 text-center text-cor-default font-weight-600">
+                                        Agricultura e Pecuária
+                                    </span>
+                                    <img src="https://www.ac.gov.br/storage/img_categoria/1678972250-agricultura.png"
+                                         alt="imagem da categoria Agricultura e Pecuária"
+                                         class="img-fluid d-block mx-auto pt-1 pb-4 img-categorias-home">
+                                    <div
+                                        class="card-footer-categorias text-end text-black pt-2 mt-auto d-flex align-items-center">
+                                        <!-- mt-auto faz o footer ficar no fim -->
+                                        Acessar
+                                        <div
+                                            class="rounded-circle shadow-sm bg-white border border-light-subtle d-flex justify-content-center align-items-center ms-2 icone">
+                                            <i class="fa-solid fa-angle-right text-primary fonte-10"> <span hidden>acessar</span></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                                    <div class="col">
+                        <div class="card card-categorias text-end rounded-3 border border-light-subtle shadow-sm h-100">
+                            <!-- Adicionado h-100 -->
+                            <a href="https://www.ac.gov.br/categorias/assistencia-social">
+                                <div class="card-body d-flex flex-column">
+                                    <!-- Garantindo que o conteúdo preencha a altura do card -->
+                                    <span class="card-title pb-2 text-center text-cor-default font-weight-600">
+                                        Assistência Social
+                                    </span>
+                                    <img src="https://www.ac.gov.br/storage/img_categoria/1678972254-assitencia-social.png"
+                                         alt="imagem da categoria Assistência Social"
+                                         class="img-fluid d-block mx-auto pt-1 pb-4 img-categorias-home">
+                                    <div
+                                        class="card-footer-categorias text-end text-black pt-2 mt-auto d-flex align-items-center">
+                                        <!-- mt-auto faz o footer ficar no fim -->
+                                        Acessar
+                                        <div
+                                            class="rounded-circle shadow-sm bg-white border border-light-subtle d-flex justify-content-center align-items-center ms-2 icone">
+                                            <i class="fa-solid fa-angle-right text-primary fonte-10"> <span hidden>acessar</span></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                                    <div class="col">
+                        <div class="card card-categorias text-end rounded-3 border border-light-subtle shadow-sm h-100">
+                            <!-- Adicionado h-100 -->
+                            <a href="https://www.ac.gov.br/categorias/comercio-e-servicos">
+                                <div class="card-body d-flex flex-column">
+                                    <!-- Garantindo que o conteúdo preencha a altura do card -->
+                                    <span class="card-title pb-2 text-center text-cor-default font-weight-600">
+                                        Comércio e Serviços
+                                    </span>
+                                    <img src="https://www.ac.gov.br/storage/img_categoria/1678972443-comercio-e-servico.png"
+                                         alt="imagem da categoria Comércio e Serviços"
+                                         class="img-fluid d-block mx-auto pt-1 pb-4 img-categorias-home">
+                                    <div
+                                        class="card-footer-categorias text-end text-black pt-2 mt-auto d-flex align-items-center">
+                                        <!-- mt-auto faz o footer ficar no fim -->
+                                        Acessar
+                                        <div
+                                            class="rounded-circle shadow-sm bg-white border border-light-subtle d-flex justify-content-center align-items-center ms-2 icone">
+                                            <i class="fa-solid fa-angle-right text-primary fonte-10"> <span hidden>acessar</span></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                                    <div class="col">
+                        <div class="card card-categorias text-end rounded-3 border border-light-subtle shadow-sm h-100">
+                            <!-- Adicionado h-100 -->
+                            <a href="https://www.ac.gov.br/categorias/comunicacao-e-transparencia-publica">
+                                <div class="card-body d-flex flex-column">
+                                    <!-- Garantindo que o conteúdo preencha a altura do card -->
+                                    <span class="card-title pb-2 text-center text-cor-default font-weight-600">
+                                        Comunicação e Transparência Pública
+                                    </span>
+                                    <img src="https://www.ac.gov.br/storage/img_categoria/1678972461-comunicacao.png"
+                                         alt="imagem da categoria Comunicação e Transparência Pública"
+                                         class="img-fluid d-block mx-auto pt-1 pb-4 img-categorias-home">
+                                    <div
+                                        class="card-footer-categorias text-end text-black pt-2 mt-auto d-flex align-items-center">
+                                        <!-- mt-auto faz o footer ficar no fim -->
+                                        Acessar
+                                        <div
+                                            class="rounded-circle shadow-sm bg-white border border-light-subtle d-flex justify-content-center align-items-center ms-2 icone">
+                                            <i class="fa-solid fa-angle-right text-primary fonte-10"> <span hidden>acessar</span></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                                <div class="col">
+                    <div class="card card-categorias text-end rounded-3 border border-light-subtle shadow-sm h-100">
+                        <a href="https://www.ac.gov.br/categorias">
+                            <div class="card-body d-flex flex-column">
+                                <span class="card-title pb-2 text-center text-cor-default font-weight-600">
+                                    Mais Categorias
+                                </span>
+                                <img src="https://www.ac.gov.br/assets/images/lupa.svg" alt="mais categorias"
+                                     class="img-fluid d-block mx-auto img-categorias-home" width="80">
+                                <div
+                                    class="card-footer-categorias text-black text-end pt-2 mt-auto d-flex align-items-center">
+                                    Acessar
+                                    <div
+                                        class="rounded-circle shadow-sm bg-white border border-light-subtle d-flex justify-content-center align-items-center ms-2 icone">
+                                        <i class="fa-solid fa-angle-right text-primary fonte-10"><span
+                                                hidden>acessar</span></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+
+    <div class="content_azul">
+        <div class="container">
+            <div class="row pt-3">
+                <div class="col d-flex justify-content-center">
+                    <span class="text-center text-white fw-bold fonte-32">Indicadores de Serviços</span>
+                </div>
+            </div>
+
+            <div class="row d-flex justify-content-between indicadores text-white">
+                <div
+                    class="col-sm-12 pt-md-4 pt-lg-5 pt-xlg-5 col-md-4 col-lg-4 col-xlg-4 pb-5 dados_indicadores d-flex flex-column align-items-center text-center">
+                    <div
+                        class="border border-2 border-white rounded-circle d-flex justify-content-center align-items-center circulo-indicador">
+                        <img class="p-2" src="https://www.ac.gov.br/assets/images/home/support.svg"
+                             alt="Serviços portal" width="50">
+                    </div>
+                    <div>
+                        <span class="indicacdores-title-numero">703</span>
+                    </div>
+                    <div>
+                        <span class="font-weight-600">Serviços Disponíveis no Portal</span>
+                    </div>
+                </div>
+
+                <div
+                    class="col-sm-12 pt-md-4 pt-lg-5 pt-xlg-5 col-md-4 col-lg-4 col-xlg-4 pb-5 dados_indicadores d-flex flex-column align-items-center text-center">
+                    <div
+                        class="border border-2 border-white rounded-circle d-flex justify-content-center align-items-center circulo-indicador">
+                        <img class="p-2" src="https://www.ac.gov.br/assets/images/home/browsing.svg"
+                             alt="Serviços digitais" width="50">
+                    </div>
+                    <div>
+                        <span class="indicacdores-title-numero">231</span>
+                    </div>
+                    <div>
+                        <span class="font-weight-600">Serviços Digitais</span>
+                    </div>
+                </div>
+                <div
+                    class="col-sm-12 pt-md-4 pt-lg-5 pt-xlg-5 col-md-4 col-lg-4 col-xlg-4 pb-5 dados_indicadores d-flex flex-column align-items-center text-center">
+                    <div
+                        class="border border-2 border-white rounded-circle d-flex justify-content-center align-items-center circulo-indicador">
+                        <img class="p-2" src="https://www.ac.gov.br/assets/images/home/calendar.svg"
+                             alt="Serviços agendaveis" width="50">
+                    </div>
+                    <div>
+                        <span class="indicacdores-title-numero">53</span>
+                    </div>
+                    <div>
+                        <span class="font-weight-600">Serviços Agendáveis</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row indicadores text-white">
+                <div class="col-12 d-flex justify-content-center px-3 pb-5 pt-1">
+                    <a
+                        class="btn satisfacao-usuario-botao border border-white text-white gap-2 d-inline-flex align-items-center text-decoration-none"
+                        href="https://www.ac.gov.br/avaliacoes"
+                    >
+                        Satisfação do Usuário
+                        <i class="fa-solid fa-square-arrow-up-right" aria-hidden="true"></i>
+                    </a>
+                </div>
+            </div>
+
+
+        </div>
+    </div>
+    <div class="container pt-3 mt-5 mb-0">
+        <div class="hemocentro-estoque">
+
+        <div class="row mb-4">
+            <div class="col">
+                <div class="d-flex flex-row align-items-center">
+                    <span class="titulos fw-bold fonte-20">Indicadores Bolsas de Sangue</span>
+                    <div class="ms-3 linha_titulo_inicio"><span hidden="">linha</span></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row d-flex align-items-center chanfrado p-4">
+            <div class="col-9 no-select">
+                <div class="row">
+                                                                        <div
+                                class="col px-3"
+                                                            >
+                                <div class="text-center fw-bold">A+</div>
+                                <div class="d-flex justify-content-center align-content-center text-center py-3">
+                                    <div class="bolsa movimento danger">
+                                        <div class="wave"></div>
+                                        <div class="wave"></div>
+                                        <div class="wave"></div>
+                                    </div>
+                                    <img src="https://www.ac.gov.br/assets/images/hemocentro/bolsas/bolsa.svg" class="bg"/>
+
+                                </div>
+                                <div class="nivel">
+                            <span class="badge text-bg-danger rounded-pill w-100">
+                               <small>Crítico</small>
+                            </span>
+                                </div>
+                            </div>
+                                                                                                                                                                                                                                                                                                                            <div
+                                class="col px-3"
+                                                            >
+                                <div class="text-center fw-bold">A-</div>
+                                <div class="d-flex justify-content-center align-content-center text-center py-3">
+                                    <div class="bolsa movimento warning">
+                                        <div class="wave"></div>
+                                        <div class="wave"></div>
+                                        <div class="wave"></div>
+                                    </div>
+                                    <img src="https://www.ac.gov.br/assets/images/hemocentro/bolsas/bolsa.svg" class="bg"/>
+
+                                </div>
+                                <div class="nivel">
+                            <span class="badge text-bg-warning rounded-pill w-100">
+                               <small>Alerta</small>
+                            </span>
+                                </div>
+                            </div>
+                                                                                                                                                                                                                                                                                                                            <div
+                                class="col px-3"
+                                                            >
+                                <div class="text-center fw-bold">B+</div>
+                                <div class="d-flex justify-content-center align-content-center text-center py-3">
+                                    <div class="bolsa movimento primary">
+                                        <div class="wave"></div>
+                                        <div class="wave"></div>
+                                        <div class="wave"></div>
+                                    </div>
+                                    <img src="https://www.ac.gov.br/assets/images/hemocentro/bolsas/bolsa.svg" class="bg"/>
+
+                                </div>
+                                <div class="nivel">
+                            <span class="badge text-bg-primary rounded-pill w-100">
+                               <small>Adequado</small>
+                            </span>
+                                </div>
+                            </div>
+                                                                                                                                                                                                                                                                                                                            <div
+                                class="col px-3"
+                                                            >
+                                <div class="text-center fw-bold">B-</div>
+                                <div class="d-flex justify-content-center align-content-center text-center py-3">
+                                    <div class="bolsa movimento danger">
+                                        <div class="wave"></div>
+                                        <div class="wave"></div>
+                                        <div class="wave"></div>
+                                    </div>
+                                    <img src="https://www.ac.gov.br/assets/images/hemocentro/bolsas/bolsa.svg" class="bg"/>
+
+                                </div>
+                                <div class="nivel">
+                            <span class="badge text-bg-danger rounded-pill w-100">
+                               <small>Crítico</small>
+                            </span>
+                                </div>
+                            </div>
+                                                                                                                                                                                                                                                                                                                            <div
+                                class="col px-3"
+                                                            >
+                                <div class="text-center fw-bold">AB+</div>
+                                <div class="d-flex justify-content-center align-content-center text-center py-3">
+                                    <div class="bolsa movimento danger">
+                                        <div class="wave"></div>
+                                        <div class="wave"></div>
+                                        <div class="wave"></div>
+                                    </div>
+                                    <img src="https://www.ac.gov.br/assets/images/hemocentro/bolsas/bolsa.svg" class="bg"/>
+
+                                </div>
+                                <div class="nivel">
+                            <span class="badge text-bg-danger rounded-pill w-100">
+                               <small>Crítico</small>
+                            </span>
+                                </div>
+                            </div>
+                                                                                                                                                                                                                                                                                                                            <div
+                                class="col px-3"
+                                                            >
+                                <div class="text-center fw-bold">AB-</div>
+                                <div class="d-flex justify-content-center align-content-center text-center py-3">
+                                    <div class="bolsa movimento success">
+                                        <div class="wave"></div>
+                                        <div class="wave"></div>
+                                        <div class="wave"></div>
+                                    </div>
+                                    <img src="https://www.ac.gov.br/assets/images/hemocentro/bolsas/bolsa.svg" class="bg"/>
+
+                                </div>
+                                <div class="nivel">
+                            <span class="badge text-bg-success rounded-pill w-100">
+                               <small>Estável</small>
+                            </span>
+                                </div>
+                            </div>
+                                                                                                                                                                                                                                                                                                                            <div
+                                class="col px-3"
+                                                            >
+                                <div class="text-center fw-bold">O+</div>
+                                <div class="d-flex justify-content-center align-content-center text-center py-3">
+                                    <div class="bolsa movimento danger">
+                                        <div class="wave"></div>
+                                        <div class="wave"></div>
+                                        <div class="wave"></div>
+                                    </div>
+                                    <img src="https://www.ac.gov.br/assets/images/hemocentro/bolsas/bolsa.svg" class="bg"/>
+
+                                </div>
+                                <div class="nivel">
+                            <span class="badge text-bg-danger rounded-pill w-100">
+                               <small>Crítico</small>
+                            </span>
+                                </div>
+                            </div>
+                                                                                                                                                                                                                                                                                                                            <div
+                                class="col px-3"
+                                                            >
+                                <div class="text-center fw-bold">O-</div>
+                                <div class="d-flex justify-content-center align-content-center text-center py-3">
+                                    <div class="bolsa movimento danger">
+                                        <div class="wave"></div>
+                                        <div class="wave"></div>
+                                        <div class="wave"></div>
+                                    </div>
+                                    <img src="https://www.ac.gov.br/assets/images/hemocentro/bolsas/bolsa.svg" class="bg"/>
+
+                                </div>
+                                <div class="nivel">
+                            <span class="badge text-bg-danger rounded-pill w-100">
+                               <small>Crítico</small>
+                            </span>
+                                </div>
+                            </div>
+                                                                                                                                                                                                                                                                                        </div>
+            </div>
+
+            <div class="col-3">
+                <div class="row text-center py-3">
+                    <div class="col-12 pb-3">
+                                                    <img src="https://www.ac.gov.br/assets/images/hemocentro/logo-small.png" class="pt-5 pb-2"/>
+                                            </div>
+                                    </div>
+            </div>
+
+        </div>
+
+        <div class="row d-flex align-items-center mt-4 border border-danger rounded-4 p-3">
+            <div class="col-md-4">
+                <div class="fw-bold text-danger pb-2 fs-18">Doe sangue, salve vidas.</div>
+                <p class="text-secondary pb-0 mb-0">Um gesto simples pode mudar o destino de muitas pessoas. Agende sua
+                    doação com facilidade e ajude quem mais precisa.Um gesto simples que faz toda a diferença.</p>
+            </div>
+            <div class="col-md-8 no-select">
+                <div class="row d-flex align-items-center">
+                    <div class="col">
+                        <div class="title text-center text-secondary">Estável</div>
+                        <div class="text-center py-1">
+                            <img src="https://www.ac.gov.br/assets/images/hemocentro/bolsas/success.svg" height="38px"/>
+                        </div>
+                        <p class="text-secondary text-center mb-0"><small>Doe regularmente e ajude a manter os estoques
+                                seguros.</small></p>
+                    </div>
+                    <div class="col">
+                        <div class="title text-center text-secondary">Adequado</div>
+                        <div class="text-center py-1">
+                            <img src="https://www.ac.gov.br/assets/images/hemocentro/bolsas/primary.svg" height="38px"/>
+                        </div>
+                        <p class="text-secondary text-center mb-0"><small>Sua doação mantém o equilíbrio. Agende
+                                agora!</small></p>
+                    </div>
+                    <div class="col">
+                        <div class="title text-center text-secondary">Alerta!</div>
+                        <div class="text-center py-1">
+                            <img src="https://www.ac.gov.br/assets/images/hemocentro/bolsas/warning.svg" height="38px"/>
+                        </div>
+                        <p class="text-secondary text-center mb-0"><small>Os estoques estão baixando.<br/>
+                                Doe e faça a diferença!</small></p>
+                    </div>
+                    <div class="col">
+                        <div class="title text-center text-secondary">Crítico</div>
+                        <div class="text-center py-1">
+                            <img src="https://www.ac.gov.br/assets/images/hemocentro/bolsas/danger.svg" height="38px"/>
+                        </div>
+                        <p class="text-secondary text-center mb-0"><small>Urgente! Precisamos da sua doação
+                                agora.</small></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+        </div>
+            <br><br><br><br><br>
+        <div class="container mt-3">
+        <div class="row card-avalie">
+    <div class="col">
+        <span class="titulos_pretos pt-5">O que está achando do ac.gov.br?</span>
+    </div>
+</div>
+
+<!-- Desktop version -->
+<div class="row cards_avaliativos_web d-none d-md-flex">
+    <div class="col-12 avaliacao d-flex flex-row align-items-center overflow-hidden">
+        <div class="col-3 me-5 avaliacao-painel-texto">
+            <div class="ps-4">
+                <a href="https://www.ac.gov.br/avaliar/portal"><span class="header_avalie">Fale Conosco</span></a>
+                <div class="col-10">
+                    <span class="text_avalie">Sua opinião é muito importante para melhoria e excelência no atendimento</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-8 d-flex gap-1 flex-row justify-content-around avaliacao-painel-card">
+            
+                            <a href="https://www.ac.gov.br/avaliar/portal?opcao=elogio">
+                    <div class="card card_avaliacao">
+                        <div class="card-body d-flex flex-column align-items-center justify-content-center">
+                            <div>
+                                <img src="https://www.ac.gov.br/assets/images/estrutura/like.png" alt="like imagem" class="tamanho-50">
+                            </div>
+                        </div>
+                        <div class="card-footer d-flex flex-row justify-content-between">
+                            <div>
+                                <span class="me-2 mais_servicos">Elogio</span>
+                            </div>
+                            <div>
+                                <i class="fa-solid fa-angle-right mt-1">
+                                    <span class="me-2 mais_servicos" hidden>Elogio</span>
+                                </i>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+                            <a href="https://www.ac.gov.br/avaliar/portal?opcao=reclamacao">
+                    <div class="card card_avaliacao">
+                        <div class="card-body d-flex flex-column align-items-center justify-content-center">
+                            <div>
+                                <img src="https://www.ac.gov.br/assets/images/estrutura/dislike.png" alt="dislike imagem" class="tamanho-50">
+                            </div>
+                        </div>
+                        <div class="card-footer d-flex flex-row justify-content-between">
+                            <div>
+                                <span class="me-2 mais_servicos">Reclamação</span>
+                            </div>
+                            <div>
+                                <i class="fa-solid fa-angle-right mt-1">
+                                    <span class="me-2 mais_servicos" hidden>Reclamação</span>
+                                </i>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+                            <a href="https://www.ac.gov.br/avaliar/portal?opcao=sugestao">
+                    <div class="card card_avaliacao">
+                        <div class="card-body d-flex flex-column align-items-center justify-content-center">
+                            <div>
+                                <img src="https://www.ac.gov.br/assets/images/estrutura/lamp.png" alt="sugestão imagem" class="tamanho-50">
+                            </div>
+                        </div>
+                        <div class="card-footer d-flex flex-row justify-content-between">
+                            <div>
+                                <span class="me-2 mais_servicos">Sugestão</span>
+                            </div>
+                            <div>
+                                <i class="fa-solid fa-angle-right mt-1">
+                                    <span class="me-2 mais_servicos" hidden>Sugestão</span>
+                                </i>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+                            <a href="https://www.ac.gov.br/avaliar/portal?opcao=solicitacao">
+                    <div class="card card_avaliacao">
+                        <div class="card-body d-flex flex-column align-items-center justify-content-center">
+                            <div>
+                                <img src="https://www.ac.gov.br/assets/images/estrutura/contact.png" alt="solicitacao imagem" class="tamanho-50">
+                            </div>
+                        </div>
+                        <div class="card-footer d-flex flex-row justify-content-between">
+                            <div>
+                                <span class="me-2 mais_servicos">Solicitação</span>
+                            </div>
+                            <div>
+                                <i class="fa-solid fa-angle-right mt-1">
+                                    <span class="me-2 mais_servicos" hidden>Solicitação</span>
+                                </i>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+                            <a href="https://www.ac.gov.br/avaliar/portal?opcao=denuncia">
+                    <div class="card card_avaliacao">
+                        <div class="card-body d-flex flex-column align-items-center justify-content-center">
+                            <div>
+                                <img src="https://www.ac.gov.br/assets/images/estrutura/bullhorn.png" alt="denuncia imagem" class="tamanho-50">
+                            </div>
+                        </div>
+                        <div class="card-footer d-flex flex-row justify-content-between">
+                            <div>
+                                <span class="me-2 mais_servicos">Denúncia</span>
+                            </div>
+                            <div>
+                                <i class="fa-solid fa-angle-right mt-1">
+                                    <span class="me-2 mais_servicos" hidden>Denúncia</span>
+                                </i>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+                            <a href="https://www.ac.gov.br/simplifique/solicitado?opcao=simplifique">
+                    <div class="card card_avaliacao">
+                        <div class="card-body d-flex flex-column align-items-center justify-content-center">
+                            <div>
+                                <img src="https://www.ac.gov.br/assets/images/estrutura/simplifique.png" alt="simplifique imagem" class="tamanho-50">
+                            </div>
+                        </div>
+                        <div class="card-footer d-flex flex-row justify-content-between">
+                            <div>
+                                <span class="me-2 mais_servicos">Simplifique</span>
+                            </div>
+                            <div>
+                                <i class="fa-solid fa-angle-right mt-1">
+                                    <span class="me-2 mais_servicos" hidden>Simplifique</span>
+                                </i>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+                    </div>
+    </div>
+</div>
+
+<!-- Mobile version -->
+<div class="cards_avaliativos_mobile d-md-none">
+    <div class="row">
+        <div class="col-12">
+            <div id="cabecalho_avaliativo_1" class="p-3">
+                <a href="https://www.ac.gov.br/avaliar/portal" class="text-decoration-none text-primary"><span class="pb-3 header_avalie">Avalie</span></a>
+                <span class="text_avalie">Sua opinião é muito importante para a melhoria e excelência no atendimento</span>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <div class="p-3" id="cabecalho_avaliativo_teste">
+                                    <a href="https://www.ac.gov.br/avaliar/portal?opcao=elogio" class="text-decoration-none">
+                        <div class="card card_avaliacao_md mb-3">
+                            <div class="card-body d-flex flex-row">
+                                <div class="w-100">
+                                    <img src="https://www.ac.gov.br/assets/images/estrutura/like.png" alt="like imagem" class="tamanho-50"/>
+                                    <span class="ps-4 titulos">Elogio</span>
+                                </div>
+                                <div class="flex-shrink-1 align-self-center">
+                                    <div><i class="fa-solid fa-angle-right"><span class="ps-4 titulos" hidden>Elogio</span></i></div>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                                    <a href="https://www.ac.gov.br/avaliar/portal?opcao=reclamacao" class="text-decoration-none">
+                        <div class="card card_avaliacao_md mb-3">
+                            <div class="card-body d-flex flex-row">
+                                <div class="w-100">
+                                    <img src="https://www.ac.gov.br/assets/images/estrutura/dislike.png" alt="dislike imagem" class="tamanho-50"/>
+                                    <span class="ps-4 titulos">Reclamação</span>
+                                </div>
+                                <div class="flex-shrink-1 align-self-center">
+                                    <div><i class="fa-solid fa-angle-right"><span class="ps-4 titulos" hidden>Reclamação</span></i></div>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                                    <a href="https://www.ac.gov.br/avaliar/portal?opcao=sugestao" class="text-decoration-none">
+                        <div class="card card_avaliacao_md mb-3">
+                            <div class="card-body d-flex flex-row">
+                                <div class="w-100">
+                                    <img src="https://www.ac.gov.br/assets/images/estrutura/lamp.png" alt="sugestão imagem" class="tamanho-50"/>
+                                    <span class="ps-4 titulos">Sugestão</span>
+                                </div>
+                                <div class="flex-shrink-1 align-self-center">
+                                    <div><i class="fa-solid fa-angle-right"><span class="ps-4 titulos" hidden>Sugestão</span></i></div>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                                    <a href="https://www.ac.gov.br/avaliar/portal?opcao=solicitacao" class="text-decoration-none">
+                        <div class="card card_avaliacao_md mb-3">
+                            <div class="card-body d-flex flex-row">
+                                <div class="w-100">
+                                    <img src="https://www.ac.gov.br/assets/images/estrutura/contact.png" alt="solicitacao imagem" class="tamanho-50"/>
+                                    <span class="ps-4 titulos">Solicitação</span>
+                                </div>
+                                <div class="flex-shrink-1 align-self-center">
+                                    <div><i class="fa-solid fa-angle-right"><span class="ps-4 titulos" hidden>Solicitação</span></i></div>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                                    <a href="https://www.ac.gov.br/avaliar/portal?opcao=denuncia" class="text-decoration-none">
+                        <div class="card card_avaliacao_md mb-3">
+                            <div class="card-body d-flex flex-row">
+                                <div class="w-100">
+                                    <img src="https://www.ac.gov.br/assets/images/estrutura/bullhorn.png" alt="denuncia imagem" class="tamanho-50"/>
+                                    <span class="ps-4 titulos">Denúncia</span>
+                                </div>
+                                <div class="flex-shrink-1 align-self-center">
+                                    <div><i class="fa-solid fa-angle-right"><span class="ps-4 titulos" hidden>Denúncia</span></i></div>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                                    <a href="https://www.ac.gov.br/avaliar/portal?opcao=simplifique" class="text-decoration-none">
+                        <div class="card card_avaliacao_md mb-3">
+                            <div class="card-body d-flex flex-row">
+                                <div class="w-100">
+                                    <img src="https://www.ac.gov.br/assets/images/estrutura/simplifique.png" alt="simplifique imagem" class="tamanho-50"/>
+                                    <span class="ps-4 titulos">Simplifique</span>
+                                </div>
+                                <div class="flex-shrink-1 align-self-center">
+                                    <div><i class="fa-solid fa-angle-right"><span class="ps-4 titulos" hidden>Simplifique</span></i></div>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                            </div>
+        </div>
+    </div>
+</div>
+        
+    </div>
+
+    <div class="container mt-5 pb-0">
+        <div class="row pt-5 anuncios-sistemas-interno">
+            <div class="col-md-4 pb-5">
+                <a href="https://www.ac.gov.br/ouvidoria" class="banner-ouvidoria">
+                    <img alt="banner imagem ouvidoria"
+                         src="https://www.ac.gov.br/assets/images/anuncios_sistemas_interno/ouvidoria.png"
+                         class="banner-sistemas"/>
+                </a>
+            </div>
+            <div class="col-md-4 pb-5">
+                <a href="https://www.ac.gov.br/indicadores">
+                    <img alt="banner dados de acesso"
+                         src="https://www.ac.gov.br/assets/images/anuncios_sistemas_interno/dados.png"
+                         class="banner-sistemas"/>
+                </a>
+            </div>
+            <div class="col-md-4 pb-5">
+                <a href="https://www.ac.gov.br/catalogo-de-api">
+                    <img alt="banner catálogo de APIs"
+                         src="https://www.ac.gov.br/assets/images/anuncios_sistemas_interno/catalogo-apis.jpg"
+                         class="banner-sistemas"/>
+                </a>
+            </div>
+        </div>
+    </div>
+    </div>
+<div class="navbottom">
+    <div class="navbottom-item active" id="inicio">
+        <i class="fa-regular fa-house"> <span hidden>Início</span></i>
+        <span class="navbottom-text">Início</span>
+    </div>
+    <div class="navbottom-item " id="servicos">
+        <i class="fa-regular fa-airplay"><span hidden>Serviços</span></i>
+        <span class="navbottom-text">Serviços</span>
+    </div>
+    <div class="navbottom-item " id="categorias">
+        <i class="fa-regular fa-list"><span hidden>Categorias</span></i>
+        <span class="navbottom-text">Categorias</span>
+    </div>
+    <div class="navbottom-item " id="perfil">
+        <i class="fa-regular fa-user"><span hidden>Perfil</span></i>
+        <span class="navbottom-text">Perfil</span>
+    </div>
+</div>
+
+<div vw class="enabled" alt="vwclass">
+    <div vw-access-button class="active"><span hidden>.</span></div>
+    <div vw-plugin-wrapper>
+        <span hidden>.</span>
+        <div class="vw-plugin-top-wrapper"><span hidden>.</span></div>
+    </div>
+</div>
+<footer>
+    <div class="rodape">
+        <div id="linha"> <span hidden>linha</span></div>
+        <div class="container">
+            <div class="row d-flex justify-content-between indicadores text-white py-5">
+                <div class="col-sm-12 col-md-12 col-lg-8 col-xlg-9 py-3 d-flex align-items-center">
+                    <div>
+                        <b>GOVERNO DO ESTADO DO ACRE</b><br>
+                        <span class="pt-2 fonte-14">
+                            Palácio Rio Branco<br>
+                            Av. Getúlio Vargas, s/n<br>
+                            Centro<br>
+                            Rio Branco - Acre
+                            <a href="https://www.google.com.br/maps/place/R.+Arlindo+Porto+Leal,+319+-+Centro,+Rio+Branco+-+AC,+69900-094/@-9.9750488,-67.8092191,19.5z/data=!4m14!1m7!3m6!1s0x917f8da64d1ab6a5:0xe37c7f7d4a6f592a!2sPalacio+Das+Secretarias!8m2!3d-9.9750228!4d-67.8090743!16s%2Fg%2F11gh_2xbsq!3m5!1s0x917f8daaab9e0639:0x26c4939489e17901!8m2!3d-9.9751092!4d-67.809544!16s%2Fg%2F11v0_4mw71?entry=ttu" target="_new" class="ms-2 text-white">
+                                <i class="fa-solid fa-location-dot me-1"><span hidden>link</span></i>
+                                mapa
+                            </a>
+                            <br>
+                            69900-100
+                        </span>
+                    </div>
+                </div>
+                <div class="col-sm-12 col-md-12 col-lg-3 col-xlg-3 py-3 d-flex justify-content-end align-items-center dados_indicadores">
+                    <div class="">
+                                                    <img style="max-width: 160px; mix-blend-mode" class="figure-img img-fluid"
+                                 src="https://www.ac.gov.br/assets/images/footer-logo-sem-slogan.png" alt="">
+                                            </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</footer>
+
+
+<script src=" https://www.ac.gov.br/assets/js/jquery-3.6.0.min.js "></script>
+
+
+<script src="https://www.ac.gov.br/assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="https://www.ac.gov.br/assets/js/jquery.mask.min.js "></script>
+<script src="https://www.ac.gov.br/assets/js/jquery.flexdatalist.min.js"></script>
+<script src="https://www.ac.gov.br/assets/vendor/latinize/latinize.js"></script>
+<script src="https://www.ac.gov.br/assets/js/sweetalert2.all.min.js"></script>
+<script src="https://www.ac.gov.br/assets/js/feather.min.js"></script>
+<script src="https://www.ac.gov.br/assets/js/moment-with-locales.js"></script>
+<script src="https://www.ac.gov.br/assets/js/script.js?v=0.0.1"></script>
+<script src="https://www.ac.gov.br/assets/js/moment-with-locales.js"></script>
+<script src="https://www.ac.gov.br/assets/js/js.cookie.min.js"></script>
+<script src="https://www.ac.gov.br/assets/js/simplifique/avaliacao-simplifique.js"></script>
+    <script>
+        $(document).ready(function () {
+            function adicionarEllipsis(texto, limite) {
+                return texto.length > limite ? texto.slice(0, limite) + '...' : texto;
+            }
+
+            $('#carouselPublicidadeHome .carousel-item').eq(0).addClass('active');
+
+
+            $('body').scroll(function () {
+                if ($(this).scrollTop() == 0) {
+
+                    $(".back_top").css("display", "none");
+                } else {
+                    $(".back_top").css("display", "block");
+                }
+            });
+            $(".back_top").click(function () {
+                $("html, body").animate({
+                    scrollTop: 0
+                }, 500);
+            });
+
+            if ($('.lista-servicos-destaque').length) {
+                $.post('https://www.ac.gov.br/api/servicos/destaques', function (data) {
+                    $('.lista-servicos-destaque').empty()
+                    for (let i in data) {
+                        $('.lista-servicos-destaque').append(`
+                    <li class="list-group list-group-servicos pb-3">
+                          <div class="pt-2 ps-2 pt-2  border rounded-servico ">
+                            <span class="nome_servico"><a href="https://www.ac.gov.br/servico/${data[i].slug}">${adicionarEllipsis(data[i].nome_servico, 63)}</a></span>
+                        </div>
+                    </li>
+                    `)
+                    }
+                });
+            }
+            if ($('.lista-servicos-mais-acessados').length) {
+
+                $.post('https://www.ac.gov.br/api/servicos/mais-acessados', function (data) {
+                    $('.lista-servicos-mais-acessados').empty()
+                    for (let i in data) {
+                        $('.lista-servicos-mais-acessados').append(`
+                            <li class="list-group list-group-servicos pb-3" title="${data[i].nome_servico}">
+                                <div class="d-flex align-items-center gap-2 pt-2 ps-2 border rounded-servico">
+                                    <span class="posicao  fw-bold ps-2">
+                                        ${(parseInt(i) + 1)}º
+                                    </span>
+                                    <span class="nome_servico texto-a-esquerda flex-grow-1">
+                                        <a href="https://www.ac.gov.br/servico/${data[i].slug}">${adicionarEllipsis(data[i].nome_servico, 63)}</a>
+                                    </span>
+                                </div>
+                            </li>
+                    `)
+                    }
+                });
+            }
+
+            if ($('.lista-servicos-recomendados').length) {
+                $.post('https://www.ac.gov.br/api/servicos/recomendados', function (data) {
+                    $('.lista-servicos-recomendados').empty()
+                    for (let i in data) {
+                        $('.lista-servicos-recomendados').append(`
+                    <li class="list-group list-group-servicos pb-3"  title="${data[i].nome_servico}">
+                        <div class="pt-2 ps-2 pt-2  border rounded-servico">
+                            <span class="nome_servico"><a href="https://www.ac.gov.br/servico/${data[i].slug}">${adicionarEllipsis(data[i].nome_servico, 63)}</a></span>
+                        </div>
+                    </li>
+                    `)
+                    }
+                });
+            }
+            if ($('.news-gov').length) {
+                $.get('https://feed.ac.gov.br/acgov', function (data) {
+                    $('.news-gov').html(data)
+                })
+            }
+
+            
+            
+            
+
+            
+            
+            
+
+        });
+    </script>
+
+<script src="https://vlibras.gov.br/app/vlibras-plugin.js"></script>
+<script>
+    new window.VLibras.Widget('https://vlibras.gov.br/app');
+
+    (function () {
+        const observer = new MutationObserver(() => {
+            const wrapper = document.getElementById('vlibras-access-wrapper');
+            const access = wrapper?.shadowRoot?.getElementById('vlibras-access');
+            if (!access) return;
+
+            access.style.top = 'calc(50vh - 33px)';
+            observer.disconnect();
+        });
+
+        observer.observe(document.body, { childList: true });
+    })();
+</script>
+
+<script src="https://www.ac.gov.br/assets/js/asb.js"></script>
+<script type="text/javascript" src="https://www.ac.gov.br/assets/js/modernizr.min.js"></script>
+
+<script>
+
+        </script>
+
+<script>
+    $(document).ready(function () {
+        $('#inicio').on('click', function () {
+            window.location.href = "https://www.ac.gov.br";
+        });
+
+        $('#servicos').on('click', function () {
+            window.location.href = "https://www.ac.gov.br/modalidades/servicos?id=0";
+        });
+        $('#categorias').on('click', function () {
+            window.location.href = "https://www.ac.gov.br/categorias";
+        });
+        $('#perfil').on('click', function () {
+            window.location.href = "https://www.ac.gov.br/painel";
+        });
+    });
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    // Função extra para garantir a remoção periódica dos atributos ARIA
+    setInterval(function () {
+        $('.pesquisa_menu').each(function () {
+            $(this).removeAttr('aria-autocomplete aria-expanded aria-owns');
+        });
+    }, 1000);
+    document.addEventListener("DOMContentLoaded", function () {
+        document.querySelectorAll(".abrir-em-nova-aba").forEach(link => {
+            link.addEventListener("click", function (e) {
+                e.preventDefault();
+                window.open(this.href, '_blank');
+            });
+        });
+    });
+</script>
+<script src="https://www.ac.gov.br/assets/vendor/pusher/pusher.min.js"></script>
+<script src="https://www.ac.gov.br/assets/vendor/echo/echo.iife.js"></script>
+<script>
+    window.CentralNotificacoesConfig = {
+        feed: 'https://www.ac.gov.br/notificacoes/demandas/disponiveis',
+        lidaLocalBase: 'https://www.ac.gov.br/lida',
+        lidaCentral: '',
+        realtimeConfig: '',
+        realtimeAuth: '',
+        assetBase: 'https://www.ac.gov.br/'
+    };
+</script>
+<script src="https://www.ac.gov.br/assets/js/central/notificacoes.js"></script>
+<script>
+    $(document).ready(function () {
+        function iniciarBuscaServico(inputSelector, dropdownSelector, wrapperSelector) {
+            const $input = $(inputSelector);
+            const $dropdown = $(dropdownSelector);
+            const csrfToken = $('meta[name="csrf-token"]').attr('content');
+
+            if (!$input.length || !$dropdown.length) return;
+
+            let pagina = 1;
+            let loading = false;
+            let hasMore = true;
+            let debounceTimer = null;
+
+            function escapeHtml(text) {
+                return $('<div>').text(text || '').html();
+            }
+
+            function renderItens(items, append = false) {
+                if (!append) {
+                    $dropdown.html('');
+                }
+
+                if (!items || !items.length) {
+                    if (!append) {
+                        $dropdown.html('<div class="dropdown-pesquisa-empty">Nenhum resultado encontrado...</div>');
+                    }
+                    return;
+                }
+
+                items.forEach(function (item) {
+                    $dropdown.append(`
+                    <div class="dropdown-pesquisa-item" data-slug="${escapeHtml(item.slug)}">
+                        ${escapeHtml(item.nome_servico)}
+                    </div>
+                `);
+                });
+            }
+
+            function showLoading(append = false) {
+                if (!append) {
+                    $dropdown
+                        .removeClass('d-none')
+                        .html('<div class="dropdown-pesquisa-empty">Carregando...</div>');
+                } else {
+                    $dropdown.find('.loading-more').remove();
+                    $dropdown.append('<div class="dropdown-pesquisa-empty loading-more">Carregando mais...</div>');
+                }
+            }
+
+            function hideLoadingMore() {
+                $dropdown.find('.loading-more').remove();
+            }
+
+            function buscarServicos(reset = false) {
+                if (loading) return;
+                if (!hasMore && !reset) return;
+
+                const termo = $input.val().trim();
+
+                if (termo.length < 1) {
+                    pagina = 1;
+                    hasMore = true;
+                    $dropdown.addClass('d-none').html('');
+                    return;
+                }
+
+                if (reset) {
+                    pagina = 1;
+                    hasMore = true;
+                    showLoading(false);
+                } else {
+                    showLoading(true);
+                }
+
+                loading = true;
+
+                $.ajax({
+                    url: "https://www.ac.gov.br/busca-servico",
+                    method: "POST",
+                    dataType: "json",
+                    data: {
+                        _token: csrfToken,
+                        search: termo,
+                        pagina: pagina,
+                        length: 12
+                    },
+                    success: function (response) {
+                        hideLoadingMore();
+
+                        const items = response.data || [];
+                        const pagination = response.pagination || {};
+
+                        $dropdown.removeClass('d-none');
+                        renderItens(items, !reset);
+
+                        hasMore = !!pagination.has_more;
+
+                        if (reset && items.length === 0) {
+                            hasMore = false;
+                        }
+                    },
+                    error: function (xhr) {
+                        console.error('ERRO AJAX:', xhr);
+                        console.error('RESPOSTA ERRO:', xhr.responseText);
+
+                        hideLoadingMore();
+
+                        if (reset) {
+                            $dropdown
+                                .removeClass('d-none')
+                                .html('<div class="dropdown-pesquisa-empty">Erro ao buscar resultados.</div>');
+                        }
+                    },
+                    complete: function () {
+                        loading = false;
+                    }
+                });
+            }
+
+            $input.on('input', function () {
+                clearTimeout(debounceTimer);
+
+                debounceTimer = setTimeout(function () {
+                    buscarServicos(true);
+                }, 300);
+            });
+
+            $dropdown.on('scroll', function () {
+                const el = this;
+                const chegouNoFim = el.scrollTop + el.clientHeight >= el.scrollHeight - 20;
+
+                if (chegouNoFim && !loading && hasMore) {
+                    pagina++;
+                    buscarServicos(false);
+                }
+            });
+
+            $dropdown.on('click', '.dropdown-pesquisa-item', function () {
+                const slug = $(this).data('slug');
+                if (slug) {
+                    window.location.href = "https://www.ac.gov.br/servico/" + slug;
+                }
+            });
+
+            $(document).on('click', function (e) {
+                if (!$(e.target).closest(wrapperSelector).length) {
+                    $dropdown.addClass('d-none');
+                }
+            });
+
+            $input.on('focus', function () {
+                if ($dropdown.children().length) {
+                    $dropdown.removeClass('d-none');
+                }
+            });
+        }
+
+        iniciarBuscaServico('#campo_pesquisa', '#resultado-pesquisa', '#input_pesquisa');
+        iniciarBuscaServico('#campo_pesquisa_servico', '#resultado-pesquisa-servico', '#pesquisa_servico');
+        iniciarBuscaServico('#campo_pesquisa_menu', '#resultado-pesquisa-menu', '.nav-item');
+        iniciarBuscaServico('#campo_pesquisa_home', '#resultado-pesquisa-home', '#pesquisa_servico_home');
+
+    });
+</script>
+    <!-- GA Google Analytics @ https://m0n.co/ga -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-ELK911MRCG"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag() {
+            dataLayer.push(arguments);
+        }
+
+        gtag('js', new Date());
+        gtag('config', 'G-ELK911MRCG');
+    </script>
+<noscript>
+    <p>Este site requer o JavaScript para funcionar corretamente. Por favor, habilite o JavaScript em seu navegador.</p>
+</noscript>
+</body>
+
+</html>
