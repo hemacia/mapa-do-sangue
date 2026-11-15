@@ -36,3 +36,32 @@ export function siglaDaUF(nome: string): UF | null {
   const procurado = nome.trim().toLowerCase()
   return UFS.find((uf) => NOMES_UF[uf].toLowerCase() === procurado) ?? null
 }
+
+// "em Minas Gerais", "no Rio de Janeiro", "na Bahia": cada estado tem seu artigo.
+const ARTIGO: Partial<Record<UF, 'no' | 'na'>> = {
+  AC: 'no',
+  AP: 'no',
+  AM: 'no',
+  BA: 'na',
+  CE: 'no',
+  DF: 'no',
+  ES: 'no',
+  MA: 'no',
+  PA: 'no',
+  PB: 'na',
+  PR: 'no',
+  PI: 'no',
+  RJ: 'no',
+  RN: 'no',
+  RS: 'no',
+  TO: 'no',
+}
+
+export function noEstado(uf: UF): string {
+  return `${ARTIGO[uf] ?? 'em'} ${NOMES_UF[uf]}`
+}
+
+export function doEstado(uf: UF): string {
+  const artigo = ARTIGO[uf]
+  return `${artigo === 'na' ? 'da' : artigo === 'no' ? 'do' : 'de'} ${NOMES_UF[uf]}`
+}
