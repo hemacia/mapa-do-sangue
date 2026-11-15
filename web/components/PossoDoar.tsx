@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import { type FormEvent, useState } from 'react'
 import { dataLocal, parseData } from '@/lib/domain/datas'
 import { avaliarCandidato, type ResultadoAvaliacao, type Sexo } from '@/lib/domain/elegibilidade'
@@ -32,56 +33,79 @@ export function PossoDoar({ hoje }: { hoje?: Date }) {
   }
 
   return (
-    <>
-      <form className="formulario" noValidate onSubmit={verificar}>
-        <label className="campo">
-          Data de nascimento
-          <input name="nascimento" type="date" required />
-        </label>
-        <label className="campo">
-          Sexo
-          <select name="sexo" defaultValue="feminino">
+    <div className="posso-doar">
+      <form className="formulario caixa" noValidate onSubmit={verificar}>
+        <div className="campo">
+          <label htmlFor="nascimento">Data de nascimento</label>
+          <input id="nascimento" name="nascimento" type="date" required aria-describedby="dica-nascimento" />
+          <small id="dica-nascimento">Pode doar de 16 a 69 anos.</small>
+        </div>
+        <div className="campo">
+          <label htmlFor="sexo">Sexo</label>
+          <select id="sexo" name="sexo" defaultValue="feminino" aria-describedby="dica-sexo">
             <option value="feminino">Feminino</option>
             <option value="masculino">Masculino</option>
           </select>
-        </label>
-        <label className="campo">
-          Peso (kg)
-          <input name="peso" type="number" min="1" step="0.1" inputMode="decimal" required />
-        </label>
-        <label className="campo">
-          Data da última doação (deixe vazio se nunca doou)
-          <input name="ultima-doacao" type="date" />
-        </label>
-        <button type="submit" className="botao">
+          <small id="dica-sexo">Define o intervalo: 3 meses para mulheres, 2 meses para homens.</small>
+        </div>
+        <div className="campo">
+          <label htmlFor="peso">Peso (kg)</label>
+          <input
+            id="peso"
+            name="peso"
+            type="number"
+            min="1"
+            step="0.1"
+            inputMode="decimal"
+            required
+            aria-describedby="dica-peso"
+          />
+          <small id="dica-peso">A partir de 50 kg.</small>
+        </div>
+        <div className="campo">
+          <label htmlFor="ultima-doacao">Data da última doação</label>
+          <input id="ultima-doacao" name="ultima-doacao" type="date" aria-describedby="dica-ultima" />
+          <small id="dica-ultima">Deixe em branco se nunca doou.</small>
+        </div>
+        <button type="submit" className="botao botao-primario">
           Verificar
         </button>
+        {erro && (
+          <p role="alert" className="erro">
+            {erro}
+          </p>
+        )}
       </form>
 
-      {erro && (
-        <p role="alert" className="erro" style={{ marginTop: 'var(--space-4)' }}>
-          {erro}
-        </p>
-      )}
-      {resultado && (
-        <div role="status" className={`resultado nivel-${resultado.podeDoarHoje ? 'adequado' : 'alerta'}`}>
-          <p>
-            <strong>
-              {resultado.podeDoarHoje ? 'Você pode doar hoje' : 'Hoje você ainda não pode doar'}
-            </strong>
-          </p>
-          {resultado.mensagens.length > 0 && (
-            <ul>
-              {resultado.mensagens.map((mensagem) => (
-                <li key={mensagem}>{mensagem}</li>
-              ))}
-            </ul>
-          )}
-          <p className="nota" style={{ marginTop: 'var(--space-3)' }}>
-            Resultado indicativo. A triagem no hemocentro é quem confirma.
-          </p>
-        </div>
-      )}
-    </>
+      <div className="resultado" aria-live="polite">
+        {resultado ? (
+          <div role="status" className="secao">
+            <span className={`selo-resultado nivel-${resultado.podeDoarHoje ? 'estavel' : 'alerta'}`}>
+              {resultado.podeDoarHoje ? 'Pode doar' : 'Ainda não'}
+            </span>
+            <h2>{resultado.podeDoarHoje ? 'Você pode doar hoje' : 'Hoje você ainda não pode doar'}</h2>
+            {resultado.mensagens.length > 0 && (
+              <ul>
+                {resultado.mensagens.map((mensagem) => (
+                  <li key={mensagem}>{mensagem}</li>
+                ))}
+              </ul>
+            )}
+            <p className="nota">
+              Resultado indicativo. A triagem do hemocentro ainda pergunta sobre saúde, viagens e remédios.
+              Leve um documento com foto.
+            </p>
+            <Link href="/" className="botao botao-contorno" style={{ alignSelf: 'flex-start' }}>
+              Ver onde falta sangue
+            </Link>
+          </div>
+        ) : (
+          <>
+            <h2>Preencha os dados e toque em Verificar</h2>
+            <p>A resposta aparece aqui, com a próxima data em que você pode doar.</p>
+          </>
+        )}
+      </div>
+    </div>
   )
 }

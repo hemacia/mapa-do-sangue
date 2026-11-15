@@ -20,3 +20,17 @@ describe('QuemDoaParaQuem', () => {
     expect(screen.getByTestId('doa-para').textContent?.split(', ')).toHaveLength(8)
   })
 })
+
+describe('QuemDoaParaQuem: tabela', () => {
+  it('destaca a linha do tipo escolhido e marca as células compatíveis', async () => {
+    const usuario = userEvent.setup()
+    render(<QuemDoaParaQuem />)
+
+    await usuario.selectOptions(screen.getByLabelText('Seu tipo sanguíneo'), 'AB+')
+
+    const linha = screen.getByRole('rowheader', { name: 'AB+' }).closest('tr')
+    expect(linha).toHaveClass('selecionado')
+    expect(linha?.querySelectorAll('td.pode')).toHaveLength(1)
+    expect(screen.getAllByText('pode doar')).toHaveLength(27)
+  })
+})
