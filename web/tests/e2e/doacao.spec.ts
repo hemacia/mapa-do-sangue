@@ -17,16 +17,16 @@ test('o quiz informa a próxima data para quem doou há pouco', async ({ page })
 
 test('registrar uma doação soma no contador do mês', async ({ page }) => {
   await page.goto('/')
-  const contador = page.getByTestId('total-mes').locator('.numero')
+  const contador = page.getByTestId('total-mes')
   await expect(contador).toBeVisible()
-  const antes = Number(await contador.textContent())
+  const antes = Number(await contador.getAttribute('data-total'))
 
   await page.getByRole('combobox', { name: /^Estado/ }).selectOption('MG')
   await page.getByRole('combobox', { name: /^Tipo sanguíneo/ }).selectOption('O-')
   await page.getByRole('button', { name: 'Registrar minha doação' }).click()
 
   await expect(page.getByRole('status')).toContainText('Obrigado por doar')
-  await expect(contador).toHaveText(String(antes + 1))
+  await expect(contador).toHaveAttribute('data-total', String(antes + 1))
 })
 
 test('o tema escolhido continua depois de recarregar', async ({ page }) => {
