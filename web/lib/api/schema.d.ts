@@ -89,6 +89,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/alertas": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Notícias de estoque baixo publicadas nos últimos 30 dias pelos sites oficiais do estado */
+        get: operations["listarAlertas"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/doacoes": {
         parameters: {
             query?: never;
@@ -192,6 +209,14 @@ export interface components {
             indicadores?: {
                 [key: string]: number;
             };
+        };
+        AlertaNoticiado: {
+            uf: components["schemas"]["UF"];
+            fonte: string;
+            titulo: string;
+            url: string;
+            /** Format: date-time */
+            publicadoEm: string;
         };
         PontoColeta: {
             cnes: number;
@@ -357,6 +382,29 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PontoColeta"][];
+                };
+            };
+            400: components["responses"]["Problema"];
+        };
+    };
+    listarAlertas: {
+        parameters: {
+            query: {
+                uf: components["schemas"]["UF"];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Da mais recente para a mais antiga, no máximo 3 */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AlertaNoticiado"][];
                 };
             };
             400: components["responses"]["Problema"];

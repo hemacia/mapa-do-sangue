@@ -2,13 +2,14 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { Suspense } from 'react'
+import { AlertaNoticiado } from '@/components/AlertaNoticiado'
 import { DiasCriticos } from '@/components/DiasCriticos'
 import { GradeTipos } from '@/components/GradeTipos'
 import { MapaDestaque } from '@/components/MapaDestaque'
 import { PerfilDoadores } from '@/components/PerfilDoadores'
 import { PontosColeta } from '@/components/PontosColeta'
 import type { EstatisticaUF } from '@/lib/api/cliente'
-import { estatisticasPorUF, estoqueAtual, pontosColeta } from '@/lib/api/dados'
+import { alertasNoticiados, estatisticasPorUF, estoqueAtual, pontosColeta } from '@/lib/api/dados'
 import { formatarAtualizacao } from '@/lib/domain/datas'
 import { type Posicao, posicaoNoRanking } from '@/lib/domain/estatisticas'
 import { nivelPorUF } from '@/lib/domain/mapa'
@@ -66,10 +67,11 @@ function FatoColetas({ estatistica, posicao }: { estatistica?: EstatisticaUF; po
 async function ConteudoEstado({ params }: Pick<PageProps<'/estado/[uf]'>, 'params'>) {
   const uf = ufDoParametro((await params).uf)
   if (!uf) notFound()
-  const [todos, estatisticas, pontos] = await Promise.all([
+  const [todos, estatisticas, pontos, alertas] = await Promise.all([
     estoqueAtual(),
     estatisticasPorUF().catch(() => []),
     pontosColeta(uf).catch(() => []),
+    alertasNoticiados(uf).catch(() => []),
   ])
   const hemocentros = todos.filter((h) => h.uf === uf)
   const estatistica = estatisticas.find((e) => e.uf === uf)
@@ -110,6 +112,7 @@ async function ConteudoEstado({ params }: Pick<PageProps<'/estado/[uf]'>, 'param
             </nav>
             <h1>Estoque de sangue {noEstado(uf)}</h1>
             <p>{resumo}</p>
+            <AlertaNoticiado alertas={alertas} />
             <dl className="placa-estado">
               <div>
                 <dt>{publica ? 'tipos críticos hoje' : 'hoje'}</dt>

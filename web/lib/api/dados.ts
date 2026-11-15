@@ -23,3 +23,9 @@ export async function pontosColeta(uf: string) {
   cacheLife('days')
   return api.pontosColeta(uf)
 }
+
+export async function alertasNoticiados(uf: string) {
+  'use cache'
+  cacheLife('hours')
+  return api.alertas(uf)
+}

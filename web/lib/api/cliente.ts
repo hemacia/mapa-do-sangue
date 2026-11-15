@@ -8,6 +8,7 @@ export type Doacao = components['schemas']['Doacao']
 export type TotalDoMes = components['schemas']['TotalDoMes']
 export type PontoColeta = components['schemas']['PontoColeta']
 export type AnoColetas = components['schemas']['AnoColetas']
+export type AlertaNoticiado = components['schemas']['AlertaNoticiado']
 
 type Problema = components['schemas']['Problema']
 
@@ -28,6 +29,7 @@ export function criarCliente(baseUrl: string, fetch?: (req: Request) => Promise<
     estatisticas: async () => resultado(await api.GET('/v1/estatisticas')),
     pontosColeta: async (uf: string) =>
       resultado(await api.GET('/v1/pontos-coleta', { params: { query: { uf } } })),
+    alertas: async (uf: string) => resultado(await api.GET('/v1/alertas', { params: { query: { uf } } })),
     totalDoMes: async () => resultado(await api.GET('/v1/doacoes/mes')),
     registrarDoacao: async (doacao: NovaDoacao) => resultado(await api.POST('/v1/doacoes', { body: doacao })),
   }

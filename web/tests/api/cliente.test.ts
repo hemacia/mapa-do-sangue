@@ -27,6 +27,15 @@ describe('cliente da API', () => {
     expect(chamadas[0].url).toBe('http://api.teste/v1/pontos-coleta?uf=AM')
   })
 
+  it('busca os alertas noticiados do estado', async () => {
+    const chamadas: Request[] = []
+    const api = criarCliente('http://api.teste', fetchFalso(200, [], chamadas))
+
+    await api.alertas('GO')
+
+    expect(chamadas[0].url).toBe('http://api.teste/v1/alertas?uf=GO')
+  })
+
   it('filtra o estoque por UF', async () => {
     const chamadas: Request[] = []
     const api = criarCliente('http://api.teste', fetchFalso(200, [], chamadas))
