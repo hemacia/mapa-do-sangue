@@ -250,6 +250,7 @@ h3 {
 
 .botao-escuro {
   background: var(--casco);
+  border-color: var(--casco-linha);
   color: #ffffff;
 }
 
@@ -516,17 +517,15 @@ h3 {
 .fatos {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  background: var(--superficie);
+  /* O fundo aparece no vão de 1px e vira a divisória, em linha ou empilhado. */
+  gap: 1px;
+  background: var(--linha);
   border: 1px solid var(--linha);
 }
 
 .fatos > div {
   padding: var(--space-4) var(--space-5);
-  border-right: 1px solid var(--linha);
-}
-
-.fatos > div:last-child {
-  border-right: 0;
+  background: var(--superficie);
 }
 
 .fatos dt {
