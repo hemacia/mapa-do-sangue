@@ -1,10 +1,17 @@
-import { GeistMono } from 'geist/font/mono'
-import { GeistSans } from 'geist/font/sans'
 import type { Metadata, Viewport } from 'next'
+import { Barlow, Barlow_Condensed } from 'next/font/google'
+import Link from 'next/link'
 import { SCRIPT_TEMA } from '@/components/BotaoTema'
 import { Topo } from '@/components/Topo'
 import { SITE } from '@/lib/site'
 import './globals.css'
+
+const barlow = Barlow({ subsets: ['latin'], weight: ['400', '500', '600', '700'], variable: '--font-barlow' })
+const barlowCondensed = Barlow_Condensed({
+  subsets: ['latin'],
+  weight: ['600', '700', '800'],
+  variable: '--font-barlow-condensed',
+})
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE.url),
@@ -21,14 +28,14 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: '(prefers-color-scheme: dark)', color: '#101216' },
-    { media: '(prefers-color-scheme: light)', color: '#f6f7f9' },
+    { media: '(prefers-color-scheme: dark)', color: '#061a28' },
+    { media: '(prefers-color-scheme: light)', color: '#0a2a40' },
   ],
 }
 
 export default function RootLayout({ children }: LayoutProps<'/'>) {
   return (
-    <html lang="pt-BR" className={`${GeistSans.variable} ${GeistMono.variable}`} suppressHydrationWarning>
+    <html lang="pt-BR" className={`${barlow.variable} ${barlowCondensed.variable}`} suppressHydrationWarning>
       <head>
         {/* biome-ignore lint/security/noDangerouslySetInnerHtml: script fixo, sem dado do usuário */}
         <script dangerouslySetInnerHTML={{ __html: SCRIPT_TEMA }} />
@@ -40,8 +47,8 @@ export default function RootLayout({ children }: LayoutProps<'/'>) {
         <Topo />
         <main id="conteudo">{children}</main>
         <footer className="rodape">
-          Projeto open source da disciplina de Teste de Software (UFMG). Dados dos sites oficiais dos
-          hemocentros, da Anvisa e do IBGE. <a href={SITE.repositorio}>Código no GitHub</a>
+          Estoque coletado dos sites oficiais dos hemocentros duas vezes por dia. Coletas por habitante:
+          Anvisa (Hemoprod) e IBGE. <Link href="/sobre">Como os dados são coletados</Link>
         </footer>
       </body>
     </html>
