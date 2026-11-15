@@ -40,6 +40,12 @@ const FONTES = [
     'Painel Qlik com bolsas e estoque estratégico',
     'O painel não mostra o excesso: quem atinge o estratégico vira Estável',
   ],
+  [
+    'Fundação Hemocentro de Brasília',
+    'Distrito Federal',
+    'Imagem diária com oito gotas, lida pela altura do vermelho em cada uma',
+    '"Baixo" vira Alerta e "Regular" vira Estável',
+  ],
   ['Hemoacre', 'Acre', 'Home do portal do governo do Acre', '"Estável" é o melhor nível lá e vira Adequado'],
   [
     'MT-Hemocentro',
@@ -98,10 +104,9 @@ export default function PaginaSobre() {
           </table>
         </div>
         <p className="nota">
-          Os outros 18 estados não publicam o estoque de um jeito que dê para ler automaticamente. O IHEBE,
+          Os outros 17 estados não publicam o estoque de um jeito que dê para ler automaticamente. O IHEBE,
           banco de sangue privado de Belém, e a rede GSH mostram percentuais nos sites, mas os números estão
-          parados há meses e ficam de fora. A Fundação Hemocentro de Brasília publica o estoque só como
-          imagem.
+          parados há meses e ficam de fora.
         </p>
       </section>
 
