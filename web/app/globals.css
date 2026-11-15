@@ -513,9 +513,12 @@ h3 {
 .placa-estado {
   display: flex;
   flex-wrap: wrap;
+  /* O fundo aparece no vão de 1px e vira a divisória, numa linha ou quebrando. */
+  gap: 1px;
+  overflow: hidden;
+  background: #cfdae2;
   align-self: flex-start;
   margin: var(--space-2) 0;
-  background: #ffffff;
   color: #0b2235;
   border-radius: 4px;
   box-shadow: 0 2px 8px rgb(3 20 32 / 0.35);
@@ -527,17 +530,14 @@ h3 {
   justify-content: flex-end;
   align-items: baseline;
   gap: var(--space-2);
+  flex: 1 1 auto;
   padding: var(--space-3) var(--space-4);
-  border-right: 1px solid #cfdae2;
+  background: #ffffff;
 }
 
 .placa-estado > div.rotulo-antes {
   flex-direction: row;
   justify-content: flex-start;
-}
-
-.placa-estado > div:last-child {
-  border-right: 0;
 }
 
 .placa-estado dt {
@@ -1332,7 +1332,7 @@ h3 {
     display: none;
   }
   /* Sem as placas, as siglas dos estados que publicam voltam para o mapa. */
-  .mapa-area text.sigla-com-placa {
+  .mapa .mapa-area text.sigla-com-placa {
     display: inline;
   }
   .lista-placas {
