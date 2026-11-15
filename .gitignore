@@ -32,3 +32,6 @@ test-results
 # ambiente
 .env
 api/coverage.out
+
+# Rascunhos e capturas locais do impeccable
+web/.impeccable/
