@@ -1757,9 +1757,9 @@ h3 {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    transition-duration: 0.01ms !important;
+  .botao,
+  .mapa-area path,
+  .placa-tipos i {
+    transition: none;
   }
 }
