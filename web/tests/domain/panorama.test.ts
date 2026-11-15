@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest'
-import { panoramaPorTipo, tiposMaisEmFalta } from '@/lib/domain/panorama'
+import {
+  juntarTipos,
+  montarManchete,
+  panoramaPorTipo,
+  tiposCriticos,
+  tiposMaisEmFalta,
+} from '@/lib/domain/panorama'
 
 const HEMOCENTROS = [
   { estoque: { 'O-': 'critico', 'A+': 'estavel', 'B+': 'adequado' } },
@@ -44,5 +50,50 @@ describe('tiposMaisEmFalta', () => {
 
   it('devolve lista vazia quando nenhum tipo está crítico', () => {
     expect(tiposMaisEmFalta(panoramaPorTipo([{ estoque: { 'O+': 'estavel' } }]))).toEqual([])
+  })
+})
+
+describe('tiposCriticos', () => {
+  it('lista, na ordem dos tipos, só os que estão críticos', () => {
+    expect(tiposCriticos({ 'O-': 'critico', 'A+': 'critico', 'B+': 'alerta' })).toEqual(['A+', 'O-'])
+  })
+})
+
+describe('juntarTipos', () => {
+  it.each([
+    [[], ''],
+    [['O-'], 'O-'],
+    [['O-', 'O+'], 'O- e O+'],
+    [['A-', 'B-', 'O-'], 'A-, B- e O-'],
+  ])('junta %j como "%s"', (tipos, esperado) => {
+    expect(juntarTipos(tipos)).toBe(esperado)
+  })
+})
+
+describe('montarManchete', () => {
+  const todos = (criticos: Partial<Record<string, number>>) =>
+    panoramaPorTipo([]).map((p) => ({ ...p, criticos: criticos[p.tipo] ?? 0, informados: 6 }))
+
+  it('diz quando o tipo está crítico em todos os hemocentros e cita o segundo colocado', () => {
+    const manchete = montarManchete(todos({ 'O-': 6, 'O+': 4, 'A-': 3 }), 6)
+
+    expect(manchete.titulo).toBe('O- está crítico nos 6 hemocentros que publicam')
+    expect(manchete.complemento).toBe('O+ está crítico em 4 deles.')
+    expect(manchete.tipos).toEqual(['O-'])
+  })
+
+  it('usa o plural e "em X dos N" quando não são todos', () => {
+    const manchete = montarManchete(todos({ 'A-': 3, 'O-': 3 }), 6)
+
+    expect(manchete.titulo).toBe('A- e O- estão críticos em 3 dos 6 hemocentros que publicam')
+    expect(manchete.complemento).toBeNull()
+  })
+
+  it('avisa quando nenhum tipo está crítico', () => {
+    expect(montarManchete(todos({}), 6)).toEqual({
+      tipos: [],
+      titulo: 'Nenhum tipo está crítico nos 6 hemocentros que publicam',
+      complemento: null,
+    })
   })
 })
