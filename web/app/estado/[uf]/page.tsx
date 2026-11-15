@@ -28,7 +28,6 @@ function ufDoParametro(parametro: string): UF | null {
 export async function generateMetadata({ params }: PageProps<'/estado/[uf]'>): Promise<Metadata> {
   const uf = ufDoParametro((await params).uf)
   if (!uf) return {}
-  const nome = NOMES_UF[uf]
   return {
     title: `Estoque de sangue ${noEstado(uf)} (${uf})`,
     description: `Nível de cada tipo sanguíneo nos hemocentros ${doEstado(uf)}, histórico de dias críticos e coletas por habitante.`,
@@ -42,11 +41,11 @@ function formatarTaxa(valor: number) {
 
 function FatoColetas({ estatistica, posicao }: { estatistica?: EstatisticaUF; posicao: Posicao | null }) {
   const ano = estatistica?.ano ?? 2024
-  let valor = <>sem dado</>
+  let valor = 'sem dado'
   if (estatistica?.cobertura === 'incompleto') {
-    valor = <>envio incompleto</>
+    valor = 'envio incompleto'
   } else if (estatistica?.porMil != null) {
-    valor = <>{formatarTaxa(estatistica.porMil)}</>
+    valor = formatarTaxa(estatistica.porMil)
   }
   return (
     <div>
