@@ -68,7 +68,7 @@ func relatar(resultados []coleta.Resultado, noActions bool) {
 				// Anotação que aparece no resumo do GitHub Actions.
 				fmt.Printf("::warning title=Coleta %s::%s\n", r.FonteID, escaparComando(r.Erro.Error()))
 			} else {
-				fmt.Printf("falha %-10s %v\n", r.FonteID, r.Erro)
+				fmt.Printf("falha %-17s %v\n", r.FonteID, r.Erro)
 			}
 			continue
 		}
@@ -80,7 +80,7 @@ func relatar(resultados []coleta.Resultado, noActions bool) {
 		if data == "" {
 			data = "sem data"
 		}
-		fmt.Printf("ok    %-10s %s (fonte: %s)\n", r.FonteID, strings.Join(niveis, " "), data)
+		fmt.Printf("ok    %-17s %s (fonte: %s)\n", r.FonteID, strings.Join(niveis, " "), data)
 	}
 }
 

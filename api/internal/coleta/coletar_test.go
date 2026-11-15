@@ -20,7 +20,7 @@ func baixarFixtures(t *testing.T) Baixar {
 	}
 }
 
-func TestColetarTodasLeAsSeisFontesNaOrdem(t *testing.T) {
+func TestColetarTodasLeTodasAsFontesNaOrdem(t *testing.T) {
 	resultados := ColetarTodas(context.Background(), Fontes, baixarFixtures(t), coletadoEm)
 
 	total := 0
@@ -30,8 +30,8 @@ func TestColetarTodasLeAsSeisFontesNaOrdem(t *testing.T) {
 		}
 		total += len(r.Leituras)
 	}
-	if total != 48 {
-		t.Errorf("leituras = %d, quero 48", total)
+	if total != 8*len(Fontes) {
+		t.Errorf("leituras = %d, quero 8 por fonte", total)
 	}
 }
 
@@ -55,8 +55,8 @@ func TestColetarTodasContinuaQuandoUmaFonteFalha(t *testing.T) {
 			ok++
 		}
 	}
-	if ok != 5 {
-		t.Errorf("fontes ok = %d, quero 5", ok)
+	if ok != len(Fontes)-1 {
+		t.Errorf("fontes ok = %d, quero todas menos uma", ok)
 	}
 }
 

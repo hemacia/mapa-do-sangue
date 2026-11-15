@@ -1,0 +1,923 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Posição de Estoque - Fundação Pró-Sangue</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #f5f5f5 0%, #e8f4f8 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            padding-bottom: 20px;
+        }
+
+        .container {
+            width: 95%;
+            max-width: 1000px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            overflow: hidden;
+            margin: 20px;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #cc0000 0%, #990000 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2em;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .header p {
+            font-size: 1em;
+            opacity: 0.9;
+        }
+
+        .estoque-content {
+            padding: 25px;
+        }
+
+        .info-atualizacao {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 12px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #cc0000;
+        }
+
+        .info-atualizacao h2 {
+            color: #333;
+            font-size: 1.2em;
+            margin-bottom: 5px;
+        }
+
+        .info-atualizacao .data-hora {
+            font-size: 1em;
+            color: #666;
+            font-weight: bold;
+        }
+
+        /* Área de Controle Administrativo */
+        .controle-admin {
+            background: #e8f4f8;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            border: 2px dashed #cc0000;
+        }
+
+        .controle-admin h3 {
+            color: #cc0000;
+            margin-bottom: 15px;
+            text-align: center;
+            font-size: 1.3em;
+        }
+
+        .form-estoque {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .input-group label {
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #333;
+            font-size: 0.9em;
+        }
+
+        .input-group input {
+            padding: 8px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 1em;
+            text-align: center;
+        }
+
+        .input-group input:focus {
+            border-color: #cc0000;
+            outline: none;
+        }
+
+        .btn-atualizar {
+            background: #cc0000;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: block;
+            margin: 0 auto;
+            font-size: 1em;
+        }
+
+        .btn-atualizar:hover {
+            background: #990000;
+            transform: translateY(-2px);
+        }
+
+        /* Grid de Tipos Sanguíneos - Padrão Desktop */
+        .tipos-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .tipo-item {
+            background: white;
+            border-radius: 15px;
+            padding: 25px 15px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            border: 2px solid #f0f0f0;
+            transition: all 0.3s ease;
+        }
+
+        .tipo-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        }
+
+        .tipo-sanguineo {
+            font-size: 2.2em;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        /* Bolsa de Sangue - Padrão Desktop */
+        .bolsa-sangue {
+            width: 100px;
+            height: 140px;
+            margin: 0 auto 20px;
+            position: relative;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2));
+        }
+
+        /* Contêiner da bolsa - Padrão Desktop */
+        .bolsa-container {
+            width: 80px;
+            height: 120px;
+            background: #f8f9fa;
+            border: 3px solid #333;
+            border-radius: 10px 10px 30px 30px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Sangue dentro da bolsa */
+        .sangue {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: linear-gradient(to top, #8b0000, #cc0000);
+            border-radius: 0 0 25px 25px;
+            transition: all 0.5s ease;
+        }
+
+        /* Estável - Bolsa Cheia */
+        .estavel .sangue { height: 100%; }
+						 
+		 
+
+        /* Emergência - Bolsa pela Metade */
+        .emergencia .sangue { height: 50%; }
+						
+		 
+
+        /* Crítico - Bolsa Quase Vazia */
+        .critico .sangue { height: 15%; }
+						
+		 
+
+        .status-texto {
+            font-size: 1.1em;
+            font-weight: bold;
+            text-transform: uppercase;
+            padding: 8px 15px;
+            border-radius: 20px;
+            background: #f8f9fa;
+            display: inline-block;
+        }
+
+        /* Animações */
+								   
+        .critico .bolsa-container { animation: pulsar 2s infinite; }
+		 
+
+        @keyframes pulsar {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        /* Bolhas no sangue */
+        .sangue::after {
+						
+            content: ''; position: absolute; width: 8px; height: 8px;
+					   
+						
+            background: rgba(255, 255, 255, 0.3); border-radius: 50%;
+							   
+					 
+					  
+            top: 20%; left: 20%; animation: bolha 3s infinite ease-in-out;
+        }
+
+        .sangue::before {
+						
+            content: ''; position: absolute; width: 5px; height: 5px;
+					   
+						
+            background: rgba(255, 255, 255, 0.2); border-radius: 50%;
+							   
+					 
+					   
+            top: 40%; right: 25%; animation: bolha 4s infinite ease-in-out;
+        }
+
+        @keyframes bolha {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        /* Legenda */
+        .legenda {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .legenda h3 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #333;
+            font-size: 1.2em;
+        }
+
+        .legenda-itens {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            flex-wrap: wrap;
+        }
+
+        .legenda-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .legenda-bolsa { width: 30px; height: 42px; position: relative; }
+						
+						 
+							   
+		 
+
+        .legenda-bolsa-container {
+						
+						 
+            width: 24px; height: 36px; background: #f8f9fa;
+								   
+            border: 2px solid #333; border-radius: 3px 3px 9px 9px;
+            position: relative; overflow: hidden;
+							 
+        }
+
+        .legenda-sangue {
+            position: absolute; bottom: 0; left: 0; width: 100%;
+					  
+					
+						
+            background: currentColor; border-radius: 0 0 7px 7px;
+									   
+        }
+
+        .legenda-estavel .legenda-sangue { height: 100%; }
+        .legenda-emergencia .legenda-sangue { height: 50%; }
+        .legenda-critico .legenda-sangue { height: 15%; }
+
+						
+        .legenda-texto { font-weight: bold; font-size: 0.95em; }
+							  
+		 
+
+        .legenda-estavel { color: #28a745; }
+        .legenda-emergencia { color: #ffc107; }
+        .legenda-critico { color: #dc3545; }
+
+        /* Ações */
+        .acoes {
+            text-align: center;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 25px;
+						  
+            background: #cc0000;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            font-size: 0.9em;
+        }
+
+        .btn:hover {
+            background: #990000;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+					  
+        .btn-agendar { background: #28a745; }
+        .btn-agendar:hover { background: #218838; }
+
+        .loading { text-align: center; padding: 40px; font-size: 1.1em; color: #666; }
+        .error { text-align: center; padding: 30px; color: #dc3545; background: #f8d7da; border-radius: 8px; margin: 15px; font-size: 0.9em; }
+		 
+
+				  
+							   
+						  
+							 
+						
+		 
+
+				
+							   
+						  
+						   
+								
+							   
+						 
+							 
+		 
+
+        /* Compartilhar URL */
+        .compartilhar-url {
+            background: #e8f5e8;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border-left: 4px solid #28a745;
+        }
+
+        .compartilhar-url h4 { color: #28a745; margin-bottom: 10px; text-align: center; }
+						   
+								
+							   
+		 
+
+        .url-container { display: flex; gap: 10px; align-items: center; }
+        .url-input { flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 0.9em; background: white; }
+        .btn-copiar { background: #28a745; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-size: 0.9em; }
+        .btn-copiar:hover { background: #218838; }
+		 
+
+        /* --- RESPONSIVIDADE --- */
+					
+						 
+								   
+							   
+							 
+							  
+		 
+
+					 
+								
+						 
+						 
+							  
+							   
+							
+							 
+		 
+
+						   
+								
+		 
+
+						
+        @media (max-width: 768px) {
+            .tipos-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 12px;
+            }
+			
+            .form-estoque { grid-template-columns: repeat(2, 1fr); }
+            .container { width: 98%; margin: 10px; }
+        }
+
+        /* --- MOBILE OTIMIZADO (480px ou menos) --- */
+        @media (max-width: 480px) {
+            body {
+                padding: 0;
+                background: #fff; /* Fundo contínuo no mobile */
+                display: block; /* Remove o display flex do body que centralizava */
+            }
+
+            .container {
+                width: 100%;
+                margin: 0;
+                border-radius: 0;
+                box-shadow: none;
+                border: none;
+            }
+            
+            .estoque-content {
+                padding: 10px 5px; /* Padding lateral mínimo */
+            }
+
+            /* Força 2 colunas reais */
+            .tipos-grid {
+                display: grid;
+                grid-template-columns: 1fr 1fr; /* 50% para cada */
+                gap: 8px; /* Espaço pequeno entre colunas */
+            }
+            
+            .form-estoque {
+                grid-template-columns: 1fr;
+            }
+
+            .header h1 { font-size: 1.4em; }
+
+            /* Redimensionamento FÍSICO dos elementos para caber em 50% da tela */
+            .tipo-item {
+                padding: 12px 5px;
+            }
+
+            .tipo-sanguineo {
+                font-size: 1.5em;
+                margin-bottom: 10px;
+            }
+
+            /* Reduzimos fisicamente a bolsa, sem usar transform */
+            .bolsa-sangue {
+                width: 50px;
+                height: 80px;
+                margin: 0 auto 10px;
+            }
+
+            .bolsa-container {
+                width: 40px;
+                height: 70px;
+                border-width: 2px;
+                border-radius: 5px 5px 15px 15px;
+            }
+
+            .sangue {
+                border-radius: 0 0 12px 12px;
+            }
+
+            .status-texto {
+                font-size: 0.75em;
+                padding: 5px;
+							   
+                width: 100%;
+								  
+								   
+            }
+
+            .input-group input {
+                font-size: 16px;
+                padding: 12px;
+            }
+		 
+
+            .btn, .btn-atualizar, .btn-copiar {
+                padding: 14px;
+                width: 100%;
+            }
+            
+            .legenda-itens {
+                flex-direction: column;
+                padding-left: 10px;
+            }
+			
+				  
+							 
+			 
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>POSIÇÃO DE ESTOQUE</h1>
+            <p>Fundação Pró-Sangue Hemocentro de São Paulo</p>
+        </div>
+
+        <div class="estoque-content">
+            <div class="info-atualizacao">
+                <h2>Última Atualização</h2>
+                <div class="data-hora" id="data-atualizacao">Carregando...</div>
+            </div>
+
+            <!-- Área de Controle Administrativo (Oculta por padrão) -->
+            <div class="controle-admin" id="controle-admin" style="display: none;">
+                <h3>🛠️ Controle de Estoque - Área Administrativa</h3>
+                
+                <div class="compartilhar-url">
+                    <h4>🔗 Compartilhar Estoque Atual</h4>
+                    <div class="url-container">
+                        <input type="text" class="url-input" id="url-compartilhar" readonly>
+                        <button class="btn-copiar" onclick="copiarUrl()">📋 Copiar URL</button>
+                    </div>
+                    <p style="text-align: center; margin-top: 8px; font-size: 0.8em; color: #666;">
+                        Esta URL contém os dados atuais do estoque e pode ser compartilhada
+                    </p>
+                </div>
+
+                <div class="form-estoque">
+                    <div class="input-group">
+                        <label for="A_positivo">A+</label>
+                        <input type="number" id="A_positivo" min="0">
+                    </div>
+                    <div class="input-group">
+                        <label for="A_negativo">A-</label>
+                        <input type="number" id="A_negativo" min="0">
+                    </div>
+                    <div class="input-group">
+                        <label for="B_positivo">B+</label>
+                        <input type="number" id="B_positivo" min="0">
+                    </div>
+                    <div class="input-group">
+                        <label for="B_negativo">B-</label>
+                        <input type="number" id="B_negativo" min="0">
+                    </div>
+                    <div class="input-group">
+                        <label for="AB_positivo">AB+</label>
+                        <input type="number" id="AB_positivo" min="0">
+                    </div>
+                    <div class="input-group">
+                        <label for="AB_negativo">AB-</label>
+                        <input type="number" id="AB_negativo" min="0">
+                    </div>
+                    <div class="input-group">
+                        <label for="O_positivo">O+</label>
+                        <input type="number" id="O_positivo" min="0">
+                    </div>
+                    <div class="input-group">
+                        <label for="O_negativo">O-</label>
+                        <input type="number" id="O_negativo" min="0">
+                    </div>
+                </div>
+                <button class="btn-atualizar" onclick="atualizarEstoque()">
+                    🔄 Atualizar Estoque
+                </button>
+                <button class="btn-atualizar" onclick="resetarEstoque()" style="background: #6c757d; margin-top: 10px;">
+                    🔄 Restaurar Valores Padrão
+                </button>
+            </div>
+
+            <div id="estoque-container" class="loading">
+                Carregando estoque...
+            </div>
+
+           <!-- <div class="legenda">
+                <h3>Legenda de Status</h3>
+                <div class="legenda-itens">
+                    <div class="legenda-item">
+                        <div class="legenda-bolsa">
+                            <div class="legenda-bolsa-container">
+                                <div class="legenda-sangue legenda-estavel"></div>
+                            </div>
+                        </div>
+                        <span class="legenda-texto">Estável - Bolsa Cheia</span>
+                    </div>
+                    <div class="legenda-item">
+                        <div class="legenda-bolsa">
+                            <div class="legenda-bolsa-container">
+                                <div class="legenda-sangue legenda-emergencia"></div>
+                            </div>
+                        </div>
+                        <span class="legenda-texto">Alerta - Bolsa pela Metade</span>
+                    </div>
+                    <div class="legenda-item">
+                        <div class="legenda-bolsa">
+                            <div class="legenda-bolsa-container">
+                                <div class="legenda-sangue legenda-critico"></div>
+                            </div>
+                        </div>
+                        <span class="legenda-texto">Crítico - Bolsa Quase Vazia</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="acoes">
+                <a href="https://prosangle.hubglobe.com/entrar" target="_blank" class="btn btn-agendar">
+                    📅 Agendar Doação
+                </a>
+                <a href="../home/Default.html" class="btn">
+                    🏠 Site Principal
+                </a>
+                <button class="btn" onclick="toggleAdmin()" style="background: #6c757d;">
+                    ⚙️ Controle Admin
+                </button>
+            </div>
+        </div>-->
+    </div>
+
+<script>
+        // Tabela de referência baseada na imagem
+        const referenciaEstoque = {
+            "A_negativo": { critico: 32, alerta: 48, estavel: 49 },
+            "A_positivo": { critico: 242, alerta: 363, estavel: 364 },
+            "AB_negativo": { critico: 3, alerta: 6, estavel: 7 },
+            "AB_positivo": { critico: 18, alerta: 27, estavel: 28 },
+            "B_negativo": { critico: 26, alerta: 30, estavel: 40 },
+            "B_positivo": { critico: 84, alerta: 126, estavel: 127 },
+            "O_negativo": { critico: 68, alerta: 102, estavel: 103 },
+            "O_positivo": { critico: 372, alerta: 558, estavel: 559 }
+        };
+
+        // Dados padrão do estoque
+        const dadosEstoquePadrao = {
+            ultima_atualizacao: new Date().toLocaleString('pt-BR'),
+            tipos_sanguineos: {
+                "A-": { quantidade: 15, status: "" },
+				"A+": { quantidade: 1257, status: "" },
+				"AB-": { quantidade: 01, status: "" },
+				"AB+": { quantidade: 168, status: "" },
+				"B-": { quantidade: 20, status: "" },
+				"B+": { quantidade: 452, status: "" },
+				"O-": { quantidade: 25, status: "" },
+				"O+": { quantidade: 214, status: "" }              
+            }
+        };
+
+        // Função para carregar dados
+        function carregarDadosSalvos() {
+													  
+			
+														   
+            const urlParams = new URLSearchParams(window.location.search);
+            const estoqueUrl = urlParams.get('estoque');
+            
+            if (estoqueUrl) {
+                try {
+                    const dadosUrl = JSON.parse(decodeURIComponent(estoqueUrl));
+																	  
+					
+																
+                    recalcularStatus(dadosUrl);
+                    return dadosUrl;
+                } catch (e) {
+                    console.error('Erro URL:', e);
+                }
+            }
+
+												 
+            try {
+                const dadosLocalStorage = localStorage.getItem('estoqueSangue');
+                if (dadosLocalStorage) {
+                    const dados = JSON.parse(dadosLocalStorage);
+																			
+					
+																
+                    recalcularStatus(dados);
+                    return dados;
+                }
+            } catch (e) {
+                console.error('Erro LocalStorage:', e);
+            }
+
+									
+												
+            const dadosPadrao = JSON.parse(JSON.stringify(dadosEstoquePadrao));
+            recalcularStatus(dadosPadrao);
+            return dadosPadrao;
+        }
+
+        // Função para recalcular todos os status
+        function recalcularStatus(dados) {
+												  
+			
+            dados.tipos_sanguineos["A-"].status = classificarStatus("A_negativo", dados.tipos_sanguineos["A-"].quantidade);
+            dados.tipos_sanguineos["A+"].status = classificarStatus("A_positivo", dados.tipos_sanguineos["A+"].quantidade);
+            dados.tipos_sanguineos["AB-"].status = classificarStatus("AB_negativo", dados.tipos_sanguineos["AB-"].quantidade);
+            dados.tipos_sanguineos["AB+"].status = classificarStatus("AB_positivo", dados.tipos_sanguineos["AB+"].quantidade);
+            dados.tipos_sanguineos["B-"].status = classificarStatus("B_negativo", dados.tipos_sanguineos["B-"].quantidade);
+            dados.tipos_sanguineos["B+"].status = classificarStatus("B_positivo", dados.tipos_sanguineos["B+"].quantidade);
+            dados.tipos_sanguineos["O-"].status = classificarStatus("O_negativo", dados.tipos_sanguineos["O-"].quantidade);
+            dados.tipos_sanguineos["O+"].status = classificarStatus("O_positivo", dados.tipos_sanguineos["O+"].quantidade);
+			
+																		
+        }
+
+        // Função para salvar dados
+        function salvarDados(dados) {
+												  
+			
+										   
+            recalcularStatus(dados);
+			
+									 
+            localStorage.setItem('estoqueSangue', JSON.stringify(dados));
+			
+										 
+            atualizarUrlComDados(dados);
+        }
+
+        // Função para atualizar URL
+        function atualizarUrlComDados(dados) {
+            const dadosString = encodeURIComponent(JSON.stringify(dados));
+            const novaUrl = `${window.location.pathname}?estoque=${dadosString}`;
+            window.history.replaceState({}, '', novaUrl);
+			
+												  
+            const urlCompleta = window.location.origin + novaUrl;
+            document.getElementById('url-compartilhar').value = urlCompleta;
+        }
+
+        // Função para copiar URL
+        function copiarUrl() {
+            const urlInput = document.getElementById('url-compartilhar');
+            urlInput.select();
+            document.execCommand('copy');
+            alert('URL copiada para a área de transferência!');
+        }
+
+								  
+        let dadosEstoqueAtual = carregarDadosSalvos();
+
+																   
+        function classificarStatus(tipo, quantidade) {
+            const ref = referenciaEstoque[tipo];
+			
+																	   
+																														   
+			
+            if (quantidade <= ref.critico) return "critico";
+													
+								 
+            else if (quantidade <= ref.alerta) return "emergencia";
+												  
+									
+												   
+													
+								 
+					
+																	   
+            else return "estavel";
+			 
+        }
+
+																	  
+        function atualizarEstoque() {
+																 
+			
+										 
+            const novosDados = {
+                ultima_atualizacao: new Date().toLocaleString('pt-BR'),
+                tipos_sanguineos: {
+                    "A+": { quantidade: parseInt(document.getElementById('A_positivo').value) || 0, status: "" },
+                    "A-": { quantidade: parseInt(document.getElementById('A_negativo').value) || 0, status: "" },
+                    "B+": { quantidade: parseInt(document.getElementById('B_positivo').value) || 0, status: "" },
+                    "B-": { quantidade: parseInt(document.getElementById('B_negativo').value) || 0, status: "" },
+                    "AB+": { quantidade: parseInt(document.getElementById('AB_positivo').value) || 0, status: "" },
+                    "AB-": { quantidade: parseInt(document.getElementById('AB_negativo').value) || 0, status: "" },
+                    "O+": { quantidade: parseInt(document.getElementById('O_positivo').value) || 0, status: "" },
+                    "O-": { quantidade: parseInt(document.getElementById('O_negativo').value) || 0, status: "" }
+                }
+            };
+
+															  
+
+									 
+            dadosEstoqueAtual = novosDados;
+
+																		   
+            salvarDados(dadosEstoqueAtual);
+
+										
+            exibirEstoque(dadosEstoqueAtual);
+
+										  
+            alert('Estoque atualizado e salvo com sucesso!');
+			
+																		
+        }
+
+																  
+        function resetarEstoque() {
+            if (confirm('Tem certeza que deseja restaurar os valores padrão do estoque?')) {
+                dadosEstoqueAtual = JSON.parse(JSON.stringify(dadosEstoquePadrao));
+                salvarDados(dadosEstoqueAtual);
+                preencherFormulario();
+                exibirEstoque(dadosEstoqueAtual);
+                alert('Estoque restaurado para os valores padrão!');
+            }
+        }
+
+																	
+        function preencherFormulario() {
+            document.getElementById('A_positivo').value = dadosEstoqueAtual.tipos_sanguineos["A+"].quantidade;
+            document.getElementById('A_negativo').value = dadosEstoqueAtual.tipos_sanguineos["A-"].quantidade;
+            document.getElementById('B_positivo').value = dadosEstoqueAtual.tipos_sanguineos["B+"].quantidade;
+            document.getElementById('B_negativo').value = dadosEstoqueAtual.tipos_sanguineos["B-"].quantidade;
+            document.getElementById('AB_positivo').value = dadosEstoqueAtual.tipos_sanguineos["AB+"].quantidade;
+            document.getElementById('AB_negativo').value = dadosEstoqueAtual.tipos_sanguineos["AB-"].quantidade;
+            document.getElementById('O_positivo').value = dadosEstoqueAtual.tipos_sanguineos["O+"].quantidade;
+            document.getElementById('O_negativo').value = dadosEstoqueAtual.tipos_sanguineos["O-"].quantidade;
+			
+												
+            atualizarUrlComDados(dadosEstoqueAtual);
+        }
+
+															 
+        function toggleAdmin() {
+            const adminArea = document.getElementById('controle-admin');
+            if (adminArea.style.display === 'none') {
+                adminArea.style.display = 'block';
+                preencherFormulario();
+            } else {
+                adminArea.style.display = 'none';
+            }
+        }
+
+														
+        function exibirEstoque(dados) {
+													
+			
+            document.getElementById('data-atualizacao').textContent = dados.ultima_atualizacao;
+			
+            const estoqueHTML = `
+                <div class="tipos-grid">
+                    ${Object.entries(dados.tipos_sanguineos).map(([tipo, info]) => `
+                        <div class="tipo-item ${info.status}">
+                            <div class="tipo-sanguineo">${tipo}</div>
+                            <div class="bolsa-sangue">
+                                <div class="bolsa-container">
+                                    <div class="sangue"></div>
+                                </div>
+                            </div>
+                            <div class="status-texto">
+                                ${info.status === 'estavel' ? 'Estável' : 
+                                  info.status === 'emergencia' ? 'Alerta' : 'Crítico'}
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+			
+            document.getElementById('estoque-container').innerHTML = estoqueHTML;
+        }
+
+								
+        document.addEventListener('DOMContentLoaded', function() {
+																  
+            exibirEstoque(dadosEstoqueAtual);
+			
+												  
+            atualizarUrlComDados(dadosEstoqueAtual);
+        });
+
+													 
+        setInterval(() => {
+            dadosEstoqueAtual.ultima_atualizacao = new Date().toLocaleString('pt-BR');
+            document.getElementById('data-atualizacao').textContent = dadosEstoqueAtual.ultima_atualizacao;
+        }, 5 * 60 * 1000);
+    </script>
+</body>
+</html>

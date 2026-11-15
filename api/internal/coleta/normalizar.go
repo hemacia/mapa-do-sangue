@@ -104,7 +104,7 @@ func interpretarDataAmbigua(texto string, coletadoEm time.Time) (string, error) 
 	return melhor, nil
 }
 
-var dataBR = regexp.MustCompile(`(\d{2})/(\d{2})/(\d{4})(?:\s+(\d{2}:\d{2}))?`)
+var dataBR = regexp.MustCompile(`(\d{2})/(\d{2})/(\d{4})(?:\s+(?:às\s+)?(\d{2}:\d{2}))?`)
 
 // Devolve AAAA-MM-DD ou AAAA-MM-DDTHH:MM no horário local da fonte, ou "" sem data válida.
 func extrairDataBR(texto string) string {

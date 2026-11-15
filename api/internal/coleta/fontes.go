@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"path"
 	"regexp"
+	"strconv"
 	"strings"
 	"time"
 
@@ -21,7 +22,15 @@ type Resultado struct {
 	Leituras []Leitura
 	// Data (AAAA-MM-DD) ou data e hora local (AAAA-MM-DDTHH:MM) informada pela própria fonte; "" se não houver.
 	AtualizadoNaFonte string
-	Erro              error
+	// Só nas fontes que publicam o número de bolsas.
+	Bolsas map[httpapi.TipoSanguineo]Contagem
+	Erro   error
+}
+
+// Minimo é a quantidade a partir da qual a própria fonte considera o estoque fora de risco.
+type Contagem struct {
+	Bolsas int
+	Minimo int
 }
 
 type Fonte struct {
@@ -39,7 +48,16 @@ var Fontes = []Fonte{
 	{ID: "unicamp", URL: "https://www.hemocentro.unicamp.br/", ler: lerUnicamp},
 	{ID: "hemosc", URL: "https://www.hemosc.org.br/", latin1: true, ler: lerHemosc},
 	{ID: "hemoba", URL: "https://www.ba.gov.br/hemoba/", ler: lerHemoba},
+	{ID: "prosangue", URL: "https://prosangue.sp.gov.br/reqestoque/posicao_estoque.php", ler: lerProSangue},
+	{ID: "rp-ribeirao", URL: "https://docs.google.com/spreadsheets/d/1-RkpABt6glrJbDM1L10PwzWJafpKYdhN_kufyPGH6_M/pubchart?oid=366971640&format=interactive", ler: lerPubchart},
+	{ID: "rp-aracatuba", URL: pubchartRP + "1367586318", ler: lerPubchart},
+	{ID: "rp-fernandopolis", URL: pubchartRP + "1071427317", ler: lerPubchart},
+	{ID: "rp-prudente", URL: pubchartRP + "2092834388", ler: lerPubchart},
+	{ID: "rp-taubate", URL: pubchartRP + "796405016", ler: lerPubchart},
 }
+
+// Gráficos do Google Planilhas que a página de estoque do Hemocentro de Ribeirão Preto embute, um por cidade.
+const pubchartRP = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQOAjdsqcyzKT16PBOjSGiZsws6AXUTyDTLhKYfmcnDulgWleyIV-1cVveKLCnOM7uuPzGHFc4GMZx_/pubchart?format=interactive&oid="
 
 func (f Fonte) decodificar(corpo []byte) string {
 	if f.latin1 {
@@ -218,4 +236,133 @@ func lerHemoba(html string, _ time.Time) (Resultado, error) {
 	})
 	// A página não informa quando o estoque foi atualizado.
 	return comLeituras("Hemoba", leituras, "")
+}
+
+type limitesProSangue struct{ critico, alerta int }
+
+// Mesma regra do classificarStatus da página: até o limite crítico, depois até o de alerta.
+func (l limitesProSangue) nivel(bolsas int) httpapi.Nivel {
+	switch {
+	case bolsas <= l.critico:
+		return httpapi.Critico
+	case bolsas <= l.alerta:
+		return httpapi.Alerta
+	default:
+		return httpapi.Estavel
+	}
+}
+
+var (
+	limiteProSangue = regexp.MustCompile(`"(AB|A|B|O)_(positivo|negativo)":\s*\{\s*critico:\s*(\d+),\s*alerta:\s*(\d+),\s*estavel:\s*(\d+)`)
+	bolsasProSangue = regexp.MustCompile(`"(AB|A|B|O)([+-])":\s*\{\s*quantidade:\s*(\d+)`)
+)
+
+// A Pró-Sangue escreve o estoque num objeto JS (não JSON: tem o literal 01) e classifica no navegador.
+// A data da página é new Date(), o relógio de quem visita, então não serve como data da fonte.
+func lerProSangue(html string, _ time.Time) (Resultado, error) {
+	limites := map[httpapi.TipoSanguineo]limitesProSangue{}
+	minimos := map[httpapi.TipoSanguineo]int{}
+	for _, m := range limiteProSangue.FindAllStringSubmatch(html, -1) {
+		tipo := httpapi.TipoSanguineo(m[1] + map[string]string{"positivo": "+", "negativo": "-"}[m[2]])
+		limites[tipo] = limitesProSangue{critico: atoi(m[3]), alerta: atoi(m[4])}
+		minimos[tipo] = atoi(m[5])
+	}
+	var leituras []Leitura
+	bolsas := map[httpapi.TipoSanguineo]Contagem{}
+	for _, m := range bolsasProSangue.FindAllStringSubmatch(html, -1) {
+		tipo := httpapi.TipoSanguineo(m[1] + m[2])
+		limite, ok := limites[tipo]
+		if _, repetido := bolsas[tipo]; !ok || repetido {
+			continue
+		}
+		quantidade := atoi(m[3])
+		leituras = append(leituras, Leitura{tipo, limite.nivel(quantidade)})
+		bolsas[tipo] = Contagem{Bolsas: quantidade, Minimo: minimos[tipo]}
+	}
+	resultado, err := comLeituras("Pró-Sangue", leituras, "")
+	resultado.Bolsas = bolsas
+	return resultado, err
+}
+
+// Abaixo do mínimo de segurança é crítico; até 1,5 vez, alerta; até 2 vezes, estável.
+func nivelPeloMinimo(bolsas, minimo int) httpapi.Nivel {
+	switch {
+	case bolsas < minimo:
+		return httpapi.Critico
+	case 2*bolsas < 3*minimo:
+		return httpapi.Alerta
+	case bolsas < 2*minimo:
+		return httpapi.Estavel
+	default:
+		return httpapi.Adequado
+	}
+}
+
+var chartJSON = regexp.MustCompile(`chartJson': '((?:[^'\\]|\\.)*)'`)
+
+// O gráfico publicado traz um chartJson com escapes \xNN: uma linha por tipo, com bolsas e mínimo.
+// A data está no rótulo da coluna de bolsas ("Situação do estoque em 13/11/2026 às 07:15h").
+func lerPubchart(html string, _ time.Time) (Resultado, error) {
+	m := chartJSON.FindStringSubmatch(html)
+	if m == nil {
+		return Resultado{}, errors.New("Ribeirão Preto: gráfico sem chartJson") //nolint:staticcheck // nome da cidade
+	}
+	var grafico struct {
+		DataTable struct {
+			Cols []struct {
+				Label string `json:"label"`
+			} `json:"cols"`
+			Rows []struct {
+				C []*struct {
+					V any `json:"v"`
+				} `json:"c"`
+			} `json:"rows"`
+		} `json:"dataTable"`
+	}
+	if err := json.Unmarshal([]byte(desescaparJS(m[1])), &grafico); err != nil {
+		return Resultado{}, fmt.Errorf("Ribeirão Preto: %w", err) //nolint:staticcheck // nome da cidade
+	}
+	var leituras []Leitura
+	bolsas := map[httpapi.TipoSanguineo]Contagem{}
+	for _, linha := range grafico.DataTable.Rows {
+		if len(linha.C) < 3 || linha.C[0] == nil || linha.C[1] == nil || linha.C[2] == nil {
+			continue
+		}
+		rotulo, _ := linha.C[0].V.(string)
+		quantidade, okQ := linha.C[1].V.(float64)
+		minimo, okM := linha.C[2].V.(float64)
+		tipo, okT := normalizarTipo(rotulo)
+		if !okT || !okQ || !okM {
+			continue
+		}
+		leituras = append(leituras, Leitura{tipo, nivelPeloMinimo(int(quantidade), int(minimo))})
+		bolsas[tipo] = Contagem{Bolsas: int(quantidade), Minimo: int(minimo)}
+	}
+	atualizado := ""
+	if len(grafico.DataTable.Cols) > 1 {
+		atualizado = extrairDataBR(grafico.DataTable.Cols[1].Label)
+	}
+	resultado, err := comLeituras("Ribeirão Preto", leituras, atualizado)
+	resultado.Bolsas = bolsas
+	return resultado, err
+}
+
+var escapeJS = regexp.MustCompile(`\\(x[0-9a-fA-F]{2}|u[0-9a-fA-F]{4}|.)`)
+
+// Desfaz os escapes de string JS (\x7b, \u00e7, \/). O resultado é JSON.
+func desescaparJS(texto string) string {
+	return escapeJS.ReplaceAllStringFunc(texto, func(e string) string {
+		switch e[1] {
+		case 'x', 'u':
+			n, _ := strconv.ParseUint(e[2:], 16, 32)
+			return string(rune(n))
+		default:
+			return e[1:]
+		}
+	})
+}
+
+func atoi(texto string) int {
+	n, _ := strconv.Atoi(texto) // só recebe dígitos casados pela regex
+	return n
 }
