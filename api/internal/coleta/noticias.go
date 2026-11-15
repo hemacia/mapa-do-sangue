@@ -31,6 +31,10 @@ type FonteNoticias struct {
 // Só estados sem estoque legível: onde há estoque, o dado vale mais que a notícia.
 var FontesNoticias = []FonteNoticias{
 	// O Maranhão tem API de notícias, mas o robots.txt proíbe /api/; Amapá e Tocantins só têm busca em HTML.
+	// DF e RJ/RS ficam de fora: o DF só tem lista em HTML e os do RJ e RS só saem pelo Google Notícias,
+	// cujos termos não permitem esse uso.
+	{ID: "ses-go", UF: "GO", URL: "https://goias.gov.br/saude/wp-json/wp/v2/posts?search=estoque%20sangue&per_page=20&_fields=date,link,title", ler: lerNoticiasWordPress},
+	{ID: "sesa-pr", UF: "PR", URL: "https://www.saude.pr.gov.br/rss.xml", ler: lerNoticiasRSS},
 	{ID: "sesau-al", UF: "AL", URL: "https://www.saude.al.gov.br/feed/?s=hemoal", ler: lerNoticiasRSS},
 	{ID: "ses-am", UF: "AM", URL: "https://www.saude.am.gov.br/feed/?s=hemoam", ler: lerNoticiasRSS},
 	{ID: "hemoce", UF: "CE", URL: "https://www.hemoce.ce.gov.br/wp-json/wp/v2/posts?search=estoque&per_page=20&_fields=date,link,title", ler: lerNoticiasWordPress},
