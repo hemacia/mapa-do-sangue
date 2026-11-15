@@ -22,6 +22,24 @@ const FONTES = [
   ['Hemocentro Unicamp', 'São Paulo', 'Página do site, nível no nome da imagem', 'Nada'],
   ['Hemosc', 'Santa Catarina', 'Página do site', '"Alerta" é o pior nível lá e vira Crítico'],
   ['Hemoba', 'Bahia', 'Página do site', 'A página não informa a data da atualização'],
+  [
+    'Pró-Sangue',
+    'São Paulo (capital)',
+    'Bolsas por tipo escritas no código da página',
+    'O nível sai dos limites da própria página; ela não informa a data',
+  ],
+  [
+    'Hemocentro RP',
+    'São Paulo (Ribeirão Preto, Araçatuba, Fernandópolis, Presidente Prudente e Taubaté)',
+    'Gráfico do Google Planilhas com bolsas e mínimo de segurança',
+    'Abaixo do mínimo é Crítico; até 1,5 vez, Alerta; até 2 vezes, Estável; acima, Adequado',
+  ],
+  [
+    'Hemosul',
+    'Mato Grosso do Sul',
+    'Painel Qlik com bolsas e estoque estratégico',
+    'O painel não mostra o excesso: quem atinge o estratégico vira Estável',
+  ],
 ]
 
 export default function PaginaSobre() {
@@ -73,7 +91,9 @@ export default function PaginaSobre() {
           </table>
         </div>
         <p className="nota">
-          Os outros 21 estados não publicam o estoque de um jeito que dê para ler automaticamente.
+          Os outros 20 estados não publicam o estoque de um jeito que dê para ler automaticamente. O IHEBE,
+          banco de sangue privado de Belém, mostra percentuais no site, mas eles são os mesmos desde janeiro
+          de 2025 e por isso ficam de fora.
         </p>
       </section>
 
