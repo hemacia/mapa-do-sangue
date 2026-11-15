@@ -232,6 +232,36 @@ func (s *Store) PontosColeta(ctx context.Context, uf string) ([]httpapi.PontoCol
 	})
 }
 
+func (s *Store) Alertas(ctx context.Context, uf string, desde time.Time) ([]httpapi.AlertaNoticiado, error) {
+	linhas, err := s.pool.Query(ctx, `
+	  SELECT uf, fonte, titulo, url, publicado_em FROM alertas_noticiados
+	  WHERE uf = $1 AND publicado_em >= $2 ORDER BY publicado_em DESC LIMIT 3`, uf, desde)
+	if err != nil {
+		return nil, fmt.Errorf("consultar alertas: %w", err)
+	}
+	return pgx.CollectRows(linhas, func(linha pgx.CollectableRow) (httpapi.AlertaNoticiado, error) {
+		var a httpapi.AlertaNoticiado
+		err := linha.Scan(&a.Uf, &a.Fonte, &a.Titulo, &a.Url, &a.PublicadoEm)
+		return a, err
+	})
+}
+
+// GravarAlertas guarda as notícias novas; a mesma URL vista de novo só atualiza o título.
+func (s *Store) GravarAlertas(ctx context.Context, noticias []coleta.Noticia, coletadoEm time.Time) error {
+	return pgx.BeginFunc(ctx, s.pool, func(tx pgx.Tx) error {
+		for _, n := range noticias {
+			if _, err := tx.Exec(ctx, `
+			  INSERT INTO alertas_noticiados (url, uf, fonte, titulo, publicado_em, coletado_em)
+			  VALUES ($1, $2, $3, $4, $5, $6)
+			  ON CONFLICT (url) DO UPDATE SET titulo = EXCLUDED.titulo`,
+				n.URL, n.UF, n.FonteID, n.Titulo, n.PublicadaEm, coletadoEm); err != nil {
+				return fmt.Errorf("gravar alerta %s: %w", n.URL, err)
+			}
+		}
+		return nil
+	})
+}
+
 func (s *Store) RegistrarDoacao(ctx context.Context, d httpapi.Doacao) error {
 	_, err := s.pool.Exec(ctx, `INSERT INTO doacoes_registradas (uf, tipo, data) VALUES ($1, $2, $3)`,
 		d.Uf, d.Tipo, d.Data.Time)

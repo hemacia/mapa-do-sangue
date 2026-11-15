@@ -23,6 +23,13 @@ type repositorioFalso struct {
 	totalDoMes   int
 	estatisticas []EstatisticaUF
 	pontos       []PontoColeta
+	alertas      []AlertaNoticiado
+	desdePedido  time.Time
+}
+
+func (r *repositorioFalso) Alertas(_ context.Context, uf string, desde time.Time) ([]AlertaNoticiado, error) {
+	r.ufPedida, r.desdePedido = uf, desde
+	return r.alertas, r.erro
 }
 
 func (r *repositorioFalso) PontosColeta(_ context.Context, uf string) ([]PontoColeta, error) {
@@ -350,5 +357,28 @@ func TestListarPontosColetaExigeUFValida(t *testing.T) {
 		if resp := requisitar(h, http.MethodGet, caminho, ""); resp.Code != http.StatusBadRequest {
 			t.Errorf("%s: status = %d, quero 400", caminho, resp.Code)
 		}
+	}
+}
+
+func TestListarAlertasPedeOsUltimos30Dias(t *testing.T) {
+	repo := &repositorioFalso{alertas: []AlertaNoticiado{{Uf: "RN", Titulo: "Estoque crítico", Url: "https://rn.gov.br/1"}}}
+	h := novoServidor(repo)
+
+	resp := requisitar(h, http.MethodGet, "/v1/alertas?uf=rn", "")
+
+	if resp.Code != http.StatusOK || repo.ufPedida != "RN" {
+		t.Fatalf("status = %d, uf = %q", resp.Code, repo.ufPedida)
+	}
+	if !repo.desdePedido.Equal(agoraFixo.AddDate(0, 0, -30)) {
+		t.Errorf("desde = %v", repo.desdePedido)
+	}
+	if alertas := decodificar[[]AlertaNoticiado](t, resp); len(alertas) != 1 {
+		t.Errorf("alertas = %+v", alertas)
+	}
+}
+
+func TestListarAlertasRecusaUFInvalida(t *testing.T) {
+	if resp := requisitar(novoServidor(&repositorioFalso{}), http.MethodGet, "/v1/alertas?uf=ZZ", ""); resp.Code != http.StatusBadRequest {
+		t.Errorf("status = %d", resp.Code)
 	}
 }

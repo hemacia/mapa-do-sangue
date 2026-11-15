@@ -77,6 +77,24 @@ paths:
                 type: array
                 items: { $ref: "#/components/schemas/PontoColeta" }
         "400": { $ref: "#/components/responses/Problema" }
+  /v1/alertas:
+    get:
+      operationId: listarAlertas
+      summary: Notícias de estoque baixo publicadas nos últimos 30 dias pelos sites oficiais do estado
+      parameters:
+        - name: uf
+          in: query
+          required: true
+          schema: { $ref: "#/components/schemas/UF" }
+      responses:
+        "200":
+          description: Da mais recente para a mais antiga, no máximo 3
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/AlertaNoticiado" }
+        "400": { $ref: "#/components/responses/Problema" }
   /v1/doacoes:
     post:
       operationId: registrarDoacao
@@ -192,6 +210,15 @@ components:
             Doadores aptos no ano (primeira_vez, repeticao, esporadico, espontanea, reposicao, feminino,
             masculino, ate_29_anos, acima_29_anos, tipo_A+ ... tipo_O-) e candidatos inaptos
           additionalProperties: { type: integer }
+    AlertaNoticiado:
+      type: object
+      required: [uf, fonte, titulo, url, publicadoEm]
+      properties:
+        uf: { $ref: "#/components/schemas/UF" }
+        fonte: { type: string }
+        titulo: { type: string }
+        url: { type: string }
+        publicadoEm: { type: string, format: date-time }
     PontoColeta:
       type: object
       required: [cnes, nome, uf, latitude, longitude, publico]

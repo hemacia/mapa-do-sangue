@@ -19,6 +19,7 @@ type Repositorio interface {
 	EstoqueAtual(ctx context.Context, uf string) ([]EstoqueHemocentro, error) // uf vazia = todas
 	Estatisticas(ctx context.Context) ([]EstatisticaUF, error)
 	PontosColeta(ctx context.Context, uf string) ([]PontoColeta, error)
+	Alertas(ctx context.Context, uf string, desde time.Time) ([]AlertaNoticiado, error)
 	RegistrarDoacao(ctx context.Context, doacao Doacao) error
 	ContarDoacoes(ctx context.Context, mes string) (int, error) // mes = AAAA-MM
 }
@@ -132,6 +133,18 @@ func (s *servidor) ListarPontosColeta(ctx context.Context, req ListarPontosColet
 		return nil, err
 	}
 	return ListarPontosColeta200JSONResponse(naoNulo(pontos)), nil
+}
+
+func (s *servidor) ListarAlertas(ctx context.Context, req ListarAlertasRequestObject) (ListarAlertasResponseObject, error) {
+	uf := strings.ToUpper(req.Params.Uf)
+	if !slices.Contains(UFs, uf) {
+		return ListarAlertas400ApplicationProblemPlusJSONResponse{problema(400, "UF inválida", uf)}, nil
+	}
+	alertas, err := s.repo.Alertas(ctx, uf, s.agora().AddDate(0, 0, -30))
+	if err != nil {
+		return nil, err
+	}
+	return ListarAlertas200JSONResponse(naoNulo(alertas)), nil
 }
 
 // O corpo vem do navegador: nada é confiável, e a data é sempre a do servidor.

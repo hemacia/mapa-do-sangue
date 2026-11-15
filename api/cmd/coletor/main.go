@@ -50,9 +50,19 @@ func executar() error {
 	resultados := coleta.ColetarTodas(ctx, coleta.Fontes, coleta.BaixarHTTP(cliente), agora)
 	relatar(resultados, os.Getenv("GITHUB_ACTIONS") == "true")
 
-	if err := store.Novo(pool, time.Now).GravarColeta(ctx, resultados, agora); err != nil {
+	banco := store.Novo(pool, time.Now)
+	if err := banco.GravarColeta(ctx, resultados, agora); err != nil {
 		return err
 	}
+	// Notícia é complemento: se falhar, a coleta do estoque continua valendo.
+	noticias, errosNoticias := coleta.ColetarNoticias(ctx, coleta.FontesNoticias, coleta.BaixarHTTP(cliente), agora)
+	for id, err := range errosNoticias {
+		fmt.Printf("falha %-17s notícias: %v\n", id, err)
+	}
+	if err := banco.GravarAlertas(ctx, noticias, agora); err != nil {
+		fmt.Printf("falha ao gravar alertas: %v\n", err)
+	}
+	fmt.Printf("alertas noticiados nos últimos 60 dias: %d\n", len(noticias))
 	for _, r := range resultados {
 		if r.Erro == nil {
 			return nil

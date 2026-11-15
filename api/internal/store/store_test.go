@@ -364,3 +364,26 @@ func TestPontosColetaDaMigrationCobremOs27EstadosComOsPublicosPrimeiro(t *testin
 		t.Errorf("MG: %d pontos, primeiro público %v, último público %v", len(pontos), pontos[0].Publico, pontos[len(pontos)-1].Publico)
 	}
 }
+
+func TestGravarAlertasNaoDuplicaEListaOsRecentes(t *testing.T) {
+	s := bancoDeTeste(t)
+	ctx := context.Background()
+	noticias := []coleta.Noticia{
+		{FonteID: "sesap-rn", UF: "RN", Titulo: "Estoque crítico", URL: "https://rn.gov.br/1", PublicadaEm: agoraFixo.AddDate(0, 0, -2)},
+		{FonteID: "sesap-rn", UF: "RN", Titulo: "Estoque baixo", URL: "https://rn.gov.br/2", PublicadaEm: agoraFixo.AddDate(0, 0, -40)},
+	}
+
+	for range 2 {
+		if err := s.GravarAlertas(ctx, noticias, agoraFixo); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	alertas, err := s.Alertas(ctx, "RN", agoraFixo.AddDate(0, 0, -30))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(alertas) != 1 || alertas[0].Url != "https://rn.gov.br/1" || alertas[0].Fonte != "sesap-rn" {
+		t.Errorf("alertas = %+v", alertas)
+	}
+}

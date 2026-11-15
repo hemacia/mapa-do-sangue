@@ -99,6 +99,17 @@ func (e TipoSanguineo) Valid() bool {
 	}
 }
 
+// AlertaNoticiado defines model for AlertaNoticiado.
+type AlertaNoticiado struct {
+	Fonte       string    `json:"fonte"`
+	PublicadoEm time.Time `json:"publicadoEm"`
+	Titulo      string    `json:"titulo"`
+
+	// Uf Example: MG
+	Uf  UF     `json:"uf"`
+	Url string `json:"url"`
+}
+
 // AnoColetas defines model for AnoColetas.
 type AnoColetas struct {
 	Ano     int      `json:"ano"`
@@ -233,6 +244,11 @@ type TotalDoMes struct {
 // UF Example: MG
 type UF = string
 
+// ListarAlertasParams defines parameters for ListarAlertas.
+type ListarAlertasParams struct {
+	Uf UF `form:"uf" json:"uf"`
+}
+
 // ListarEstoqueParams defines parameters for ListarEstoque.
 type ListarEstoqueParams struct {
 	Uf *UF `form:"uf,omitempty" json:"uf,omitempty"`
@@ -254,6 +270,9 @@ type ServerInterface interface {
 	// VerificarProntidao O processo está pronto para receber tráfego (banco acessível)
 	// (GET /readyz)
 	VerificarProntidao(w http.ResponseWriter, r *http.Request)
+	// ListarAlertas Notícias de estoque baixo publicadas nos últimos 30 dias pelos sites oficiais do estado
+	// (GET /v1/alertas)
+	ListarAlertas(w http.ResponseWriter, r *http.Request, params ListarAlertasParams)
 	// RegistrarDoacao Registra uma doação (só estado e tipo, sem dado pessoal)
 	// (POST /v1/doacoes)
 	RegistrarDoacao(w http.ResponseWriter, r *http.Request)
@@ -299,6 +318,39 @@ func (siw *ServerInterfaceWrapper) VerificarProntidao(w http.ResponseWriter, r *
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.VerificarProntidao(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// ListarAlertas operation middleware
+func (siw *ServerInterfaceWrapper) ListarAlertas(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params ListarAlertasParams
+
+	// ------------- Required query parameter "uf" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", true, true, "uf", r.URL.Query(), &params.Uf, runtime.BindQueryParameterOptions{Type: "string", Format: ""})
+	if err != nil {
+		var requiredError *runtime.RequiredParameterError
+		if errors.As(err, &requiredError) {
+			siw.ErrorHandlerFunc(w, r, &RequiredParamError{ParamName: "uf"})
+		} else {
+			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "uf", Err: err})
+		}
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.ListarAlertas(w, r, params)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -541,6 +593,7 @@ func HandlerWithOptions(si ServerInterface, options StdHTTPServerOptions) http.H
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/estoque", wrapper.ListarEstoque)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/estatisticas", wrapper.ListarEstatisticas)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/pontos-coleta", wrapper.ListarPontosColeta)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/alertas", wrapper.ListarAlertas)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/doacoes", wrapper.RegistrarDoacao)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/doacoes/mes", wrapper.ContarDoacoesDoMes)
 
@@ -603,6 +656,44 @@ func (response VerificarProntidao503ApplicationProblemPlusJSONResponse) VisitVer
 	}
 	w.Header().Set("Content-Type", "application/problem+json")
 	w.WriteHeader(503)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type ListarAlertasRequestObject struct {
+	Params ListarAlertasParams
+}
+
+type ListarAlertasResponseObject interface {
+	VisitListarAlertasResponse(w http.ResponseWriter) error
+}
+
+type ListarAlertas200JSONResponse []AlertaNoticiado
+
+func (response ListarAlertas200JSONResponse) VisitListarAlertasResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type ListarAlertas400ApplicationProblemPlusJSONResponse struct {
+	ProblemaApplicationProblemPlusJSONResponse
+}
+
+func (response ListarAlertas400ApplicationProblemPlusJSONResponse) VisitListarAlertasResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(400)
 	_, err := buf.WriteTo(w)
 	return err
 }
@@ -785,6 +876,9 @@ type StrictServerInterface interface {
 	// VerificarProntidao O processo está pronto para receber tráfego (banco acessível)
 	// (GET /readyz)
 	VerificarProntidao(ctx context.Context, request VerificarProntidaoRequestObject) (VerificarProntidaoResponseObject, error)
+	// ListarAlertas Notícias de estoque baixo publicadas nos últimos 30 dias pelos sites oficiais do estado
+	// (GET /v1/alertas)
+	ListarAlertas(ctx context.Context, request ListarAlertasRequestObject) (ListarAlertasResponseObject, error)
 	// RegistrarDoacao Registra uma doação (só estado e tipo, sem dado pessoal)
 	// (POST /v1/doacoes)
 	RegistrarDoacao(ctx context.Context, request RegistrarDoacaoRequestObject) (RegistrarDoacaoResponseObject, error)
@@ -882,6 +976,32 @@ func (sh *strictHandler) VerificarProntidao(w http.ResponseWriter, r *http.Reque
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
 	} else if validResponse, ok := response.(VerificarProntidaoResponseObject); ok {
 		if err := validResponse.VisitVerificarProntidaoResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// ListarAlertas operation middleware
+func (sh *strictHandler) ListarAlertas(w http.ResponseWriter, r *http.Request, params ListarAlertasParams) {
+	var request ListarAlertasRequestObject
+
+	request.Params = params
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.ListarAlertas(ctx, request.(ListarAlertasRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "ListarAlertas")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(ListarAlertasResponseObject); ok {
+		if err := validResponse.VisitListarAlertasResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {
