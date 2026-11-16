@@ -5,11 +5,17 @@ updates:
     schedule:
       interval: weekly
     groups:
+      # React e React DOM precisam da mesma versão: em PRs separados, cada um quebra o build sozinho.
+      react:
+        patterns: ["react", "react-dom", "@types/react", "@types/react-dom"]
       dependencias-de-desenvolvimento:
         dependency-type: development
     open-pull-requests-limit: 5
     ignore:
       - dependency-name: "@types/node"
+        update-types: [version-update:semver-major]
+      # O openapi-typescript (gera os tipos da API) só aceita TypeScript 5; o 7 quebra o npm ci.
+      - dependency-name: typescript
         update-types: [version-update:semver-major]
 
   - package-ecosystem: github-actions
