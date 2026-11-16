@@ -4,10 +4,12 @@ import type { EstatisticaUF, EstoqueHemocentro } from '@/lib/api/cliente'
 import { faixaDeColetas, LIMITES_FAIXAS } from '@/lib/domain/estatisticas'
 import { nivelPorUF } from '@/lib/domain/mapa'
 import { NIVEIS_ESTOQUE, type NivelEstoque, ROTULOS_NIVEL } from '@/lib/domain/nivel'
+import { montarResumos } from '@/lib/domain/resumo'
 import { TIPOS_SANGUINEOS } from '@/lib/domain/tipos'
 import { NOMES_UF, type UF } from '@/lib/domain/ufs'
 import { desenharEstados } from '@/lib/mapa/geografia'
 import { ArrumarPlacas } from './ArrumarPlacas'
+import { PainelEstado } from './PainelEstado'
 
 const LADO = 600
 // Estados pequenos demais para caber a sigla dentro.
@@ -225,6 +227,7 @@ export function MapaBrasil({
           })}
         </svg>
         <ArrumarPlacas />
+        <PainelEstado resumos={montarResumos(hemocentros, estatisticas)} />
         <ul className="placas">
           {placas.map((placa) => {
             const x = (placa.centro[0] / LADO) * 100
