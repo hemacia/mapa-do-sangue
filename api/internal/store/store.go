@@ -187,7 +187,7 @@ func (s *Store) Estatisticas(ctx context.Context) ([]httpapi.EstatisticaUF, erro
 		}
 		serie := series[e.Uf]
 		e.Serie = &serie
-		if ind, ok := indicadores[string(e.Uf)]; ok {
+		if ind, ok := indicadores[e.Uf]; ok {
 			e.Indicadores = &ind
 		}
 		if p, ok := parciais[e.Uf]; ok {

@@ -396,8 +396,11 @@ func desescaparJS(texto string) string {
 	return escapeJS.ReplaceAllStringFunc(texto, func(e string) string {
 		switch e[1] {
 		case 'x', 'u':
-			n, _ := strconv.ParseUint(e[2:], 16, 32)
-			return string(rune(n))
+			r, _, _, err := strconv.UnquoteChar(e, 0) // a regex garante os dígitos; sem conversão de número para rune
+			if err != nil {
+				return e
+			}
+			return string(r)
 		default:
 			return e[1:]
 		}

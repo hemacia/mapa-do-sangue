@@ -208,8 +208,12 @@ func TestNivelPeloMinimoDeSeguranca(t *testing.T) {
 		bolsas, minimo int
 		quero          httpapi.Nivel
 	}{
-		{0, 3, httpapi.Critico}, {60, 61, httpapi.Critico}, {61, 61, httpapi.Alerta},
-		{91, 61, httpapi.Alerta}, {92, 61, httpapi.Estavel}, {122, 61, httpapi.Adequado},
+		{0, 3, httpapi.Critico},
+		{60, 61, httpapi.Critico},
+		{61, 61, httpapi.Alerta},
+		{91, 61, httpapi.Alerta},
+		{92, 61, httpapi.Estavel},
+		{122, 61, httpapi.Adequado},
 		{4, 0, httpapi.Adequado},
 	}
 	for _, c := range casos {

@@ -14,7 +14,6 @@ func TestImportarCSVRecalculaOsAnosFechadosEOParcial(t *testing.T) {
 	buscar := func(context.Context, FontePopulacao, int) (map[string]int, error) { return populacaoFixa(1000), nil }
 
 	imp, err := ImportarCSV(context.Background(), csv, 2026, buscar)
-
 	if err != nil {
 		t.Fatal(err)
 	}

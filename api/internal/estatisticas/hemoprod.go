@@ -262,8 +262,10 @@ func GerarMigration(totais Totais, populacao map[int]map[string]int) string {
 	return sql.String()
 }
 
-var Meses = []string{"Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto",
-	"Setembro", "Outubro", "Novembro", "Dezembro"}
+var Meses = []string{
+	"Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto",
+	"Setembro", "Outubro", "Novembro", "Dezembro",
+}
 
 // MesesPublicados devolve os meses do ano já publicados em sequência desde janeiro: um mês só
 // conta quando pelo menos minimoUFs estados o enviaram (a Anvisa solta o ano aos poucos).

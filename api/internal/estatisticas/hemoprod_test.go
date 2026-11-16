@@ -115,7 +115,8 @@ func TestGerarMigrationTemAs27UFsPorAnoENullParaQuemNaoEnviou(t *testing.T) {
 func TestAgregarPorUFSomaCadaIndicadorPorAno(t *testing.T) {
 	cabecalho := "Data de envio;Ano de referência;Período de referência;Razão Social - Nome Fantasia;CNPJ;Unidade Federativa;" +
 		"2.2 Total de candidatos quanto ao tipo de doador  [Primeira vez][Aptos];4.2 Imunohematologia [O-][Doador]"
-	csv := strings.Join([]string{cabecalho,
+	csv := strings.Join([]string{
+		cabecalho,
 		"2025-02-01;2025;Janeiro;Hemo A;1;Bahia;10;3",
 		"2025-03-01;2025;Fevereiro;Hemo A;1;Bahia;5;",
 		"2024-02-01;2024;Janeiro;Hemo A;1;Bahia;7;1",
@@ -123,7 +124,6 @@ func TestAgregarPorUFSomaCadaIndicadorPorAno(t *testing.T) {
 
 	totais, err := AgregarPorUF(strings.NewReader(csv), []int{2024, 2025},
 		map[string][]string{"primeira_vez": {"[Primeira vez][Aptos]"}, "tipo_O-": {"[O-][Doador]"}})
-
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -148,7 +148,8 @@ func TestAgregarPorUFRecusaTrechoQueCasaDuasColunas(t *testing.T) {
 func TestSomaCadaLinhaAgregadaDaAnvisaSemDeduplicar(t *testing.T) {
 	cabecalho := "ID da resposta;Data de envio;Ano de referência;Período de referência;Razão Social - Nome Fantasia;CNPJ;Unidade Federativa;" +
 		"3.3\u00a0Total de coletas [Sangue total];3.3\u00a0Total de coletas [Por aférese]"
-	csv := strings.Join([]string{cabecalho,
+	csv := strings.Join([]string{
+		cabecalho,
 		"0;0;2025;Consolidado;Rede de serviços;0;Rio de Janeiro;80327;0",
 		"0;0;2025;Consolidado;Rede de serviços;0;Rio de Janeiro;76055;10",
 		"7;2026-01-10;2025;Consolidado;Hemo B;1;Rio de Janeiro;5;0",
@@ -156,7 +157,6 @@ func TestSomaCadaLinhaAgregadaDaAnvisaSemDeduplicar(t *testing.T) {
 	}, "\n")
 
 	got, err := AgregarColetasPorUF(strings.NewReader(csv), 2025)
-
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -167,7 +167,8 @@ func TestSomaCadaLinhaAgregadaDaAnvisaSemDeduplicar(t *testing.T) {
 func TestAgregarMesesFicaSoComOsMesesPedidosESemConsolidado(t *testing.T) {
 	cabecalho := "Data de envio;Ano de referência;Período de referência;Razão Social - Nome Fantasia;CNPJ;Unidade Federativa;" +
 		"3.3\u00a0Total de coletas [Sangue total];3.3\u00a0Total de coletas [Por aférese]"
-	csv := strings.Join([]string{cabecalho,
+	csv := strings.Join([]string{
+		cabecalho,
 		"2026-02-01;2026;Janeiro;Hemo A;1;Bahia;100;0",
 		"2026-03-01;2026;Fevereiro;Hemo A;1;Bahia;50;0",
 		"2026-05-01;2026;Abril;Hemo A;1;Bahia;999;0",
@@ -177,7 +178,6 @@ func TestAgregarMesesFicaSoComOsMesesPedidosESemConsolidado(t *testing.T) {
 
 	totais, err := AgregarMeses(strings.NewReader(csv), []int{2025, 2026}, []string{"Janeiro", "Fevereiro"},
 		map[string][]string{"coletas": Indicadores["coletas"]})
-
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -208,7 +208,8 @@ func TestGerarMigrationParcialSoComEstadosNosDoisAnos(t *testing.T) {
 func TestComparativoUsaSoAsUnidadesComTodosOsMesesNosDoisAnos(t *testing.T) {
 	cabecalho := "Data de envio;Ano de referência;Período de referência;Razão Social - Nome Fantasia;CNPJ;Unidade Federativa;" +
 		"3.3\u00a0Total de coletas [Sangue total];3.3\u00a0Total de coletas [Por aférese]"
-	csv := strings.Join([]string{cabecalho,
+	csv := strings.Join([]string{
+		cabecalho,
 		// Hemo A mandou janeiro e fevereiro nos dois anos: entra.
 		"2025-02-01;2025;Janeiro;Hemo A;1;Amazonas;100;0", "2025-03-01;2025;Fevereiro;Hemo A;1;Amazonas;100;0",
 		"2026-02-01;2026;Janeiro;Hemo A;1;Amazonas;80;0", "2026-03-01;2026;Fevereiro;Hemo A;1;Amazonas;90;0",
@@ -220,7 +221,6 @@ func TestComparativoUsaSoAsUnidadesComTodosOsMesesNosDoisAnos(t *testing.T) {
 	}, "\n")
 
 	got, err := ComparativoMesmoPeriodo(strings.NewReader(csv), 2026, []string{"Janeiro", "Fevereiro"})
-
 	if err != nil {
 		t.Fatal(err)
 	}

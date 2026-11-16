@@ -309,8 +309,10 @@ func TestGravarColetaGuardaAsBolsasSoDasFontesQueInformam(t *testing.T) {
 	s := bancoDeTeste(t)
 	ctx := context.Background()
 	resultados := []coleta.Resultado{
-		{FonteID: "prosangue", Leituras: []coleta.Leitura{{Tipo: "O-", Nivel: httpapi.Critico}},
-			Bolsas: map[httpapi.TipoSanguineo]coleta.Contagem{"O-": {Bolsas: 25, Minimo: 103}}},
+		{
+			FonteID: "prosangue", Leituras: []coleta.Leitura{{Tipo: "O-", Nivel: httpapi.Critico}},
+			Bolsas: map[httpapi.TipoSanguineo]coleta.Contagem{"O-": {Bolsas: 25, Minimo: 103}},
+		},
 		{FonteID: "hemoba", Leituras: []coleta.Leitura{{Tipo: "O-", Nivel: httpapi.Critico}}},
 	}
 

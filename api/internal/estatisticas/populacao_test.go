@@ -25,7 +25,6 @@ func TestPopulacaoUsaCensoNos2010E2022EInterpola2023(t *testing.T) {
 	}
 
 	pop, err := PopulacaoPorAno(context.Background(), buscar, []int{2010, 2023})
-
 	if err != nil {
 		t.Fatal(err)
 	}

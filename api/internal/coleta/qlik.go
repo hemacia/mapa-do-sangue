@@ -136,7 +136,7 @@ func lerHemosul(texto string, _ time.Time) (Resultado, error) {
 		QText string `json:"qText"`
 	}
 	if err := json.Unmarshal([]byte(texto), &matriz); err != nil {
-		return Resultado{}, fmt.Errorf("Hemosul: %w", err)
+		return Resultado{}, fmt.Errorf("Hemosul: %w", err) //nolint:staticcheck // nome do hemocentro
 	}
 	var leituras []Leitura
 	bolsas := map[httpapi.TipoSanguineo]Contagem{}

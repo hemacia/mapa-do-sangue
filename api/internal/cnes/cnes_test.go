@@ -15,8 +15,10 @@ func estabelecimento(cnes int, nome string) Estabelecimento {
 	}
 }
 
-var municipios = map[int]string{292740: "Salvador"}
-var ufs = map[int]string{29: "BA"}
+var (
+	municipios = map[int]string{292740: "Salvador"}
+	ufs        = map[int]string{29: "BA"}
+)
 
 func TestSelecionarTiraAgenciaTransfusionalLaboratorioEDesativada(t *testing.T) {
 	desativada := estabelecimento(4, "HEMANA")
