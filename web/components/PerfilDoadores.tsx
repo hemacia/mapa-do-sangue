@@ -4,7 +4,16 @@ import { noEstado, type UF } from '@/lib/domain/ufs'
 
 const numero = (n: number) => n.toLocaleString('pt-BR')
 
-export function PerfilDoadores({ uf, estatistica }: { uf: UF; estatistica?: EstatisticaUF }) {
+// titulo troca o "Quem doa no estado" quando o perfil é do Brasil inteiro.
+export function PerfilDoadores({
+  uf,
+  estatistica,
+  titulo,
+}: {
+  uf?: UF
+  estatistica?: EstatisticaUF
+  titulo?: string
+}) {
   const perfil = montarPerfil(estatistica?.indicadores)
   const variacao = variacaoDasColetas(estatistica?.serie)
   if (!estatistica || !perfil) return null
@@ -19,7 +28,7 @@ export function PerfilDoadores({ uf, estatistica }: { uf: UF; estatistica?: Esta
   return (
     <section className="secao" aria-labelledby="perfil">
       <div className="cabecalho">
-        <h2 id="perfil">Quem doa {noEstado(uf)}</h2>
+        <h2 id="perfil">{titulo ?? `Quem doa ${uf ? noEstado(uf) : 'no Brasil'}`}</h2>
         <p className="nota">
           {numero(perfil.doadores)} doadores aptos em {estatistica.ano}, segundo a Anvisa (Hemoprod).
           {variacao &&

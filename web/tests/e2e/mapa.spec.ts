@@ -73,3 +73,13 @@ test('o menu leva à lista de hemocentros separada por estado', async ({ page })
   await expect(page.getByRole('heading', { level: 2, name: 'Minas Gerais' })).toBeVisible()
   await expect(page.getByRole('heading', { name: 'Hemominas' })).toBeVisible()
 })
+
+test('o histórico mostra o Brasil ano a ano e a tabela dos estados', async ({ page }) => {
+  await page.goto('/')
+
+  await page.getByRole('navigation', { name: 'Principal' }).getByRole('link', { name: 'Histórico' }).click()
+
+  await expect(page).toHaveURL(/\/historico$/)
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Histórico das doações de sangue')
+  await expect(page.getByRole('table', { name: /por mil habitantes em cada estado/ })).toBeVisible()
+})

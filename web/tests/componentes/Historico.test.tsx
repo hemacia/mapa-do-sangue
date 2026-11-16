@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
-import { HistoricoBrasil, HistoricoEstado } from '@/components/Historico'
+import { HistoricoEstado } from '@/components/Historico'
 import type { EstatisticaUF } from '@/lib/api/cliente'
 
 const MG = {
@@ -44,23 +44,5 @@ describe('HistoricoEstado', () => {
     render(<HistoricoEstado uf="SP" estatistica={{ ...MG, uf: 'SP', parcial: undefined }} />)
 
     expect(screen.getByText(/ainda não publicou meses de 2026/)).toBeInTheDocument()
-  })
-})
-
-describe('HistoricoBrasil', () => {
-  it('soma o Brasil por ano e mostra o comparativo do ano em andamento', () => {
-    render(<HistoricoBrasil estatisticas={[MG]} />)
-
-    expect(
-      screen.getByRole('heading', { name: 'Coletas de sangue no Brasil, 2010 a 2025' }),
-    ).toBeInTheDocument()
-    expect(screen.getAllByRole('listitem')).toHaveLength(3)
-    expect(screen.getByText(/nas unidades de 1 estado que/)).toBeInTheDocument()
-  })
-
-  it('some sem série', () => {
-    const { container } = render(<HistoricoBrasil estatisticas={[]} />)
-
-    expect(container).toBeEmptyDOMElement()
   })
 })

@@ -212,3 +212,26 @@ export function EsqueletoSobre() {
     </div>
   )
 }
+
+export function EsqueletoHistorico() {
+  return (
+    <div className="esq-tela">
+      <section className="faixa-casco" aria-hidden="true">
+        <div className="faixa-casco-conteudo">
+          <div className="faixa-casco-texto esq-escuro">
+            <Bloco largura="70%" altura={56} />
+            <Bloco largura="85%" altura={18} />
+            <Bloco largura="520px" altura={56} />
+          </div>
+        </div>
+      </section>
+      <div className="pagina" aria-hidden="true">
+        <Bloco largura="40%" altura={30} />
+        <Bloco altura={300} />
+        <Bloco largura="30%" altura={30} />
+        <Bloco altura={420} />
+      </div>
+      <Carregando texto="Carregando o histórico" />
+    </div>
+  )
+}

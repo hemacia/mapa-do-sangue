@@ -361,8 +361,21 @@ h3 {
   }
 }
 
-/* Celular pequeno: os quatro itens ainda cabem; abaixo de 340px o menu rola de lado. */
-@media (max-width: 380px) {
+.navegacao .rotulo-curto {
+  display: none;
+}
+
+@media (max-width: 720px) {
+  .navegacao .rotulo-longo {
+    display: none;
+  }
+  .navegacao .rotulo-curto {
+    display: inline;
+  }
+}
+
+/* Celular: os cinco itens cabem com a fonte menor; abaixo de 340px o menu rola de lado. */
+@media (max-width: 420px) {
   .navegacao {
     gap: var(--space-2);
     font-size: var(--text-sm);
@@ -2484,4 +2497,139 @@ h3 {
   height: 24px;
   border-radius: 3px;
   background: var(--nivel);
+}
+
+/* Página de histórico */
+
+.grafico-grande .grafico-area {
+  height: 280px;
+}
+
+.calor-rolagem {
+  position: relative;
+  overflow-x: auto;
+}
+
+.calor {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 2px;
+  font-variant-numeric: tabular-nums;
+}
+
+.calor th {
+  padding: 0 var(--space-1);
+  color: var(--tinta-2);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.calor abbr {
+  text-decoration: none;
+}
+
+.calor tbody th {
+  padding-right: var(--space-3);
+  text-align: left;
+}
+
+.calor tbody th a {
+  color: var(--tinta);
+  font-size: var(--text-md);
+  font-weight: 600;
+}
+
+.calor td {
+  min-width: 28px;
+  height: 26px;
+  border-radius: 3px;
+}
+
+.calor td.calor-vazio {
+  background: transparent;
+  outline: 1px dashed var(--linha);
+  outline-offset: -1px;
+}
+
+.calor td.calor-incompleto {
+  background: repeating-linear-gradient(135deg, var(--faixa-2) 0 4px, transparent 4px 8px);
+  outline: 1px solid var(--faixa-3);
+  outline-offset: -1px;
+}
+
+.calor .calor-ultimo {
+  padding-left: var(--space-3);
+  color: var(--tinta);
+  font-size: var(--text-md);
+  font-weight: 700;
+  text-align: right;
+}
+
+.parcial-estados {
+  display: grid;
+  gap: var(--space-2);
+  padding: 0;
+  list-style: none;
+}
+
+.parcial-estados li {
+  display: grid;
+  grid-template-columns: minmax(120px, 180px) 1fr 64px;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.parcial-estados a {
+  color: var(--tinta);
+  font-weight: 600;
+}
+
+.parcial-trilho {
+  position: relative;
+  height: 14px;
+  background: linear-gradient(var(--tinta-3), var(--tinta-3)) center / 1px 100% no-repeat;
+}
+
+.parcial-trilho span {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+}
+
+.parcial-alta {
+  border-radius: 0 3px 3px 0;
+  background: var(--faixa-4);
+}
+
+.parcial-queda {
+  border-radius: 3px 0 0 3px;
+  background: var(--alerta);
+}
+
+.parcial-valor {
+  color: var(--tinta);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+/* Celular: a coluna dos estados fica parada enquanto os anos rolam, e a barra de 2026 ganha a linha toda. */
+.calor tbody th,
+.calor thead th:first-child {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  background: var(--superficie);
+}
+
+@media (max-width: 600px) {
+  .parcial-estados li {
+    grid-template-columns: 1fr auto;
+    row-gap: var(--space-1);
+  }
+  .parcial-trilho {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
 }

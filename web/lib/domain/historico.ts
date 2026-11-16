@@ -83,3 +83,90 @@ const MESES = [
 export function periodoParcial(ano: number, ateMes: number) {
   return ateMes === 1 ? `janeiro de ${ano}` : `janeiro a ${MESES[ateMes - 1]} de ${ano}`
 }
+
+export interface ResumoNacional {
+  ano: number
+  coletas: number
+  porMil: number
+  variacao: number | null // contra o ano anterior, só quando os dois anos têm menos de 5 estados faltando
+  recorde: { ano: number; coletas: number }
+}
+
+export function resumoNacional(estatisticas: EstatisticaUF[]): ResumoNacional | null {
+  const barras = barrasDoBrasil(estatisticas).filter((b) => b.valor !== null)
+  const ultima = barras.at(-1)
+  if (!ultima || ultima.valor === null) return null
+  const populacao = estatisticas.reduce((s, e) => s + e.populacao, 0)
+  const anterior = barras.at(-2)
+  const recorde = barras.reduce((a, b) => ((b.valor ?? 0) > (a.valor ?? 0) ? b : a))
+  return {
+    ano: ultima.ano,
+    coletas: ultima.valor,
+    porMil: Math.round((ultima.valor / populacao) * 10_000) / 10,
+    variacao:
+      anterior?.valor && !anterior.incompleto && !ultima.incompleto
+        ? Math.round(((ultima.valor - anterior.valor) / anterior.valor) * 1000) / 10
+        : null,
+    recorde: { ano: recorde.ano, coletas: recorde.valor ?? 0 },
+  }
+}
+
+export interface LinhaEstado {
+  uf: string
+  ultimo: number | null // taxa do último ano, para ordenar
+  anos: { ano: number; porMil: number | null; incompleto: boolean }[]
+}
+
+// Uma linha por estado, da maior taxa no último ano para a menor; sem dado vai para o fim.
+export function tabelaPorEstado(estatisticas: EstatisticaUF[]): { anos: number[]; linhas: LinhaEstado[] } {
+  const anos = [...new Set(estatisticas.flatMap((e) => (e.serie ?? []).map((a) => a.ano)))].sort(
+    (a, b) => a - b,
+  )
+  const linhas = estatisticas.map((e) => {
+    const porAno = new Map((e.serie ?? []).map((a) => [a.ano, a]))
+    return {
+      uf: e.uf,
+      ultimo: e.cobertura === 'completo' ? e.porMil : null,
+      anos: anos.map((ano) => {
+        const a = porAno.get(ano)
+        const porMil = a?.porMil ?? null
+        return { ano, porMil, incompleto: porMil !== null && porMil < 5 }
+      }),
+    }
+  })
+  linhas.sort((a, b) => (b.ultimo ?? -1) - (a.ultimo ?? -1))
+  return { anos, linhas }
+}
+
+export interface ParcialEstado {
+  uf: string
+  percentual: number
+}
+
+// Variação do ano em andamento por estado, da maior alta para a maior queda.
+export function parciaisPorEstado(estatisticas: EstatisticaUF[]): ParcialEstado[] {
+  return estatisticas
+    .flatMap((e) =>
+      e.parcial
+        ? [
+            {
+              uf: e.uf,
+              percentual:
+                Math.round(
+                  ((e.parcial.coletas - e.parcial.coletasAnoAnterior) / e.parcial.coletasAnoAnterior) * 1000,
+                ) / 10,
+            },
+          ]
+        : [],
+    )
+    .sort((a, b) => b.percentual - a.percentual)
+}
+
+// Soma os indicadores dos estados (último ano) para o perfil do Brasil.
+export function indicadoresNacionais(estatisticas: EstatisticaUF[]): Record<string, number> {
+  const soma: Record<string, number> = {}
+  for (const e of estatisticas) {
+    for (const [nome, valor] of Object.entries(e.indicadores ?? {})) soma[nome] = (soma[nome] ?? 0) + valor
+  }
+  return soma
+}

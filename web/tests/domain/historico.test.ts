@@ -1,6 +1,15 @@
 import { describe, expect, it } from 'vitest'
 import type { EstatisticaUF } from '@/lib/api/cliente'
-import { barrasDoBrasil, barrasDoEstado, parcialNacional, periodoParcial } from '@/lib/domain/historico'
+import {
+  barrasDoBrasil,
+  barrasDoEstado,
+  indicadoresNacionais,
+  parciaisPorEstado,
+  parcialNacional,
+  periodoParcial,
+  resumoNacional,
+  tabelaPorEstado,
+} from '@/lib/domain/historico'
 
 const estado = (uf: string, serie: EstatisticaUF['serie'], parcial?: EstatisticaUF['parcial']) =>
   ({
@@ -68,5 +77,60 @@ describe('histórico', () => {
   it('escreve o período', () => {
     expect(periodoParcial(2026, 3)).toBe('janeiro a março de 2026')
     expect(periodoParcial(2026, 1)).toBe('janeiro de 2026')
+  })
+})
+
+describe('página de histórico', () => {
+  const sp = estado(
+    'SP',
+    [
+      { ano: 2024, coletas: 1000, porMil: 20 },
+      { ano: 2025, coletas: 900, porMil: 18 },
+    ],
+    { ano: 2026, ateMes: 3, coletas: 90, coletasAnoAnterior: 100 },
+  )
+  const ma = {
+    ...estado('MA', [
+      { ano: 2024, coletas: 0, porMil: 0 },
+      { ano: 2025, coletas: 0, porMil: 0 },
+    ]),
+    cobertura: 'incompleto',
+    populacao: 9,
+  } as EstatisticaUF
+
+  it('resume o último ano do Brasil, a variação e o recorde', () => {
+    const r = resumoNacional([{ ...sp, populacao: 50 }, ma])
+
+    expect(r).toEqual({
+      ano: 2025,
+      coletas: 900,
+      porMil: 15254.2,
+      variacao: -10,
+      recorde: { ano: 2024, coletas: 1000 },
+    })
+  })
+
+  it('monta a tabela com o estado de maior taxa primeiro e marca o incompleto', () => {
+    const { anos, linhas } = tabelaPorEstado([ma, { ...sp, porMil: 18 }])
+
+    expect(anos).toEqual([2024, 2025])
+    expect(linhas.map((l) => l.uf)).toEqual(['SP', 'MA'])
+    expect(linhas[1].anos[0]).toEqual({ ano: 2024, porMil: 0, incompleto: true })
+  })
+
+  it('ordena o ano em andamento da maior alta para a maior queda', () => {
+    const sc = estado('SC', [], { ano: 2026, ateMes: 3, coletas: 110, coletasAnoAnterior: 100 })
+
+    expect(parciaisPorEstado([sp, sc, ma])).toEqual([
+      { uf: 'SC', percentual: 10 },
+      { uf: 'SP', percentual: -10 },
+    ])
+  })
+
+  it('soma os indicadores dos estados', () => {
+    const a = { ...sp, indicadores: { primeira_vez: 10, repeticao: 5 } }
+    const b = { ...ma, indicadores: { primeira_vez: 1 } }
+
+    expect(indicadoresNacionais([a, b])).toEqual({ primeira_vez: 11, repeticao: 5 })
   })
 })
