@@ -44,7 +44,7 @@ export function EuDoei({ registrar = api.registrarDoacao, totalDoMes = api.total
   }
 
   return (
-    <section className="eu-doei" aria-labelledby="titulo-eu-doei">
+    <section id="eu-doei" className="eu-doei" aria-labelledby="titulo-eu-doei">
       <div className="eu-doei-texto">
         <h2 id="titulo-eu-doei">Doou sangue hoje? Conte para o mapa</h2>
         <p>

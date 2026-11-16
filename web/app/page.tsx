@@ -1,6 +1,9 @@
 import Link from 'next/link'
 import { Suspense } from 'react'
 import { CartaoHemocentro } from '@/components/CartaoHemocentro'
+import { ColunaFixa } from '@/components/ColunaFixa'
+import { DoacoesBrasil } from '@/components/DoacoesBrasil'
+import { EsqueletoInicioConteudo } from '@/components/Esqueletos'
 import { EuDoei } from '@/components/EuDoei'
 import { MapaBrasil } from '@/components/MapaBrasil'
 import { PanoramaTipos } from '@/components/PanoramaTipos'
@@ -51,36 +54,41 @@ async function Estoque() {
   return (
     <>
       <section className="manchete-painel" aria-labelledby="manchete">
-        <div className="manchete">
-          <h1 id="manchete">
-            {primeiro ? (
-              <>
-                <span className="tipo">{juntarTipos([primeiro, ...resto])}</span>
-                {manchete.titulo.slice(juntarTipos(manchete.tipos).length)}
-              </>
-            ) : (
-              manchete.titulo
+        <ColunaFixa className="manchete-fixa">
+          <div className="manchete">
+            <h1 id="manchete">
+              {primeiro ? (
+                <>
+                  <span className="tipo">{juntarTipos([primeiro, ...resto])}</span>
+                  {manchete.titulo.slice(juntarTipos(manchete.tipos).length)}
+                </>
+              ) : (
+                manchete.titulo
+              )}
+            </h1>
+            {manchete.complemento && (
+              <p>
+                {manchete.complemento} Os hemocentros que publicam ficam em {juntarTipos(ufs)}.
+              </p>
             )}
-          </h1>
-          {manchete.complemento && (
-            <p>
-              {manchete.complemento} Os hemocentros que publicam ficam em {juntarTipos(ufs)}.
-            </p>
-          )}
-          {ultimaColeta && <p className="coleta">Coletado em {formatarColeta(ultimaColeta)}</p>}
-        </div>
-        <div className="acoes">
-          <Link href="/posso-doar" className="botao botao-primario">
-            Posso doar?
-          </Link>
-          <a href="#hemocentros" className="botao botao-contorno">
-            Ver os hemocentros
-          </a>
-        </div>
-        <PanoramaTipos panorama={panorama} hemocentros={hemocentros.length} />
+            {ultimaColeta && <p className="coleta">Coletado em {formatarColeta(ultimaColeta)}</p>}
+          </div>
+          <div className="acoes">
+            <Link href="/posso-doar" className="botao botao-primario">
+              Posso doar?
+            </Link>
+            <Link href="/hemocentros" className="botao botao-contorno">
+              Ver os hemocentros
+            </Link>
+          </div>
+          <PanoramaTipos panorama={panorama} hemocentros={hemocentros.length} />
+        </ColunaFixa>
       </section>
       <section className="palco" aria-label="Mapa do Brasil">
-        <MapaBrasil estatisticas={estatisticas} hemocentros={hemocentros} />
+        <ColunaFixa className="palco-fixo">
+          <MapaBrasil estatisticas={estatisticas} hemocentros={hemocentros} />
+          <DoacoesBrasil estatisticas={estatisticas} />
+        </ColunaFixa>
       </section>
       <aside id="hemocentros" className="painel-hemocentros" aria-labelledby="titulo-hemocentros">
         <h2 id="titulo-hemocentros">Hemocentros que publicam</h2>
@@ -108,7 +116,7 @@ export default function Home() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, '\\u003c') }}
       />
       <div className="inicio">
-        <Suspense fallback={<p className="manchete-painel">Carregando o estoque</p>}>
+        <Suspense fallback={<EsqueletoInicioConteudo />}>
           <Estoque />
         </Suspense>
       </div>

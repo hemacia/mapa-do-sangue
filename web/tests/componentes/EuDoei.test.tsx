@@ -8,7 +8,7 @@ function montar(
   registrar = vi.fn(async (d: NovaDoacao) => ({ ...d, tipo: d.tipo ?? null, data: '2026-11-11' })),
   total = 41,
 ) {
-  render(<EuDoei registrar={registrar} totalDoMes={async () => ({ mes: '2026-11', total })} />)
+  render(<EuDoei registrar={registrar} totalDoMes={async () => ({ mes: '2026-11', total, hoje: 0 })} />)
   return { registrar, usuario: userEvent.setup() }
 }
 

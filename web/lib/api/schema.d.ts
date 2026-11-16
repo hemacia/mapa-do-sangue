@@ -252,6 +252,8 @@ export interface components {
             /** @example 2026-11 */
             mes: string;
             total: number;
+            /** @description Doações registradas hoje */
+            hoje: number;
         };
         /** @description RFC 9457 Problem Details */
         Problema: {
