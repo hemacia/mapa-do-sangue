@@ -133,8 +133,9 @@ async function ConteudoHistorico() {
           <div className="cabecalho">
             <h2 id="por-estado">Estado por estado</h2>
             <p className="nota">
-              Coletas por mil habitantes de cada estado em cada ano, na mesma escala do mapa. Listrado: envio
-              incompleto à Anvisa naquele ano. O estado com a maior taxa em {anos.at(-1)} vem primeiro.
+              Cada linha é um estado e cada quadrado é um ano: quanto mais escuro, mais doações por mil
+              habitantes, na mesma escala do mapa. Listrado é ano de envio incompleto à Anvisa, e o tracejado
+              vazio é ano sem dado. O estado com a maior taxa em {anos.at(-1)} vem primeiro.
             </p>
           </div>
           <div className="caixa">
