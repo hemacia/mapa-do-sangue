@@ -352,10 +352,20 @@ h3 {
   .navegacao {
     order: 3;
     width: 100%;
+    gap: var(--space-3);
+    font-size: var(--text-md);
     overflow-x: auto;
   }
   .navegacao a {
     min-height: 48px;
+  }
+}
+
+/* Celular pequeno: os quatro itens ainda cabem; abaixo de 340px o menu rola de lado. */
+@media (max-width: 380px) {
+  .navegacao {
+    gap: var(--space-2);
+    font-size: var(--text-sm);
   }
 }
 
@@ -599,9 +609,6 @@ h3 {
 }
 
 .manchete-painel {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-6);
   padding: var(--space-6);
   background: var(--casco);
   color: var(--casco-tinta);
@@ -723,9 +730,17 @@ h3 {
   list-style: none;
 }
 
-/* Com três colunas o mapa acompanha a rolagem, em vez de deixar um vão azul embaixo. */
+.manchete-fixa {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+/* Com três colunas o mapa e a manchete acompanham a rolagem enquanto a lista da direita desce,
+   em vez de deixar um vão vazio embaixo deles. ColunaFixa ajusta o top quando a manchete é alta. */
 @media (min-width: 1280px) {
-  .palco .mapa {
+  .palco-fixo,
+  .manchete-fixa {
     position: sticky;
     top: var(--topbar-height);
   }
@@ -1953,4 +1968,315 @@ h3 {
   margin-top: var(--space-1);
   color: var(--casco-tinta-2);
   font-size: var(--text-sm);
+}
+
+/* Página de hemocentros: estados com um hemocentro lado a lado; quem tem vários ocupa a linha. */
+
+.hemocentros-estados {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr));
+  gap: var(--space-6) var(--space-4);
+}
+
+.hemocentros-estados .varios {
+  grid-column: 1 / -1;
+}
+
+.hemocentros-estado-topo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-4);
+}
+
+.hemocentros-estado-topo h2 {
+  font-family: var(--display);
+  font-size: var(--text-2xl);
+}
+
+.hemocentros-grade {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr));
+  gap: var(--space-4);
+  padding: 0;
+  list-style: none;
+}
+
+.hemocentros-grade .hemocentro {
+  height: 100%;
+  padding: var(--space-4) var(--space-5);
+  background: var(--superficie);
+  border: 1px solid var(--linha);
+}
+
+/* Esqueletos de carregamento: um por tela, na mesma grade da página. */
+
+.esq-tela {
+  min-height: calc(100dvh - var(--topbar-height));
+}
+
+.esq-tela-curta {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-7);
+  min-height: 60dvh;
+}
+
+.esq {
+  display: block;
+  width: 100%;
+  height: 16px;
+  max-width: 100%;
+  border-radius: 4px;
+  background: var(--linha);
+  animation: esq-pulso 1.4s ease-in-out infinite;
+}
+
+.esq-escuro .esq {
+  background: rgb(255 255 255 / 0.1);
+}
+
+@keyframes esq-pulso {
+  50% {
+    opacity: 0.55;
+  }
+}
+
+.esq-linha {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.esq-tipos {
+  display: grid;
+  grid-template-columns: repeat(8, minmax(0, 1fr));
+  gap: 3px;
+}
+
+.esq-tipos-grandes {
+  gap: 6px;
+}
+
+.esq-tipos-quatro {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+.esq-cartao {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4) 0;
+  border-bottom: 1px solid var(--linha);
+}
+
+.esq-cartao-caixa {
+  padding: var(--space-4) var(--space-5);
+  background: var(--superficie);
+  border: 1px solid var(--linha);
+}
+
+.esq-palco {
+  gap: var(--space-5);
+  padding: var(--space-5);
+}
+
+.esq-mapa {
+  width: min(100%, 640px);
+  aspect-ratio: 1;
+  height: auto;
+  align-self: center;
+  margin-inline: auto;
+  border-radius: 40% 45% 50% 35%;
+}
+
+.esq-mapa-pequeno {
+  border-radius: 40% 45% 50% 35%;
+}
+
+.esq-campo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+@media (max-width: 899px) {
+  .esq-tipos-grandes {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .esq {
+    animation: none;
+  }
+}
+
+/* Resumo do estado ao clicar no mapa */
+
+.painel-estado {
+  /* O reset global zera a margem que o navegador usa para centralizar o dialog. */
+  margin: auto;
+  width: min(100% - 2 * var(--space-4), 460px);
+  max-height: calc(100dvh - 2 * var(--space-4));
+  padding: 0;
+  border: 1px solid var(--linha);
+  border-radius: 8px;
+  background: var(--superficie);
+  color: var(--tinta);
+  box-shadow: 0 12px 40px rgb(3 20 32 / 0.35);
+}
+
+.painel-estado::backdrop {
+  background: rgb(6 22 34 / 0.55);
+}
+
+.painel-estado-conteudo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-5);
+}
+
+.painel-estado-topo {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.painel-estado-topo h2 {
+  font-family: var(--display);
+  font-size: var(--text-2xl);
+  font-weight: 800;
+  line-height: 1.1;
+}
+
+.botao-fechar {
+  min-height: 40px;
+  padding: 0 var(--space-3);
+  border: 1px solid var(--linha);
+  border-radius: 4px;
+  background: transparent;
+  color: var(--tinta);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.painel-estado-manchete {
+  font-size: var(--text-lg);
+  font-weight: 600;
+}
+
+.painel-estado-fatos {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1px;
+  margin: 0;
+  background: var(--linha);
+  border: 1px solid var(--linha);
+}
+
+.painel-estado-fatos div {
+  display: flex;
+  flex-direction: column-reverse;
+  justify-content: flex-end;
+  gap: 2px;
+  padding: var(--space-3);
+  background: var(--superficie);
+}
+
+.painel-estado-fatos dd {
+  margin: 0;
+  font-family: var(--display);
+  font-size: var(--text-xl);
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.painel-estado-fatos dt {
+  color: var(--tinta-2);
+  font-size: var(--text-sm);
+}
+
+.painel-estado .botao {
+  align-self: stretch;
+  justify-content: center;
+}
+
+/* Sangue doado no Brasil, embaixo do mapa */
+
+.doacoes-brasil {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-5) var(--space-5);
+  background: var(--superficie);
+  color: var(--tinta);
+  border-top: 1px solid var(--linha);
+}
+
+.doacoes-brasil-numero {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-1) var(--space-4);
+}
+
+.doacoes-brasil h2 {
+  font-family: var(--display);
+  font-size: var(--text-lg);
+  font-weight: 700;
+}
+
+.doacoes-brasil-numero p {
+  color: var(--tinta-2);
+  font-size: var(--text-md);
+}
+
+.doacoes-brasil-numero strong {
+  color: var(--tinta);
+  font-family: var(--display);
+  font-size: var(--text-xl);
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.doacoes-barra {
+  position: relative;
+  height: 14px;
+  margin-bottom: 18px;
+  background: var(--linha);
+}
+
+.doacoes-barra-cheia {
+  display: block;
+  height: 100%;
+  background: var(--critico);
+}
+
+.doacoes-barra-minimo {
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  width: 2px;
+  background: var(--tinta);
+}
+
+.doacoes-barra-minimo small {
+  position: absolute;
+  top: calc(100% + 2px);
+  left: 50%;
+  transform: translateX(-50%);
+  color: var(--tinta-2);
+  font-size: var(--text-sm);
+  white-space: nowrap;
+}
+
+.doacoes-no-site {
+  font-size: var(--text-md);
 }

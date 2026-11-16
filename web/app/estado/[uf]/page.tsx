@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation'
 import { Suspense } from 'react'
 import { AlertaNoticiado } from '@/components/AlertaNoticiado'
 import { DiasCriticos } from '@/components/DiasCriticos'
+import { EsqueletoEstado } from '@/components/Esqueletos'
 import { GradeTipos } from '@/components/GradeTipos'
 import { MapaDestaque } from '@/components/MapaDestaque'
 import { PerfilDoadores } from '@/components/PerfilDoadores'
@@ -204,7 +205,7 @@ async function ConteudoEstado({ params }: Pick<PageProps<'/estado/[uf]'>, 'param
 // Os 27 estados saem prontos do build (generateStaticParams); o Suspense só aparece para URL desconhecida.
 export default function PaginaEstado({ params }: PageProps<'/estado/[uf]'>) {
   return (
-    <Suspense fallback={<p className="pagina nota">Carregando o estoque</p>}>
+    <Suspense fallback={<EsqueletoEstado />}>
       <ConteudoEstado params={params} />
     </Suspense>
   )
