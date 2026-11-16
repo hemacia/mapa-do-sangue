@@ -209,6 +209,14 @@ export interface components {
             indicadores?: {
                 [key: string]: number;
             };
+            parcial?: components["schemas"]["ParcialUF"];
+        };
+        /** @description Ano em andamento: coletas de janeiro até ateMes, comparadas ao mesmo período do ano anterior, só nas unidades que enviaram todos esses meses nos dois anos */
+        ParcialUF: {
+            ano: number;
+            ateMes: number;
+            coletas: number;
+            coletasAnoAnterior: number;
         };
         AlertaNoticiado: {
             uf: components["schemas"]["UF"];

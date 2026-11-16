@@ -6,6 +6,7 @@ import { AlertaNoticiado } from '@/components/AlertaNoticiado'
 import { DiasCriticos } from '@/components/DiasCriticos'
 import { EsqueletoEstado } from '@/components/Esqueletos'
 import { GradeTipos } from '@/components/GradeTipos'
+import { HistoricoEstado } from '@/components/Historico'
 import { MapaDestaque } from '@/components/MapaDestaque'
 import { PerfilDoadores } from '@/components/PerfilDoadores'
 import { PontosColeta } from '@/components/PontosColeta'
@@ -159,6 +160,7 @@ async function ConteudoEstado({ params }: Pick<PageProps<'/estado/[uf]'>, 'param
         ))}
 
         <PontosColeta uf={uf} pontos={pontos} />
+        <HistoricoEstado uf={uf} estatistica={estatistica} />
         <PerfilDoadores uf={uf} estatistica={estatistica} />
 
         {!publica && (

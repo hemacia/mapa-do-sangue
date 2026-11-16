@@ -5,6 +5,7 @@ import { ColunaFixa } from '@/components/ColunaFixa'
 import { DoacoesBrasil } from '@/components/DoacoesBrasil'
 import { EsqueletoInicioConteudo } from '@/components/Esqueletos'
 import { EuDoei } from '@/components/EuDoei'
+import { HistoricoBrasil } from '@/components/Historico'
 import { MapaBrasil } from '@/components/MapaBrasil'
 import { PanoramaTipos } from '@/components/PanoramaTipos'
 import { estatisticasPorUF, estoqueAtual } from '@/lib/api/dados'
@@ -107,6 +108,11 @@ async function Estoque() {
   )
 }
 
+async function HistoricoDoBrasil() {
+  const estatisticas = await estatisticasPorUF().catch(() => [])
+  return <HistoricoBrasil estatisticas={estatisticas} />
+}
+
 export default function Home() {
   return (
     <>
@@ -120,6 +126,9 @@ export default function Home() {
           <Estoque />
         </Suspense>
       </div>
+      <Suspense fallback={null}>
+        <HistoricoDoBrasil />
+      </Suspense>
       <EuDoei />
     </>
   )
