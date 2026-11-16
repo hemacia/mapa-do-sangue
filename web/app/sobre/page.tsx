@@ -138,6 +138,13 @@ export default function PaginaSobre() {
             Abaixo de 5 por mil, o estado quase certamente não mandou todos os dados. Nesse caso o mapa mostra
             listras e o texto “envio incompleto”, em vez do número.
           </p>
+          <p className="nota">
+            O histórico vai de 2010 ao último ano fechado: até 2021 pelas planilhas anuais da Anvisa, depois
+            pelo CSV nacional, que o coletor baixa de novo todo mês. A população é a estimativa do IBGE; em
+            2010 e 2022 vale o Censo, e 2023, que não tem estimativa, fica na média entre 2022 e 2024. O ano
+            em andamento aparece só como comparativo com o mesmo período do ano anterior, nas unidades que já
+            mandaram todos os meses nos dois anos.
+          </p>
         </section>
         <section className="secao" aria-labelledby="projeto">
           <h2 id="projeto">O projeto</h2>
