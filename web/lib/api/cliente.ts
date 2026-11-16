@@ -9,6 +9,7 @@ export type TotalDoMes = components['schemas']['TotalDoMes']
 export type PontoColeta = components['schemas']['PontoColeta']
 export type AnoColetas = components['schemas']['AnoColetas']
 export type AlertaNoticiado = components['schemas']['AlertaNoticiado']
+export type DiaEstoque = components['schemas']['DiaEstoque']
 
 type Problema = components['schemas']['Problema']
 
@@ -30,6 +31,8 @@ export function criarCliente(baseUrl: string, fetch?: (req: Request) => Promise<
     pontosColeta: async (uf: string) =>
       resultado(await api.GET('/v1/pontos-coleta', { params: { query: { uf } } })),
     alertas: async (uf: string) => resultado(await api.GET('/v1/alertas', { params: { query: { uf } } })),
+    historico: async (id: string) =>
+      resultado(await api.GET('/v1/hemocentros/{id}/historico', { params: { path: { id } } })),
     totalDoMes: async () => resultado(await api.GET('/v1/doacoes/mes')),
     registrarDoacao: async (doacao: NovaDoacao) => resultado(await api.POST('/v1/doacoes', { body: doacao })),
   }

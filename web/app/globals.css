@@ -2392,3 +2392,41 @@ h3 {
   margin-inline: auto;
   width: 100%;
 }
+
+/* Estoque dia a dia */
+
+.dia-a-dia-rolagem {
+  /* relative: os textos escondidos das células (position: absolute) ficam presos aqui dentro. */
+  position: relative;
+  overflow-x: auto;
+}
+
+.dia-a-dia {
+  border-collapse: separate;
+  border-spacing: 2px;
+  font-variant-numeric: tabular-nums;
+}
+
+.dia-a-dia th {
+  padding: 0 var(--space-1);
+  color: var(--tinta-2);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.dia-a-dia tbody th {
+  padding-right: var(--space-2);
+  color: var(--tinta);
+  font-family: var(--display);
+  font-size: var(--text-lg);
+  font-weight: 800;
+  text-align: left;
+}
+
+.dia-a-dia td {
+  min-width: 36px;
+  height: 24px;
+  border-radius: 3px;
+  background: var(--nivel);
+}

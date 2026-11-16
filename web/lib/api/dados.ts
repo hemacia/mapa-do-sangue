@@ -29,3 +29,9 @@ export async function alertasNoticiados(uf: string) {
   cacheLife('hours')
   return api.alertas(uf)
 }
+
+export async function historicoDiario(id: string) {
+  'use cache'
+  cacheLife('minutes')
+  return api.historico(id)
+}

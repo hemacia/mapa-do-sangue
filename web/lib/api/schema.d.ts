@@ -106,6 +106,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/hemocentros/{id}/historico": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Nível de cada tipo dia a dia nos últimos 90 dias (a última leitura de cada dia) */
+        get: operations["historicoDoHemocentro"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/doacoes": {
         parameters: {
             query?: never;
@@ -217,6 +234,13 @@ export interface components {
             ateMes: number;
             coletas: number;
             coletasAnoAnterior: number;
+        };
+        DiaEstoque: {
+            /** Format: date */
+            data: string;
+            estoque: {
+                [key: string]: components["schemas"]["Nivel"];
+            };
         };
         AlertaNoticiado: {
             uf: components["schemas"]["UF"];
@@ -415,6 +439,29 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["AlertaNoticiado"][];
+                };
+            };
+            400: components["responses"]["Problema"];
+        };
+    };
+    historicoDoHemocentro: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Do dia mais antigo para o mais recente; vazio se o hemocentro não existe */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DiaEstoque"][];
                 };
             };
             400: components["responses"]["Problema"];

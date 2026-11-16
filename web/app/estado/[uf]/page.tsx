@@ -5,13 +5,20 @@ import { Suspense } from 'react'
 import { AlertaNoticiado } from '@/components/AlertaNoticiado'
 import { DiasCriticos } from '@/components/DiasCriticos'
 import { EsqueletoEstado } from '@/components/Esqueletos'
+import { EstoqueDiaADia } from '@/components/EstoqueDiaADia'
 import { GradeTipos } from '@/components/GradeTipos'
 import { HistoricoEstado } from '@/components/Historico'
 import { MapaDestaque } from '@/components/MapaDestaque'
 import { PerfilDoadores } from '@/components/PerfilDoadores'
 import { PontosColeta } from '@/components/PontosColeta'
 import type { EstatisticaUF } from '@/lib/api/cliente'
-import { alertasNoticiados, estatisticasPorUF, estoqueAtual, pontosColeta } from '@/lib/api/dados'
+import {
+  alertasNoticiados,
+  estatisticasPorUF,
+  estoqueAtual,
+  historicoDiario,
+  pontosColeta,
+} from '@/lib/api/dados'
 import { formatarAtualizacao } from '@/lib/domain/datas'
 import { type Posicao, posicaoNoRanking } from '@/lib/domain/estatisticas'
 import { nivelPorUF } from '@/lib/domain/mapa'
@@ -76,6 +83,7 @@ async function ConteudoEstado({ params }: Pick<PageProps<'/estado/[uf]'>, 'param
     alertasNoticiados(uf).catch(() => []),
   ])
   const hemocentros = todos.filter((h) => h.uf === uf)
+  const historicos = await Promise.all(hemocentros.map((h) => historicoDiario(h.id).catch(() => [])))
   const estatistica = estatisticas.find((e) => e.uf === uf)
   const posicao = posicaoNoRanking(estatisticas, uf)
   const ufsQuePublicam = [...new Set(todos.map((h) => h.uf))]
@@ -144,7 +152,7 @@ async function ConteudoEstado({ params }: Pick<PageProps<'/estado/[uf]'>, 'param
       </section>
 
       <div className="pagina">
-        {hemocentros.map((hemocentro) => (
+        {hemocentros.map((hemocentro, i) => (
           <section key={hemocentro.id} className="secao" aria-labelledby={`hemocentro-${hemocentro.id}`}>
             <h2 id={`hemocentro-${hemocentro.id}`}>
               {hemocentro.nome}, {hemocentro.cidade}
@@ -156,6 +164,7 @@ async function ConteudoEstado({ params }: Pick<PageProps<'/estado/[uf]'>, 'param
               </h3>
               <DiasCriticos historico={hemocentro.historico} />
             </div>
+            <EstoqueDiaADia dias={historicos[i]} id={hemocentro.id} />
           </section>
         ))}
 
