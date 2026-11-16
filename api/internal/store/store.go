@@ -167,6 +167,10 @@ func (s *Store) Estatisticas(ctx context.Context) ([]httpapi.EstatisticaUF, erro
 	if err != nil {
 		return nil, err
 	}
+	parciais, err := s.parciais(ctx)
+	if err != nil {
+		return nil, err
+	}
 	var lista []httpapi.EstatisticaUF
 	for _, e := range todas {
 		if e.Ano != ultimoAno {
@@ -184,10 +188,31 @@ func (s *Store) Estatisticas(ctx context.Context) ([]httpapi.EstatisticaUF, erro
 		if ind, ok := indicadores[string(e.Uf)]; ok {
 			e.Indicadores = &ind
 		}
+		if p, ok := parciais[e.Uf]; ok {
+			e.Parcial = &p
+		}
 		lista = append(lista, e)
 	}
 	sort.SliceStable(lista, func(a, b int) bool { return valor(lista[a].PorMil) > valor(lista[b].PorMil) })
 	return lista, nil
+}
+
+func (s *Store) parciais(ctx context.Context) (map[httpapi.UF]httpapi.ParcialUF, error) {
+	linhas, err := s.pool.Query(ctx, `SELECT uf, ano, ate_mes, coletas, coletas_ano_anterior FROM parcial_uf`)
+	if err != nil {
+		return nil, fmt.Errorf("consultar parcial: %w", err)
+	}
+	defer linhas.Close()
+	porUF := map[httpapi.UF]httpapi.ParcialUF{}
+	for linhas.Next() {
+		var uf httpapi.UF
+		var p httpapi.ParcialUF
+		if err := linhas.Scan(&uf, &p.Ano, &p.AteMes, &p.Coletas, &p.ColetasAnoAnterior); err != nil {
+			return nil, err
+		}
+		porUF[uf] = p
+	}
+	return porUF, linhas.Err()
 }
 
 func (s *Store) indicadores(ctx context.Context, ano int) (map[string]map[string]int, error) {

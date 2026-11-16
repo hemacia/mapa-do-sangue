@@ -211,6 +211,12 @@ func TestMigrationCarregaAs27UFsDe2025ComSerieDesde2010EIndicadores(t *testing.T
 		if e.Uf == "RJ" && (e.Ano != 2025 || e.Coletas == nil || *e.Coletas < 200000 || len(*e.Serie) != 16 || (*e.Serie)[0].Ano != 2010) {
 			t.Errorf("RJ = %+v (a rede do RJ vem em linhas agregadas e não pode zerar)", e)
 		}
+		if e.Uf == "SC" && (e.Parcial == nil || e.Parcial.Ano != 2026 || e.Parcial.AteMes != 3 || e.Parcial.ColetasAnoAnterior == 0) {
+			t.Errorf("SC sem o parcial de 2026: %+v", e.Parcial)
+		}
+		if e.Uf == "SP" && e.Parcial != nil {
+			t.Errorf("SP manda só o consolidado e não deveria ter parcial: %+v", e.Parcial)
+		}
 		if e.Uf == "SP" && (e.Indicadores == nil || (*e.Indicadores)["tipo_O-"] == 0) {
 			t.Errorf("SP sem indicadores: %+v", e.Indicadores)
 		}

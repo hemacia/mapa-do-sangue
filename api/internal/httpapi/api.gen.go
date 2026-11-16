@@ -142,8 +142,11 @@ type EstatisticaUF struct {
 
 	// Indicadores Doadores aptos no ano (primeira_vez, repeticao, esporadico, espontanea, reposicao, feminino, masculino, ate_29_anos, acima_29_anos, tipo_A+ ... tipo_O-) e candidatos inaptos
 	Indicadores *map[string]int `json:"indicadores,omitempty"`
-	Populacao   int             `json:"populacao"`
-	PorMil      *float64        `json:"porMil"`
+
+	// Parcial Ano em andamento: coletas de janeiro até ateMes, comparadas ao mesmo período do ano anterior, só nas unidades que enviaram todos esses meses nos dois anos
+	Parcial   *ParcialUF `json:"parcial,omitempty"`
+	Populacao int        `json:"populacao"`
+	PorMil    *float64   `json:"porMil"`
 
 	// Serie Coletas de todos os anos importados, do mais antigo ao mais recente
 	Serie *[]AnoColetas `json:"serie,omitempty"`
@@ -199,6 +202,14 @@ type NovaDoacao struct {
 
 	// Uf Example: MG
 	Uf UF `json:"uf"`
+}
+
+// ParcialUF Ano em andamento: coletas de janeiro até ateMes, comparadas ao mesmo período do ano anterior, só nas unidades que enviaram todos esses meses nos dois anos
+type ParcialUF struct {
+	Ano                int `json:"ano"`
+	AteMes             int `json:"ateMes"`
+	Coletas            int `json:"coletas"`
+	ColetasAnoAnterior int `json:"coletasAnoAnterior"`
 }
 
 // PontoColeta defines model for PontoColeta.
