@@ -163,3 +163,68 @@ func TestSomaCadaLinhaAgregadaDaAnvisaSemDeduplicar(t *testing.T) {
 	// As duas linhas de ID 0 somam; o Hemo B reenviou e vale só o último envio.
 	quero(t, got, map[string]int{"RJ": 80327 + 76055 + 10 + 6})
 }
+
+func TestAgregarMesesFicaSoComOsMesesPedidosESemConsolidado(t *testing.T) {
+	cabecalho := "Data de envio;Ano de referência;Período de referência;Razão Social - Nome Fantasia;CNPJ;Unidade Federativa;" +
+		"3.3\u00a0Total de coletas [Sangue total];3.3\u00a0Total de coletas [Por aférese]"
+	csv := strings.Join([]string{cabecalho,
+		"2026-02-01;2026;Janeiro;Hemo A;1;Bahia;100;0",
+		"2026-03-01;2026;Fevereiro;Hemo A;1;Bahia;50;0",
+		"2026-05-01;2026;Abril;Hemo A;1;Bahia;999;0",
+		"2026-02-01;2026;Consolidado;Rede;2;São Paulo;7000;0",
+		"2025-02-01;2025;Janeiro;Hemo A;1;Bahia;90;0",
+	}, "\n")
+
+	totais, err := AgregarMeses(strings.NewReader(csv), []int{2025, 2026}, []string{"Janeiro", "Fevereiro"},
+		map[string][]string{"coletas": Indicadores["coletas"]})
+
+	if err != nil {
+		t.Fatal(err)
+	}
+	if totais[2026]["BA"]["coletas"] != 150 || totais[2025]["BA"]["coletas"] != 90 || totais[2026]["SP"] != nil {
+		t.Errorf("totais = %v", totais)
+	}
+}
+
+func TestMesesPublicadosParaNoPrimeiroMesComPoucosEstados(t *testing.T) {
+	got := MesesPublicados(map[string]int{"Janeiro": 24, "Fevereiro": 24, "Março": 23, "Abril": 2, "Novembro": 1}, 15)
+
+	if strings.Join(got, ",") != "Janeiro,Fevereiro,Março" {
+		t.Errorf("meses = %v", got)
+	}
+}
+
+func TestGerarMigrationParcialSoComEstadosNosDoisAnos(t *testing.T) {
+	sql := GerarMigrationParcial(2026, 3, map[string][2]int{"BA": {33000, 31755}, "AC": {0, 900}})
+
+	if !strings.Contains(sql, "('BA', 2026, 3, 31755, 33000)") || strings.Contains(sql, "'AC'") {
+		t.Errorf("sql:\n%s", sql)
+	}
+	if !strings.Contains(sql, "janeiro a março de 2026") {
+		t.Errorf("cabeçalho:\n%s", sql)
+	}
+}
+
+func TestComparativoUsaSoAsUnidadesComTodosOsMesesNosDoisAnos(t *testing.T) {
+	cabecalho := "Data de envio;Ano de referência;Período de referência;Razão Social - Nome Fantasia;CNPJ;Unidade Federativa;" +
+		"3.3\u00a0Total de coletas [Sangue total];3.3\u00a0Total de coletas [Por aférese]"
+	csv := strings.Join([]string{cabecalho,
+		// Hemo A mandou janeiro e fevereiro nos dois anos: entra.
+		"2025-02-01;2025;Janeiro;Hemo A;1;Amazonas;100;0", "2025-03-01;2025;Fevereiro;Hemo A;1;Amazonas;100;0",
+		"2026-02-01;2026;Janeiro;Hemo A;1;Amazonas;80;0", "2026-03-01;2026;Fevereiro;Hemo A;1;Amazonas;90;0",
+		// Hemo B ainda não mandou 2026: fica de fora, em vez de parecer uma queda.
+		"2025-02-01;2025;Janeiro;Hemo B;2;Amazonas;5000;0", "2025-03-01;2025;Fevereiro;Hemo B;2;Amazonas;5000;0",
+		// Hemo C só mandou janeiro de 2026: também fica de fora.
+		"2025-02-01;2025;Janeiro;Hemo C;3;Amazonas;10;0", "2025-03-01;2025;Fevereiro;Hemo C;3;Amazonas;10;0",
+		"2026-02-01;2026;Janeiro;Hemo C;3;Amazonas;10;0",
+	}, "\n")
+
+	got, err := ComparativoMesmoPeriodo(strings.NewReader(csv), 2026, []string{"Janeiro", "Fevereiro"})
+
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got["AM"] != [2]int{200, 170} || len(got) != 1 {
+		t.Errorf("comparativo = %v", got)
+	}
+}

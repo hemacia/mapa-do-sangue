@@ -1,18 +1,25 @@
-// Comando estatisticas: gera uma migration com as coletas e os indicadores dos doadores
-// da Anvisa (Hemoprod) e a população do IBGE, para os anos pedidos.
+// Comando estatisticas: gera as migrations com as coletas e o perfil dos doadores por estado
+// (Anvisa, Hemoprod) e a população do IBGE.
 //
-// Uso: go run ./cmd/estatisticas caminho/hemoprod_nacional.csv migrations/<arquivo>.sql 2023 2024 2025
-// CSV: https://www.gov.br/anvisa/pt-br/centraisdeconteudo/publicacoes/sangue-tecidos-celulas-e-orgaos/producao-e-avaliacao-de-servicos-de-hemoterapia/dados-brutos-de-producao-hemoterapica
+//	go run ./cmd/estatisticas -saida migrations/00016_x.sql [-csv hemoprod_nacional.csv -anos 2022,2023] [bd-hemoprod-AAAA-sat.xlsx...]
+//	go run ./cmd/estatisticas -csv hemoprod_nacional.csv -parcial migrations/00017_x.sql
+//
+// CSV e planilhas: https://www.gov.br/anvisa/pt-br/centraisdeconteudo/publicacoes/sangue-tecidos-celulas-e-orgaos/producao-e-avaliacao-de-servicos-de-hemoterapia/dados-brutos-de-producao-hemoterapica
 package main
 
 import (
+	"bytes"
 	"context"
-	"encoding/json"
 	"errors"
+	"flag"
 	"fmt"
+	"maps"
 	"net/http"
 	"os"
+	"regexp"
+	"slices"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/hemacia/mapa-do-sangue/api/internal/estatisticas"
@@ -25,79 +32,104 @@ func main() {
 	}
 }
 
-func executar(args []string) error {
-	if len(args) < 3 {
-		return errors.New("uso: estatisticas hemoprod_nacional.csv migrations/00008_estatisticas.sql 2023 2024 2025")
-	}
-	var anos []int
-	for _, a := range args[2:] {
-		ano, err := strconv.Atoi(a)
-		if err != nil {
-			return fmt.Errorf("ano inválido: %s", a)
-		}
-		anos = append(anos, ano)
-	}
-	arquivo, err := os.Open(args[0]) //nolint:gosec // ferramenta local: o caminho vem de quem roda
-	if err != nil {
-		return err
-	}
-	defer func() { _ = arquivo.Close() }()
-	totais, err := estatisticas.AgregarPorUF(arquivo, anos, estatisticas.Indicadores)
-	if err != nil {
-		return err
-	}
-	populacao := map[int]map[string]int{}
-	for _, ano := range anos {
-		if populacao[ano], err = populacaoIBGE(ano); err != nil {
-			return fmt.Errorf("população do IBGE em %d: %w", ano, err)
-		}
-	}
-	if err := os.WriteFile(args[1], //nolint:gosec // ferramenta local: o destino vem de quem roda
-		[]byte(estatisticas.GerarMigration(totais, populacao)), 0o600); err != nil {
-		return err
-	}
-	fmt.Println("gravado em", args[1])
-	return nil
-}
+var anoNoNome = regexp.MustCompile(`(20\d{2})`)
 
-// Estimativa de população por UF (agregado 6579 do SIDRA).
-func populacaoIBGE(ano int) (map[string]int, error) {
-	ctx, cancelar := context.WithTimeout(context.Background(), 30*time.Second)
+func executar(args []string) error {
+	flags := flag.NewFlagSet("estatisticas", flag.ContinueOnError)
+	saida := flags.String("saida", "", "migration com os anos fechados")
+	csv := flags.String("csv", "", "hemoprod_nacional.csv")
+	anosCSV := flags.String("anos", "", "anos fechados a tirar do CSV, separados por vírgula")
+	parcial := flags.String("parcial", "", "migration com o ano em andamento, comparado ao anterior")
+	if err := flags.Parse(args); err != nil {
+		return err
+	}
+	ctx, cancelar := context.WithTimeout(context.Background(), 5*time.Minute)
 	defer cancelar()
-	url := fmt.Sprintf("https://servicodados.ibge.gov.br/api/v3/agregados/6579/periodos/%d/variaveis/9324?localidades=N3[all]", ano)
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil) //nolint:gosec // URL fixa do IBGE, só o ano muda
-	if err != nil {
-		return nil, err
-	}
-	resp, err := http.DefaultClient.Do(req) //nolint:gosec // URL fixa do IBGE
-	if err != nil {
-		return nil, err
-	}
-	defer func() { _ = resp.Body.Close() }()
-	var corpo []struct {
-		Resultados []struct {
-			Series []struct {
-				Localidade struct {
-					Nome string `json:"nome"`
-				} `json:"localidade"`
-				Serie map[string]string `json:"serie"`
-			} `json:"series"`
-		} `json:"resultados"`
-	}
-	if err := json.NewDecoder(resp.Body).Decode(&corpo); err != nil {
-		return nil, err
-	}
-	if len(corpo) == 0 || len(corpo[0].Resultados) == 0 {
-		return nil, errors.New("resposta sem resultados")
-	}
-	populacao := map[string]int{}
-	for _, s := range corpo[0].Resultados[0].Series {
-		if uf := estatisticas.SiglaDaUF(s.Localidade.Nome); uf != "" {
-			populacao[uf], _ = strconv.Atoi(s.Serie[strconv.Itoa(ano)])
+	buscar := estatisticas.BuscarNoIBGE(&http.Client{Timeout: time.Minute}, "https://servicodados.ibge.gov.br")
+
+	if *saida != "" {
+		totais := estatisticas.Totais{}
+		for _, arquivo := range flags.Args() {
+			m := anoNoNome.FindString(arquivo)
+			if m == "" {
+				return fmt.Errorf("sem ano no nome: %s", arquivo)
+			}
+			ano, _ := strconv.Atoi(m)
+			conteudo, err := os.ReadFile(arquivo) //nolint:gosec // ferramenta local
+			if err != nil {
+				return err
+			}
+			folhas, err := estatisticas.LerXLSX(conteudo)
+			if err != nil {
+				return fmt.Errorf("%s: %w", arquivo, err)
+			}
+			if totais[ano], err = estatisticas.AgregarPlanilhaAnual(folhas); err != nil {
+				return fmt.Errorf("%s: %w", arquivo, err)
+			}
 		}
+		if *csv != "" && *anosCSV != "" {
+			var anos []int
+			for _, a := range strings.Split(*anosCSV, ",") {
+				ano, err := strconv.Atoi(strings.TrimSpace(a))
+				if err != nil {
+					return fmt.Errorf("ano inválido: %s", a)
+				}
+				anos = append(anos, ano)
+			}
+			conteudo, err := os.ReadFile(*csv) //nolint:gosec // ferramenta local
+			if err != nil {
+				return err
+			}
+			doCSV, err := estatisticas.AgregarPorUF(bytes.NewReader(conteudo), anos, estatisticas.Indicadores)
+			if err != nil {
+				return err
+			}
+			maps.Copy(totais, doCSV)
+		}
+		populacao, err := estatisticas.PopulacaoPorAno(ctx, buscar, slices.Sorted(maps.Keys(totais)))
+		if err != nil {
+			return err
+		}
+		if err := os.WriteFile(*saida, []byte(estatisticas.GerarMigration(totais, populacao)), 0o600); err != nil { //nolint:gosec // ferramenta local
+			return err
+		}
+		fmt.Println("gravado em", *saida)
 	}
-	if len(populacao) != len(estatisticas.UFs) {
-		return nil, fmt.Errorf("vieram %d UFs, quero %d", len(populacao), len(estatisticas.UFs))
+
+	if *parcial != "" {
+		if *csv == "" {
+			return errors.New("-parcial precisa do -csv")
+		}
+		conteudo, err := os.ReadFile(*csv) //nolint:gosec // ferramenta local
+		if err != nil {
+			return err
+		}
+		ano := time.Now().Year()
+		ufsPorMes := map[string]int{}
+		coletas := map[string][]string{"coletas": estatisticas.Indicadores["coletas"]}
+		for _, mes := range estatisticas.Meses {
+			doMes, err := estatisticas.AgregarMeses(bytes.NewReader(conteudo), []int{ano}, []string{mes}, coletas)
+			if err != nil {
+				return err
+			}
+			ufsPorMes[mes] = len(doMes[ano])
+		}
+		meses := estatisticas.MesesPublicados(ufsPorMes, 15)
+		if len(meses) == 0 {
+			return fmt.Errorf("nenhum mês de %d publicado ainda", ano)
+		}
+		comparativo, err := estatisticas.ComparativoMesmoPeriodo(bytes.NewReader(conteudo), ano, meses)
+		if err != nil {
+			return err
+		}
+		sql := estatisticas.GerarMigrationParcial(ano, len(meses), comparativo)
+		if err := os.WriteFile(*parcial, []byte(sql), 0o600); err != nil { //nolint:gosec // ferramenta local
+			return err
+		}
+		fmt.Printf("gravado em %s (janeiro a %s de %d)\n", *parcial, strings.ToLower(meses[len(meses)-1]), ano)
 	}
-	return populacao, nil
+	if *saida == "" && *parcial == "" {
+		return errors.New("informe -saida ou -parcial")
+	}
+	return nil
 }

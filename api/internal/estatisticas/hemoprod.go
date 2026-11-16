@@ -113,6 +113,17 @@ func localizarColuna(cabecalho []string, trecho string) (int, error) {
 }
 
 func AgregarPorUF(r io.Reader, anos []int, indicadores map[string][]string) (Totais, error) {
+	return agregarFiltrado(r, anos, indicadores, nil, false)
+}
+
+// AgregarMeses soma só os envios mensais dos meses pedidos ("Janeiro", "Fevereiro"...). Quem manda
+// só o consolidado anual (SP, RJ e parte de MG) fica de fora, nos dois anos comparados.
+func AgregarMeses(r io.Reader, anos []int, meses []string, indicadores map[string][]string) (Totais, error) {
+	return agregarFiltrado(r, anos, indicadores, func(periodo string) bool { return slices.Contains(meses, periodo) }, false)
+}
+
+// porUnidade troca a UF pela chave "UF|CNPJ|nome|período", para comparar unidade a unidade.
+func agregarFiltrado(r io.Reader, anos []int, indicadores map[string][]string, aceitarPeriodo func(string) bool, porUnidade bool) (Totais, error) {
 	leitor := bufio.NewReader(r)
 	if bom, _ := leitor.Peek(3); string(bom) == "\xef\xbb\xbf" {
 		_, _ = leitor.Discard(3)
@@ -158,7 +169,7 @@ func AgregarPorUF(r io.Reader, anos []int, indicadores map[string][]string) (Tot
 	ultimoEnvio := map[string][]string{}
 	for n, linha := range linhas[1:] {
 		ano, _ := strconv.Atoi(campo(linha, col[colAno]))
-		if !slices.Contains(anos, ano) {
+		if !slices.Contains(anos, ano) || (aceitarPeriodo != nil && !aceitarPeriodo(campo(linha, col[colPeriodo]))) {
 			continue
 		}
 		chave := estabelecimento(linha) + "|" + campo(linha, col[colPeriodo])
@@ -190,6 +201,9 @@ func AgregarPorUF(r io.Reader, anos []int, indicadores map[string][]string) (Tot
 			continue
 		}
 		ano, _ := strconv.Atoi(campo(linha, col[colAno]))
+		if porUnidade {
+			uf = strings.Join([]string{uf, campo(linha, col[colCNPJ]), campo(linha, col[colNome]), campo(linha, col[colPeriodo])}, "|")
+		}
 		if totais[ano] == nil {
 			totais[ano] = map[string]map[string]int{}
 		}
@@ -246,4 +260,75 @@ func GerarMigration(totais Totais, populacao map[int]map[string]int) string {
 	}
 	fmt.Fprintf(&sql, "\n-- +goose Down\nDELETE FROM indicadores_uf WHERE ano IN (%s);\nDELETE FROM estatisticas_uf WHERE ano IN (%s);\n", listaAnos, listaAnos)
 	return sql.String()
+}
+
+var Meses = []string{"Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto",
+	"Setembro", "Outubro", "Novembro", "Dezembro"}
+
+// MesesPublicados devolve os meses do ano já publicados em sequência desde janeiro: um mês só
+// conta quando pelo menos minimoUFs estados o enviaram (a Anvisa solta o ano aos poucos).
+func MesesPublicados(ufsPorMes map[string]int, minimoUFs int) []string {
+	var meses []string
+	for _, mes := range Meses {
+		if ufsPorMes[mes] < minimoUFs {
+			break
+		}
+		meses = append(meses, mes)
+	}
+	return meses
+}
+
+// GerarMigrationParcial grava as coletas do ano em andamento até o último mês publicado, ao lado
+// das do mesmo período do ano anterior, pelas mesmas unidades (ComparativoMesmoPeriodo).
+func GerarMigrationParcial(ano, ateMes int, comparativo map[string][2]int) string {
+	var sql strings.Builder
+	fmt.Fprintf(&sql, "-- +goose Up\n-- Coletas de janeiro a %s de %d e do mesmo período de %d (Anvisa, Hemoprod, envios mensais).\n",
+		strings.ToLower(Meses[ateMes-1]), ano, ano-1)
+	sql.WriteString("-- Gerado por api/cmd/estatisticas. SP, RJ e quem manda só o consolidado anual ficam de fora.\n")
+	sql.WriteString("DELETE FROM parcial_uf;\n")
+	var linhas []string
+	for _, uf := range UFs {
+		b, a := comparativo[uf][0], comparativo[uf][1]
+		if a > 0 && b > 0 {
+			linhas = append(linhas, fmt.Sprintf("  ('%s', %d, %d, %d, %d)", uf, ano, ateMes, a, b))
+		}
+	}
+	if len(linhas) > 0 {
+		sql.WriteString("INSERT INTO parcial_uf (uf, ano, ate_mes, coletas, coletas_ano_anterior) VALUES\n")
+		sql.WriteString(strings.Join(linhas, ",\n") + ";\n")
+	}
+	sql.WriteString("\n-- +goose Down\nDELETE FROM parcial_uf;\n")
+	return sql.String()
+}
+
+// ComparativoMesmoPeriodo soma as coletas de cada UF nos meses pedidos do ano e do ano anterior,
+// contando só as unidades que mandaram todos esses meses nos dois anos. Assim uma unidade que ainda
+// não enviou 2026 não parece uma queda. Devolve UF → [ano anterior, ano].
+func ComparativoMesmoPeriodo(r io.Reader, ano int, meses []string) (map[string][2]int, error) {
+	porUnidade, err := agregarFiltrado(r, []int{ano - 1, ano}, map[string][]string{"coletas": Indicadores["coletas"]},
+		func(periodo string) bool { return slices.Contains(meses, periodo) }, true)
+	if err != nil {
+		return nil, err
+	}
+	type unidade struct{ uf, id string }
+	mesesDe := map[int]map[unidade]int{}
+	coletasDe := map[int]map[unidade]int{}
+	for _, a := range []int{ano - 1, ano} {
+		mesesDe[a], coletasDe[a] = map[unidade]int{}, map[unidade]int{}
+		for chave, ind := range porUnidade[a] {
+			partes := strings.SplitN(chave, "|", 4)
+			u := unidade{partes[0], partes[1] + "|" + partes[2]}
+			mesesDe[a][u]++
+			coletasDe[a][u] += ind["coletas"]
+		}
+	}
+	comparativo := map[string][2]int{}
+	for u, n := range mesesDe[ano] {
+		if n != len(meses) || mesesDe[ano-1][u] != len(meses) {
+			continue
+		}
+		c := comparativo[u.uf]
+		comparativo[u.uf] = [2]int{c[0] + coletasDe[ano-1][u], c[1] + coletasDe[ano][u]}
+	}
+	return comparativo, nil
 }

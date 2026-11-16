@@ -197,7 +197,7 @@ func TestEstatisticasCalculaTaxaECoberturaOrdenadas(t *testing.T) {
 	}
 }
 
-func TestMigrationCarregaAs27UFsDe2025ComSerieEIndicadores(t *testing.T) {
+func TestMigrationCarregaAs27UFsDe2025ComSerieDesde2010EIndicadores(t *testing.T) {
 	s := bancoDeTeste(t)
 
 	estatisticas, err := s.Estatisticas(context.Background())
@@ -208,7 +208,7 @@ func TestMigrationCarregaAs27UFsDe2025ComSerieEIndicadores(t *testing.T) {
 		t.Errorf("UFs = %d, quero 27", len(estatisticas))
 	}
 	for _, e := range estatisticas {
-		if e.Uf == "RJ" && (e.Ano != 2025 || e.Coletas == nil || *e.Coletas < 200000 || len(*e.Serie) != 2) {
+		if e.Uf == "RJ" && (e.Ano != 2025 || e.Coletas == nil || *e.Coletas < 200000 || len(*e.Serie) != 16 || (*e.Serie)[0].Ano != 2010) {
 			t.Errorf("RJ = %+v (a rede do RJ vem em linhas agregadas e não pode zerar)", e)
 		}
 		if e.Uf == "SP" && (e.Indicadores == nil || (*e.Indicadores)["tipo_O-"] == 0) {
