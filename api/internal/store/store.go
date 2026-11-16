@@ -15,6 +15,7 @@ import (
 	"github.com/pressly/goose/v3"
 
 	"github.com/hemacia/mapa-do-sangue/api/internal/coleta"
+	"github.com/hemacia/mapa-do-sangue/api/internal/estatisticas"
 	"github.com/hemacia/mapa-do-sangue/api/internal/httpapi"
 	"github.com/hemacia/mapa-do-sangue/api/migrations"
 )
@@ -281,6 +282,56 @@ func (s *Store) GravarAlertas(ctx context.Context, noticias []coleta.Noticia, co
 			  ON CONFLICT (url) DO UPDATE SET titulo = EXCLUDED.titulo`,
 				n.URL, n.UF, n.FonteID, n.Titulo, n.PublicadaEm, coletadoEm); err != nil {
 				return fmt.Errorf("gravar alerta %s: %w", n.URL, err)
+			}
+		}
+		return nil
+	})
+}
+
+// GravarImportacao aplica a atualização mensal da Anvisa: anos fechados por cima do que existe e o
+// comparativo do ano em andamento no lugar do anterior. Tudo ou nada.
+func (s *Store) GravarImportacao(ctx context.Context, imp estatisticas.Importacao) error {
+	return pgx.BeginFunc(ctx, s.pool, func(tx pgx.Tx) error {
+		for ano, porUF := range imp.Totais {
+			for _, uf := range estatisticas.UFs {
+				var coletas *int
+				if ind, ok := porUF[uf]; ok {
+					c := ind["coletas"]
+					coletas = &c
+				}
+				if _, err := tx.Exec(ctx, `
+				  INSERT INTO estatisticas_uf (uf, ano, coletas, populacao) VALUES ($1, $2, $3, $4)
+				  ON CONFLICT (uf, ano) DO UPDATE SET coletas = EXCLUDED.coletas, populacao = EXCLUDED.populacao`,
+					uf, ano, coletas, imp.Populacao[ano][uf]); err != nil {
+					return fmt.Errorf("gravar estatística %s %d: %w", uf, ano, err)
+				}
+				for indicador, valor := range porUF[uf] {
+					if indicador == "coletas" {
+						continue
+					}
+					if _, err := tx.Exec(ctx, `
+					  INSERT INTO indicadores_uf (uf, ano, indicador, valor) VALUES ($1, $2, $3, $4)
+					  ON CONFLICT (uf, ano, indicador) DO UPDATE SET valor = EXCLUDED.valor`,
+						uf, ano, indicador, valor); err != nil {
+						return fmt.Errorf("gravar indicador %s %d: %w", uf, ano, err)
+					}
+				}
+			}
+		}
+		if imp.AteMes == 0 {
+			return nil
+		}
+		if _, err := tx.Exec(ctx, `DELETE FROM parcial_uf`); err != nil {
+			return err
+		}
+		for uf, c := range imp.Comparativo {
+			if c[0] == 0 || c[1] == 0 {
+				continue
+			}
+			if _, err := tx.Exec(ctx, `
+			  INSERT INTO parcial_uf (uf, ano, ate_mes, coletas, coletas_ano_anterior) VALUES ($1, $2, $3, $4, $5)`,
+				uf, imp.AnoParcial, imp.AteMes, c[1], c[0]); err != nil {
+				return fmt.Errorf("gravar parcial %s: %w", uf, err)
 			}
 		}
 		return nil

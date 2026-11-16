@@ -12,6 +12,7 @@ import (
 	openapi_types "github.com/oapi-codegen/runtime/types"
 
 	"github.com/hemacia/mapa-do-sangue/api/internal/coleta"
+	"github.com/hemacia/mapa-do-sangue/api/internal/estatisticas"
 	"github.com/hemacia/mapa-do-sangue/api/internal/httpapi"
 )
 
@@ -391,5 +392,49 @@ func TestGravarAlertasNaoDuplicaEListaOsRecentes(t *testing.T) {
 	}
 	if len(alertas) != 1 || alertas[0].Url != "https://rn.gov.br/1" || alertas[0].Fonte != "sesap-rn" {
 		t.Errorf("alertas = %+v", alertas)
+	}
+}
+
+func TestGravarImportacaoAtualizaOAnoEOParcial(t *testing.T) {
+	s := bancoDeTeste(t)
+	ctx := context.Background()
+	populacao := map[string]int{}
+	for _, uf := range estatisticas.UFs {
+		populacao[uf] = 1_000_000
+	}
+	imp := estatisticas.Importacao{
+		Totais:      estatisticas.Totais{2025: {"BA": {"coletas": 20000, "primeira_vez": 5000}}},
+		Populacao:   map[int]map[string]int{2025: populacao},
+		AnoParcial:  2026,
+		AteMes:      4,
+		Comparativo: map[string][2]int{"BA": {900, 1000}, "AC": {0, 10}},
+	}
+
+	if err := s.GravarImportacao(ctx, imp); err != nil {
+		t.Fatal(err)
+	}
+
+	lista, err := s.Estatisticas(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, e := range lista {
+		switch e.Uf {
+		case "BA":
+			if *e.Coletas != 20000 || *e.PorMil != 20 || (*e.Indicadores)["primeira_vez"] != 5000 {
+				t.Errorf("BA = coletas %d, por mil %v, indicadores %v", *e.Coletas, *e.PorMil, e.Indicadores)
+			}
+			if e.Parcial == nil || e.Parcial.AteMes != 4 || e.Parcial.Coletas != 1000 || e.Parcial.ColetasAnoAnterior != 900 {
+				t.Errorf("BA parcial = %+v", e.Parcial)
+			}
+		case "SP":
+			if e.Coletas != nil || e.Parcial != nil {
+				t.Errorf("SP fora do CSV vira sem dado e sem parcial: %+v", e)
+			}
+		case "AC":
+			if e.Parcial != nil {
+				t.Errorf("AC sem ano anterior não entra no parcial: %+v", e.Parcial)
+			}
+		}
 	}
 }
