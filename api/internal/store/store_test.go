@@ -257,12 +257,12 @@ func TestRegistrarEContarDoacoesDoMes(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	total, err := s.ContarDoacoes(ctx, "2026-11")
+	total, hoje, err := s.ContarDoacoes(ctx, time.Date(2026, 11, 30, 0, 0, 0, 0, time.UTC))
 	if err != nil {
 		t.Fatal(err)
 	}
-	if total != 2 {
-		t.Errorf("total = %d, quero 2", total)
+	if total != 2 || hoje != 1 {
+		t.Errorf("total = %d, hoje = %d, quero 2 e 1", total, hoje)
 	}
 }
 

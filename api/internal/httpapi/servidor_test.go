@@ -21,6 +21,7 @@ type repositorioFalso struct {
 	doacoes      []Doacao
 	mesPedido    string
 	totalDoMes   int
+	totalDoDia   int
 	estatisticas []EstatisticaUF
 	pontos       []PontoColeta
 	alertas      []AlertaNoticiado
@@ -53,9 +54,9 @@ func (r *repositorioFalso) RegistrarDoacao(_ context.Context, d Doacao) error {
 	return r.erro
 }
 
-func (r *repositorioFalso) ContarDoacoes(_ context.Context, mes string) (int, error) {
-	r.mesPedido = mes
-	return r.totalDoMes, r.erro
+func (r *repositorioFalso) ContarDoacoes(_ context.Context, dia time.Time) (int, int, error) {
+	r.mesPedido = dia.Format(time.DateOnly)
+	return r.totalDoMes, r.totalDoDia, r.erro
 }
 
 // 01:30 UTC de 1º de dezembro ainda é 30 de novembro em Brasília.
@@ -263,13 +264,14 @@ func TestRegistrarDoacaoLimitaRequisicoesPorIP(t *testing.T) {
 }
 
 func TestContarDoacoesUsaOMesDeBrasilia(t *testing.T) {
-	repo := &repositorioFalso{totalDoMes: 42}
+	repo := &repositorioFalso{totalDoMes: 42, totalDoDia: 3}
 	h := novoServidor(repo)
 
 	resp := requisitar(h, http.MethodGet, "/v1/doacoes/mes", "")
 
+	// 01:30 UTC de 1º/12 ainda é 30/11 em Brasília.
 	total := decodificar[TotalDoMes](t, resp)
-	if total.Mes != "2026-11" || total.Total != 42 || repo.mesPedido != "2026-11" {
+	if total.Mes != "2026-11" || total.Total != 42 || total.Hoje != 3 || repo.mesPedido != "2026-11-30" {
 		t.Errorf("total = %+v, mês pedido = %q", total, repo.mesPedido)
 	}
 }

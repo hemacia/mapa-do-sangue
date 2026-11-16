@@ -259,10 +259,11 @@ components:
         data: { type: string, format: date }
     TotalDoMes:
       type: object
-      required: [mes, total]
+      required: [mes, total, hoje]
       properties:
         mes: { type: string, example: "2026-11" }
         total: { type: integer }
+        hoje: { type: integer, description: Doações registradas hoje, no horário de Brasília }
     Problema:
       type: object
       description: RFC 9457 Problem Details

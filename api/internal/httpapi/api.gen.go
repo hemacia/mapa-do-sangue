@@ -236,6 +236,9 @@ type TipoSanguineo string
 
 // TotalDoMes defines model for TotalDoMes.
 type TotalDoMes struct {
+	// Hoje Doações registradas hoje
+	Hoje int `json:"hoje"`
+
 	// Mes Example: 2026-11
 	Mes   string `json:"mes"`
 	Total int    `json:"total"`

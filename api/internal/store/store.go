@@ -268,11 +268,12 @@ func (s *Store) RegistrarDoacao(ctx context.Context, d httpapi.Doacao) error {
 	return err
 }
 
-func (s *Store) ContarDoacoes(ctx context.Context, mes string) (int, error) {
-	var total int
-	err := s.pool.QueryRow(ctx,
-		`SELECT count(*) FROM doacoes_registradas WHERE to_char(data, 'YYYY-MM') = $1`, mes).Scan(&total)
-	return total, err
+func (s *Store) ContarDoacoes(ctx context.Context, dia time.Time) (mes, hoje int, err error) {
+	err = s.pool.QueryRow(ctx, `
+	  SELECT count(*), count(*) FILTER (WHERE data = $1::date)
+	  FROM doacoes_registradas WHERE date_trunc('month', data) = date_trunc('month', $1::date)`,
+		dia.Format(time.DateOnly)).Scan(&mes, &hoje)
+	return mes, hoje, err
 }
 
 // GravarColeta grava as leituras das fontes que funcionaram e marca a última coleta boa de cada uma.

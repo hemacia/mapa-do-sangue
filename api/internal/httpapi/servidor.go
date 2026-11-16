@@ -21,7 +21,7 @@ type Repositorio interface {
 	PontosColeta(ctx context.Context, uf string) ([]PontoColeta, error)
 	Alertas(ctx context.Context, uf string, desde time.Time) ([]AlertaNoticiado, error)
 	RegistrarDoacao(ctx context.Context, doacao Doacao) error
-	ContarDoacoes(ctx context.Context, mes string) (int, error) // mes = AAAA-MM
+	ContarDoacoes(ctx context.Context, dia time.Time) (mes, hoje int, err error) // total do mês de dia e do próprio dia
 }
 
 type Opcoes struct {
@@ -167,12 +167,12 @@ func (s *servidor) RegistrarDoacao(ctx context.Context, req RegistrarDoacaoReque
 }
 
 func (s *servidor) ContarDoacoesDoMes(ctx context.Context, _ ContarDoacoesDoMesRequestObject) (ContarDoacoesDoMesResponseObject, error) {
-	mes := s.hoje().Format("2006-01")
-	total, err := s.repo.ContarDoacoes(ctx, mes)
+	hoje := s.hoje()
+	total, doDia, err := s.repo.ContarDoacoes(ctx, hoje)
 	if err != nil {
 		return nil, err
 	}
-	return ContarDoacoesDoMes200JSONResponse{Mes: mes, Total: total}, nil
+	return ContarDoacoesDoMes200JSONResponse{Mes: hoje.Format("2006-01"), Total: total, Hoje: doDia}, nil
 }
 
 // O servidor roda em UTC: às 22h de Brasília já seria amanhã.
