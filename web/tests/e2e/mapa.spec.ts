@@ -22,10 +22,16 @@ test('trocar o tipo sanguíneo muda as cores do mapa', async ({ page }) => {
   await expect.poll(() => santaCatarina.evaluate((el) => getComputedStyle(el).fill)).not.toBe(corGeral)
 })
 
-test('clicar num estado abre a página do estado com os hemocentros', async ({ page }) => {
+test('clicar num estado mostra o resumo e o "Ver mais" abre a página do estado', async ({ page }) => {
   await page.goto('/')
 
   await page.getByRole('link', { name: /^Minas Gerais:/ }).click()
+
+  const resumo = page.getByRole('dialog', { name: 'Minas Gerais' })
+  await expect(resumo).toBeVisible()
+  await expect(resumo).toContainText('tipos críticos hoje')
+  await expect(page).toHaveURL(/\/$/)
+  await resumo.getByRole('link', { name: 'Ver mais sobre Minas Gerais' }).click()
 
   await expect(page).toHaveURL(/\/estado\/mg$/)
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Estoque de sangue em Minas Gerais')
@@ -55,4 +61,14 @@ test('a UF em maiúsculas redireciona para o endereço canônico', async ({ page
   await page.goto('/estado/MG')
 
   await expect(page).toHaveURL(/\/estado\/mg$/)
+})
+
+test('o menu leva à lista de hemocentros separada por estado', async ({ page }) => {
+  await page.goto('/')
+
+  await page.getByRole('navigation', { name: 'Principal' }).getByRole('link', { name: 'Hemocentros' }).click()
+
+  await expect(page).toHaveURL(/\/hemocentros$/)
+  await expect(page.getByRole('heading', { level: 2, name: 'Minas Gerais' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Hemominas' })).toBeVisible()
 })

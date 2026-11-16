@@ -9,6 +9,7 @@ describe('Navegacao', () => {
   it.each([
     ['/', 'Estoque'],
     ['/estado/mg', 'Estoque'],
+    ['/hemocentros', 'Hemocentros'],
     ['/posso-doar', 'Posso doar?'],
     ['/sobre', 'Sobre os dados'],
   ])('em %s marca "%s" como a página atual', (caminho, rotulo) => {
