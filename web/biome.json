@@ -15,7 +15,8 @@
       "!build",
       "!lib/api/schema.d.ts",
       "!coverage",
-      "!.impeccable"
+      "!.impeccable",
+      "!**/*.md"
     ]
   },
   "formatter": {
