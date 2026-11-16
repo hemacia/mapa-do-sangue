@@ -125,6 +125,15 @@ export function PainelEstado({ resumos }: { resumos: Record<UF, ResumoEstado> })
                   </dd>
                 </div>
               )}
+              {r.parcial && (
+                <div>
+                  <dt>coletas em {r.parcial.periodo}, contra o mesmo período do ano anterior</dt>
+                  <dd>
+                    {r.parcial.percentual > 0 ? '+' : ''}
+                    {taxa(r.parcial.percentual)}%
+                  </dd>
+                </div>
+              )}
               {r.primeiraVez !== null && (
                 <div>
                   <dt>dos doadores doaram pela primeira vez</dt>

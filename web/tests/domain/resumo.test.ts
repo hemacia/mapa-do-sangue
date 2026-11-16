@@ -15,6 +15,7 @@ const ESTATISTICAS: EstatisticaUF[] = [
       { ano: 2025, coletas: 336030, porMil: 15.7 },
     ],
     indicadores: { primeira_vez: 280, repeticao: 420, esporadico: 300 },
+    parcial: { ano: 2026, ateMes: 3, coletas: 1973, coletasAnoAnterior: 1865 },
   },
   { uf: 'MA', ano: 2025, coletas: 0, populacao: 7018211, porMil: 0, cobertura: 'incompleto' },
 ]
@@ -40,6 +41,8 @@ describe('montarResumos', () => {
   it('traz a taxa, a posição, a variação e o percentual de primeira vez', () => {
     expect(resumos.MG).toMatchObject({ porMil: 15.7, ano: 2025, posicao: 1, total: 1, primeiraVez: 28 })
     expect(resumos.MG.variacao?.percentual).toBe(-3)
+    expect(resumos.MG.parcial).toEqual({ periodo: 'janeiro a março de 2026', percentual: 5.8 })
+    expect(resumos.MA.parcial).toBeNull()
   })
 
   it('não mostra taxa de envio incompleto e cobre os 27 estados', () => {

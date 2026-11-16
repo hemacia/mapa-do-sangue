@@ -1,5 +1,6 @@
 import type { EstatisticaUF } from '@/lib/api/cliente'
 import { posicaoNoRanking } from './estatisticas'
+import { periodoParcial } from './historico'
 import { nivelPorUF } from './mapa'
 import type { NivelEstoque } from './nivel'
 import { montarPerfil, type Variacao, variacaoDasColetas } from './perfil'
@@ -26,6 +27,7 @@ export interface ResumoEstado {
   total: number | null
   variacao: Variacao | null
   primeiraVez: number | null
+  parcial: { periodo: string; percentual: number } | null // ano em andamento, mesmas unidades
 }
 
 export function montarResumos(
@@ -57,6 +59,17 @@ export function montarResumos(
         total: posicao?.total ?? null,
         variacao: variacaoDasColetas(estatistica?.serie),
         primeiraVez: montarPerfil(estatistica?.indicadores)?.primeiraVez ?? null,
+        parcial: estatistica?.parcial
+          ? {
+              periodo: periodoParcial(estatistica.parcial.ano, estatistica.parcial.ateMes),
+              percentual:
+                Math.round(
+                  ((estatistica.parcial.coletas - estatistica.parcial.coletasAnoAnterior) /
+                    estatistica.parcial.coletasAnoAnterior) *
+                    1000,
+                ) / 10,
+            }
+          : null,
       }
       return [uf, resumo]
     }),
