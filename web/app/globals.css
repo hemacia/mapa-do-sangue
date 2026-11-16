@@ -1934,7 +1934,7 @@ h3 {
 .alerta-noticiado {
   max-width: 64ch;
   padding: var(--space-3) var(--space-4);
-  border-left: 4px solid var(--acento-casco);
+  border: 1px solid rgb(255 107 125 / 0.6);
   background: rgb(255 255 255 / 0.06);
 }
 
