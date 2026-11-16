@@ -85,20 +85,22 @@ func documento(html string) (*goquery.Document, error) {
 	return goquery.NewDocumentFromReader(strings.NewReader(html))
 }
 
-// API CKAN do portal de dados abertos do ES: um registro por dia, uma coluna por tipo.
-func lerHemoes(texto string, coletadoEm time.Time) (Resultado, error) {
+func registrosHemoes(texto string) ([]map[string]any, error) {
 	var resposta struct {
 		Result struct {
 			Records []map[string]any `json:"records"`
 		} `json:"result"`
 	}
 	if err := json.Unmarshal([]byte(texto), &resposta); err != nil {
-		return Resultado{}, fmt.Errorf("HEMOES: %w", err)
+		return nil, fmt.Errorf("HEMOES: %w", err)
 	}
 	if len(resposta.Result.Records) == 0 {
-		return Resultado{}, errors.New("HEMOES: API não devolveu nenhum registro")
+		return nil, errors.New("HEMOES: API não devolveu nenhum registro")
 	}
-	registro := resposta.Result.Records[0]
+	return resposta.Result.Records, nil
+}
+
+func lerRegistroHemoes(registro map[string]any, coletadoEm time.Time) (Resultado, error) {
 	var leituras []Leitura
 	for _, tipo := range []httpapi.TipoSanguineo{"A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"} {
 		texto, _ := registro[string(tipo)].(string)
@@ -112,6 +114,39 @@ func lerHemoes(texto string, coletadoEm time.Time) (Resultado, error) {
 		return Resultado{}, fmt.Errorf("HEMOES: %w", err)
 	}
 	return comLeituras("HEMOES", leituras, data)
+}
+
+// API CKAN do portal de dados abertos do ES: um registro por dia, uma coluna por tipo.
+func lerHemoes(texto string, coletadoEm time.Time) (Resultado, error) {
+	registros, err := registrosHemoes(texto)
+	if err != nil {
+		return Resultado{}, err
+	}
+	return lerRegistroHemoes(registros[0], coletadoEm)
+}
+
+// Todos os dias que o portal do ES ainda guarda, para semear o histórico. O portal regrava o arquivo
+// de tempos em tempos e apaga os dias antigos, então vale importar sempre que der.
+const URLHistoricoHemoes = "https://dados.es.gov.br/api/3/action/datastore_search?resource_id=d73f9335-f454-4d1a-bfba-51ed2dac9cb6&sort=_id%20asc&limit=1000"
+
+func LerHistoricoHemoes(texto string, coletadoEm time.Time) ([]Resultado, error) {
+	registros, err := registrosHemoes(texto)
+	if err != nil {
+		return nil, err
+	}
+	var dias []Resultado
+	for _, registro := range registros {
+		dia, err := lerRegistroHemoes(registro, coletadoEm)
+		if err != nil {
+			continue // um dia com data ou nível ilegível não derruba os outros
+		}
+		dia.FonteID = "hemoes"
+		dias = append(dias, dia)
+	}
+	if len(dias) == 0 {
+		return nil, errors.New("HEMOES: nenhum dia legível no histórico")
+	}
+	return dias, nil
 }
 
 var plaqueta = regexp.MustCompile(`(?i)plaqueta`)

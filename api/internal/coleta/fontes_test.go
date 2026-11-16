@@ -276,3 +276,22 @@ func TestCadaFonteTemCadastroNaMigration(t *testing.T) {
 		}
 	}
 }
+
+func TestHistoricoHemoesLeTodosOsDiasEPulaOIlegivel(t *testing.T) {
+	dias, err := LerHistoricoHemoes(string(fixture(t, "hemoes-historico.json")), coletadoEm)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(dias) != 14 || dias[0].AtualizadoNaFonte != "2026-10-26" || dias[13].AtualizadoNaFonte != "2026-11-11" {
+		t.Errorf("%d dias, de %s a %s", len(dias), dias[0].AtualizadoNaFonte, dias[len(dias)-1].AtualizadoNaFonte)
+	}
+	if dias[0].FonteID != "hemoes" || len(dias[0].Leituras) != 8 {
+		t.Errorf("primeiro dia = %+v", dias[0])
+	}
+
+	_, err = LerHistoricoHemoes(`{"result":{"records":[{"Data":"ontem"}]}}`, coletadoEm)
+	if err == nil {
+		t.Error("aceitou histórico sem nenhum dia legível")
+	}
+}
