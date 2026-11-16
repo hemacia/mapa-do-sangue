@@ -2633,3 +2633,8 @@ h3 {
     grid-row: 2;
   }
 }
+
+/* Número ímpar de fatos no resumo: o último ocupa a linha, sem deixar um quadrado vazio. */
+.painel-estado-fatos div:last-child:nth-child(odd) {
+  grid-column: 1 / -1;
+}
