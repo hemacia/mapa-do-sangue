@@ -1,13 +1,19 @@
 // Comando coletor: baixa o estoque de todas as fontes e grava no Postgres. Roda e sai
 // (o agendamento fica com quem chama: systemd timer, cron ou GitHub Actions).
+//
+// Com -anvisa, em vez do estoque, atualiza as estatísticas pelo CSV nacional da Anvisa (uma vez por mês).
 package main
 
 import (
 	"context"
 	"errors"
 	"fmt"
+	"io"
+	"maps"
+	"net/http"
 	"os"
 	"os/signal"
+	"slices"
 	"strings"
 	"syscall"
 	"time"
@@ -15,6 +21,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 
 	"github.com/hemacia/mapa-do-sangue/api/internal/coleta"
+	"github.com/hemacia/mapa-do-sangue/api/internal/estatisticas"
 	"github.com/hemacia/mapa-do-sangue/api/internal/store"
 )
 
@@ -38,6 +45,12 @@ func executar() error {
 		return err
 	}
 	defer pool.Close()
+	if len(os.Args) > 1 && os.Args[1] == "-anvisa" {
+		if err := store.Migrar(ctx, pool); err != nil {
+			return err
+		}
+		return atualizarAnvisa(ctx, store.Novo(pool, time.Now))
+	}
 	if err := store.Migrar(ctx, pool); err != nil {
 		return err
 	}
@@ -98,3 +111,54 @@ func relatar(resultados []coleta.Resultado, noActions bool) {
 var escapeComando = strings.NewReplacer("%", "%25", "\r", "%0D", "\n", "%0A")
 
 func escaparComando(texto string) string { return escapeComando.Replace(texto) }
+
+// O CSV tem uns 20 MB, acima do limite das páginas de estoque.
+const tamanhoMaximoCSV = 128 << 20
+
+func atualizarAnvisa(ctx context.Context, banco *store.Store) error {
+	cliente := &http.Client{Timeout: 5 * time.Minute}
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, estatisticas.URLHemoprod, nil)
+	if err != nil {
+		return err
+	}
+	resp, err := cliente.Do(req) //nolint:gosec // URL fixa da Anvisa
+	if err != nil {
+		return fmt.Errorf("Anvisa: %w", err) //nolint:staticcheck // nome do órgão
+	}
+	defer func() { _ = resp.Body.Close() }()
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("Anvisa: HTTP %d", resp.StatusCode) //nolint:staticcheck // nome do órgão
+	}
+	csv, err := io.ReadAll(io.LimitReader(resp.Body, tamanhoMaximoCSV))
+	if err != nil {
+		return err
+	}
+	ano := time.Now().In(brasilia).Year()
+	imp, err := estatisticas.ImportarCSV(ctx, csv, ano, estatisticas.BuscarNoIBGE(cliente, "https://servicodados.ibge.gov.br"))
+	if err != nil {
+		return err
+	}
+	if err := banco.GravarImportacao(ctx, imp); err != nil {
+		return err
+	}
+	fmt.Printf("Anvisa: anos %v atualizados", slices.Sorted(maps.Keys(imp.Totais)))
+	if imp.AteMes > 0 {
+		comparaveis := 0
+		for _, c := range imp.Comparativo {
+			if c[0] > 0 && c[1] > 0 {
+				comparaveis++
+			}
+		}
+		fmt.Printf("; %d até o mês %d, %d estados no comparativo", ano, imp.AteMes, comparaveis)
+	}
+	fmt.Println()
+	return nil
+}
+
+var brasilia = func() *time.Location {
+	local, err := time.LoadLocation("America/Sao_Paulo")
+	if err != nil {
+		return time.FixedZone("BRT", -3*60*60)
+	}
+	return local
+}()

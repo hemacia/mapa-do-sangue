@@ -1,0 +1,42 @@
+name: Estatísticas da Anvisa
+
+on:
+  schedule:
+    # Dia 5 de cada mês, 9h de Brasília. A Anvisa troca o CSV nacional sem data fixa.
+    - cron: '0 12 5 * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: anvisa
+  cancel-in-progress: false
+
+jobs:
+  # Como a coleta de estoque, enquanto o banco do deploy não existe grava num Postgres temporário:
+  # o job serve para avisar quando o CSV ou a API do IBGE mudarem de formato.
+  atualizar:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:18-alpine
+        env:
+          POSTGRES_USER: mapa
+          POSTGRES_PASSWORD: mapa
+          POSTGRES_DB: mapa
+        ports: ["5432:5432"]
+        options: --health-cmd "pg_isready -U mapa" --health-interval 2s --health-retries 20
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: api/go.mod
+          cache-dependency-path: api/go.sum
+
+      - name: Atualiza pelo CSV nacional
+        working-directory: api
+        run: go run ./cmd/coletor -anvisa
+        env:
+          DATABASE_URL: postgres://mapa:mapa@localhost:5432/mapa?sslmode=disable
