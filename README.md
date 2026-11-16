@@ -16,24 +16,32 @@ Poucos hemocentros publicam o estoque de forma organizada, e cada um usa uma esc
 
 Funcionalidades:
 
+- **Mapa de estoque**: nível de cada tipo sanguíneo nos hemocentros que publicam, coletado duas vezes por dia. Clicar num estado abre um resumo com o link para a página dele
+- **Página de cada estado**: estoque de cada hemocentro (com bolsas e mínimo quando a fonte informa), estoque dia a dia, onde doar (unidades do CNES), quem doa no estado, coletas por ano desde 2010 e alerta noticiado quando o site oficial fala de estoque baixo
+- **Hemocentros**: todos os hemocentros que publicam o estoque, separados por estado
+- **Histórico**: coletas no Brasil e em cada estado de 2010 até hoje (Anvisa Hemoprod), o ano em andamento comparado ao anterior e um mapa de calor por estado
 - **Posso doar?**: verifica idade, peso e intervalo desde a última doação pelas regras da Portaria GM/MS nº 11.685/2026 (em vigor desde 30/09/2026) e informa a próxima data em que a pessoa pode doar
 - **Quem doa para quem**: compatibilidade de hemácias entre os oito tipos ABO/Rh
-- **Mapa de estoque**: nível de cada tipo sanguíneo por hemocentro, em mapa e em tabela, coletado duas vezes por dia das fontes públicas
-- **Eu doei hoje!**: registra a doação (só estado e tipo, sem dado pessoal) e mostra quantas doações foram registradas no mês
-- **Estatísticas** _(em desenvolvimento)_: coletas por estado (Anvisa Hemoprod) e histórico de dias em nível crítico
+- **Eu doei hoje!**: registra a doação (só estado e tipo, sem dado pessoal) e mostra quantas doações foram registradas no dia e no mês
 
 ### Fontes de estoque
 
 | Hemocentro | Estado | Como o dado é publicado |
 |---|---|---|
-| HEMOES | ES | API de dados abertos do governo do ES |
+| HEMOES | ES | API de dados abertos do governo do ES (também guardamos os dias antigos que o portal mostra) |
 | Hemopi | PI | Endpoint JSON do site |
 | Hemominas | MG | Página do site (escala própria: "Estável" é o melhor nível) |
 | Hemocentro Unicamp | SP | Página do site (nível no nome da imagem) |
+| Pró-Sangue | SP | Bolsas por tipo no código da página, com os limites da própria página |
+| Hemocentro de Ribeirão Preto | SP | Gráficos do Google Planilhas com bolsas e mínimo de segurança em 5 cidades |
 | Hemosc | SC | Página do site em ISO-8859-1 (escala própria: "Alerta" é o pior nível) |
 | Hemoba | BA | Página do site |
+| Hemosul | MS | Painel Qlik Sense, lido pela Engine API |
+| Hemoacre | AC | Home do portal do governo do Acre |
+| MT-Hemocentro | MT | Página pública do agendamento (nível no nome da imagem) |
+| Fundação Hemocentro de Brasília | DF | Imagem diária, lida pela altura do vermelho em cada gota |
 
-Os outros estados não publicam o estoque de forma que dê para coletar. A pesquisa que embasou o projeto (fontes por estado, regras de doação, projetos parecidos) está em [docs/pesquisa](docs/pesquisa/).
+Os outros 17 estados não publicam o estoque de forma que dê para coletar. Para eles o site mostra os dados da Anvisa, as unidades de hemoterapia do CNES e, em 11 estados, as notícias de estoque baixo dos sites oficiais. A pesquisa que embasou o projeto (fontes por estado, regras de doação, projetos parecidos) está em [docs/pesquisa](docs/pesquisa/).
 
 ## Tecnologias
 
@@ -57,9 +65,30 @@ Usamos o **Claude Code** (Anthropic) em duas frentes:
 - **Pesquisa de viabilidade**: levantamento de como cada um dos 27 estados publica o estoque de sangue, das bases nacionais (Anvisa, CNES, IBGE), das regras de doação vigentes e de projetos open source parecidos. Todas as fontes foram verificadas nos sites oficiais e estão citadas em [docs/pesquisa](docs/pesquisa/)
 - **Apoio na implementação**: escrita dos testes e do código em ciclos de TDD, configuração do CI e revisão. Todo o código foi revisado e as decisões foram tomadas pelo grupo
 
+## Como executar
+
+Requer Docker, Node.js 22.13 ou superior (a versão usada no CI está em `.nvmrc`) e Go (a versão está em `api/go.mod`). `make help` lista todos os comandos.
+
+```bash
+# 1. configuração local (senhas de exemplo, só para a sua máquina)
+cp .env.example .env
+
+# 2. banco e API em Docker, com recarga automática (http://localhost:8080/healthz)
+make dev
+
+# 3. em outro terminal: coleta o estoque de verdade agora e grava no banco
+make carregar-coleta
+
+# 4. site em http://localhost:3000
+cd web && npm ci && cd ..
+make web
+```
+
+As estatísticas da Anvisa (2010 em diante) e as unidades do CNES entram no banco pelas migrations, na primeira vez que a API sobe. Se a porta 8080 estiver ocupada, troque `API_PORT` no `.env` e crie `web/.env.local` com `API_URL` e `NEXT_PUBLIC_API_URL` apontando para a nova porta.
+
 ## Execução dos testes
 
-Requer Node.js 22.13 ou superior (a versão usada no CI está em `.nvmrc`), Go (a versão está em `api/go.mod`) e Docker. `make help` lista todos os comandos.
+Os requisitos são os mesmos de [Como executar](#como-executar).
 
 ### Site (Next.js, em `web/`)
 
@@ -73,8 +102,6 @@ cd web && npm run test:coverage && cd ..
 # (na primeira vez: cd web && npx playwright install chromium)
 make test-e2e-web
 ```
-
-Para ver o site com dados de verdade: `make dev` (API e banco), `make carregar-coleta` (coleta o estoque agora e grava no banco) e `make web` (site em http://localhost:3000). Se a porta 8080 estiver ocupada, troque `API_PORT` no `.env` e aponte `API_URL` e `NEXT_PUBLIC_API_URL` em `web/.env.local` para ela.
 
 ### API (Go + PostgreSQL)
 
@@ -102,8 +129,12 @@ Os testes do coletor rodam junto com os da API (`make test-api`). Cada leitor é
 # coleta o estoque de verdade agora e grava no Postgres local
 make carregar-coleta
 
-# regenera a migration de estatísticas a partir do CSV da Anvisa (Hemoprod)
-cd api && go run ./cmd/estatisticas caminho/hemoprod_nacional.csv 2024
+# atualiza as estatísticas pelo CSV nacional da Anvisa (o GitHub Actions roda isto todo mês)
+cd api && DATABASE_URL=postgres://mapa:mapa@localhost:5439/mapa?sslmode=disable go run ./cmd/coletor -anvisa
+
+# regenera as migrations de estatísticas (planilhas antigas e CSV da Anvisa) e do CNES
+cd api && go run ./cmd/estatisticas -saida migrations/<arquivo>.sql -csv hemoprod_nacional.csv -anos 2022,2023 bd-hemoprod-*.xlsx
+cd api && go run ./cmd/cnes migrations/<arquivo>.sql
 ```
 
 ### Boas práticas adotadas nos testes
