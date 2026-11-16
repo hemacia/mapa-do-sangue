@@ -2,14 +2,15 @@ import { expect, test } from '@playwright/test'
 
 // Dados fixos de tests/e2e/seed.sql. Ex.: Hemominas (MG) tem A+ crítico; Hemosc (SC) tem A+ estável.
 
-test('a página inicial mostra a manchete, o mapa, os tipos em falta e os hemocentros', async ({ page }) => {
+test('a página inicial mostra a manchete, o mapa, os tipos em falta e o sangue doado', async ({ page }) => {
   await page.goto('/')
 
   await expect(page.getByRole('heading', { level: 1 })).toContainText('O-')
   await expect(page.getByRole('group', { name: 'Mapa do Brasil por estado' })).toBeVisible()
   await expect(page.getByRole('radio', { name: 'Doações por estado' })).toBeChecked()
   await expect(page.getByRole('heading', { name: 'Tipos em falta hoje' })).toBeVisible()
-  await expect(page.getByRole('article')).toHaveCount(6)
+  await expect(page.getByRole('heading', { name: 'Sangue doado no Brasil' })).toBeVisible()
+  await expect(page.getByRole('article')).toHaveCount(0) // a lista de hemocentros tem página própria
 })
 
 test('trocar o tipo sanguíneo muda as cores do mapa', async ({ page }) => {

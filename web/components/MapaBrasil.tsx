@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import type { CSSProperties } from 'react'
+import type { CSSProperties, ReactNode } from 'react'
 import type { EstatisticaUF, EstoqueHemocentro } from '@/lib/api/cliente'
 import { faixaDeColetas, LIMITES_FAIXAS } from '@/lib/domain/estatisticas'
 import { nivelPorUF } from '@/lib/domain/mapa'
@@ -91,9 +91,11 @@ function rotuloDaPlaca(placa: Placa) {
 export function MapaBrasil({
   estatisticas,
   hemocentros,
+  lateral,
 }: {
   estatisticas: EstatisticaUF[]
   hemocentros: Pick<EstoqueHemocentro, 'uf' | 'nivelGeral' | 'estoque'>[]
+  lateral?: ReactNode // vai embaixo da legenda: na coluna da direita com palco largo, embaixo do mapa no estreito
 }) {
   const estados = desenharEstados(LADO, LADO)
   const porTipo = TIPOS_SANGUINEOS.map((tipo) => nivelPorUF(hemocentros, tipo))
@@ -311,6 +313,7 @@ export function MapaBrasil({
           </ul>
         </div>
       </figcaption>
+      {lateral && <div className="mapa-lateral">{lateral}</div>}
     </figure>
   )
 }

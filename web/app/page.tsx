@@ -1,16 +1,14 @@
 import Link from 'next/link'
 import { Suspense } from 'react'
-import { CartaoHemocentro } from '@/components/CartaoHemocentro'
 import { ColunaFixa } from '@/components/ColunaFixa'
 import { DoacoesBrasil } from '@/components/DoacoesBrasil'
 import { EsqueletoInicioConteudo } from '@/components/Esqueletos'
 import { EuDoei } from '@/components/EuDoei'
-import { HistoricoBrasil } from '@/components/Historico'
 import { MapaBrasil } from '@/components/MapaBrasil'
 import { PanoramaTipos } from '@/components/PanoramaTipos'
 import { estatisticasPorUF, estoqueAtual } from '@/lib/api/dados'
 import { formatarColeta } from '@/lib/domain/datas'
-import { juntarTipos, montarManchete, panoramaPorTipo, tiposCriticos } from '@/lib/domain/panorama'
+import { juntarTipos, montarManchete, panoramaPorTipo } from '@/lib/domain/panorama'
 import { SITE } from '@/lib/site'
 
 const jsonLd = {
@@ -47,9 +45,6 @@ async function Estoque() {
     .map((h) => h.coletadoEm)
     .sort()
     .at(-1)
-  const ordenados = [...hemocentros].sort(
-    (a, b) => tiposCriticos(b.estoque).length - tiposCriticos(a.estoque).length,
-  )
   const [primeiro, ...resto] = manchete.tipos
   const ufs = [...new Set(hemocentros.map((h) => h.uf))].sort()
   return (
@@ -87,30 +82,15 @@ async function Estoque() {
       </section>
       <section className="palco" aria-label="Mapa do Brasil">
         <ColunaFixa className="palco-fixo">
-          <MapaBrasil estatisticas={estatisticas} hemocentros={hemocentros} />
-          <DoacoesBrasil estatisticas={estatisticas} />
+          <MapaBrasil
+            estatisticas={estatisticas}
+            hemocentros={hemocentros}
+            lateral={<DoacoesBrasil estatisticas={estatisticas} />}
+          />
         </ColunaFixa>
       </section>
-      <aside id="hemocentros" className="painel-hemocentros" aria-labelledby="titulo-hemocentros">
-        <h2 id="titulo-hemocentros">Hemocentros que publicam</h2>
-        <p>
-          {hemocentros.length} hemocentros em {ufs.length} estados, do mais crítico para o menos
-        </p>
-        <ul className="lista-hemocentros">
-          {ordenados.map((hemocentro) => (
-            <li key={hemocentro.id}>
-              <CartaoHemocentro hemocentro={hemocentro} />
-            </li>
-          ))}
-        </ul>
-      </aside>
     </>
   )
-}
-
-async function HistoricoDoBrasil() {
-  const estatisticas = await estatisticasPorUF().catch(() => [])
-  return <HistoricoBrasil estatisticas={estatisticas} />
 }
 
 export default function Home() {
@@ -126,9 +106,6 @@ export default function Home() {
           <Estoque />
         </Suspense>
       </div>
-      <Suspense fallback={null}>
-        <HistoricoDoBrasil />
-      </Suspense>
       <EuDoei />
     </>
   )

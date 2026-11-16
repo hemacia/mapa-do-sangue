@@ -601,11 +601,11 @@ h3 {
   color: var(--tinta-2);
 }
 
-/* Página inicial: manchete, palco do mapa e hemocentros */
+/* Página inicial: manchete à esquerda, palco do mapa ocupando o resto (os hemocentros têm página própria) */
 
 .inicio {
   display: grid;
-  grid-template-columns: 400px minmax(0, 1fr) 380px;
+  grid-template-columns: clamp(380px, 25vw, 480px) minmax(0, 1fr);
 }
 
 .manchete-painel {
@@ -730,14 +730,20 @@ h3 {
   list-style: none;
 }
 
+/* Container do palco: o .mapa também é container, mas uma regra não consulta o próprio container,
+   então a grade do .mapa no palco largo depende deste. */
+.palco-fixo {
+  container: palco / inline-size;
+}
+
 .manchete-fixa {
   display: flex;
   flex-direction: column;
   gap: var(--space-6);
 }
 
-/* Com três colunas o mapa e a manchete acompanham a rolagem enquanto a lista da direita desce,
-   em vez de deixar um vão vazio embaixo deles. ColunaFixa ajusta o top quando a manchete é alta. */
+/* A coluna mais curta acompanha a rolagem da mais alta, em vez de deixar um vão vazio embaixo.
+   ColunaFixa ajusta o top quando ela é mais alta que a tela. */
 @media (min-width: 1280px) {
   .palco-fixo,
   .manchete-fixa {
@@ -748,10 +754,7 @@ h3 {
 
 @media (max-width: 1279px) {
   .inicio {
-    grid-template-columns: minmax(0, 1fr) 380px;
-  }
-  .manchete-painel {
-    grid-column: 1 / -1;
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 
@@ -1055,23 +1058,75 @@ h3 {
   }
 }
 
-/* Palco largo: a legenda vira um quadro no mar, à direita do mapa, como na previsão do tempo,
-   e o mapa cresce até quase a altura da tela. */
-@container (min-width: 1000px) {
-  .mapa-area {
-    --lado: min(100cqw - 360px, max(480px, 100dvh - 190px), 900px);
-    margin-left: max(var(--space-4), calc((100cqw - var(--lado) - 320px) / 2));
+@container palco (min-width: 860px) {
+  /* Palco largo: o mapa fica com a altura da tela inteira e os controles, a legenda e o sangue doado
+     viram uma coluna à direita, como o quadro de uma previsão do tempo. Tudo cabe sem rolar. */
+  .mapa {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 300px;
+    grid-template-rows: auto auto 1fr;
+    gap: var(--space-3) var(--space-5);
+    padding: var(--space-4);
   }
-  .legenda-mapa {
-    position: absolute;
-    top: 96px;
-    right: var(--space-5);
-    width: 280px;
-    flex-direction: column;
-    gap: var(--space-4);
+  .camadas {
+    grid-column: 2;
+    grid-row: 1;
+    padding: 0;
+  }
+  .camadas .rotulo-tipos {
+    flex-basis: 100%;
+    margin: var(--space-1) 0 0;
+  }
+  .mapa-area {
+    grid-column: 1;
+    grid-row: 1 / -1;
+    /* sem isto a área estica até a altura da linha e as posições em % saem do lugar */
+    align-self: start;
+    --lado: min(
+      100cqw -
+      300px -
+      2 *
+      var(--space-5) -
+      var(--space-7),
+      max(480px, 100dvh - var(--topbar-height) - 2 * var(--space-5)),
+      960px
+    );
+    margin: 0 auto;
+  }
+  .legenda-mapa,
+  .mapa-lateral {
+    grid-column: 2;
     border: 0;
     border-radius: var(--radius);
     box-shadow: 0 2px 10px rgb(3 20 32 / 0.35);
+  }
+  .legenda-mapa {
+    grid-row: 2;
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+  .mapa-lateral {
+    grid-row: 3;
+    align-self: start;
+    overflow: hidden;
+  }
+  .mapa-lateral .doacoes-brasil {
+    border-top: 0;
+  }
+  .lista-placas {
+    grid-column: 1;
+  }
+  /* A placa do ES fica no mar, à direita, onde agora está a coluna lateral: volta para a posição em terra. */
+  .mapa-area .placa-alternavel {
+    left: auto;
+    right: var(--terra-direita);
+    top: var(--terra-topo);
+  }
+  .mapa-area .placas-linhas .linha-mar {
+    display: none;
+  }
+  .mapa-area .placas-linhas .linha-terra {
+    display: inline;
   }
 }
 

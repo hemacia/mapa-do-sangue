@@ -13,9 +13,9 @@ describe('DoacoesBrasil', () => {
   it('mostra a média por dia, o mínimo da OMS e os estados abaixo dele', () => {
     render(<DoacoesBrasil estatisticas={ESTATISTICAS} />)
 
-    expect(screen.getByText(/bolsas por dia, em média, em 2025/)).toHaveTextContent('2.010 bolsas por dia')
-    expect(screen.getByText(/mínimo da OMS para o Brasil/)).toHaveTextContent(
-      'seria 1.020 bolsas por dia (10 doações por mil habitantes por ano). 1 estado fica abaixo dele: AC.',
+    expect(screen.getByText(/bolsas por dia em 2025/)).toHaveTextContent('2.010 bolsas por dia')
+    expect(screen.getByText(/Abaixo dele/)).toHaveTextContent(
+      'Mínimo da OMS: 1.020 por dia. Abaixo dele: AC.',
     )
   })
 
@@ -30,8 +30,6 @@ describe('DoacoesNoSite', () => {
   it('conta as doações registradas hoje e no mês', async () => {
     render(<DoacoesNoSite totalDoMes={async () => ({ mes: '2026-11', total: 12, hoje: 1 })} />)
 
-    expect(await screen.findByText(/Registradas neste site/)).toHaveTextContent(
-      'Registradas neste site: 1 doação hoje e 12 doações neste mês.',
-    )
+    expect(await screen.findByText(/Neste site/)).toHaveTextContent('Neste site: 1 hoje, 12 no mês.')
   })
 })

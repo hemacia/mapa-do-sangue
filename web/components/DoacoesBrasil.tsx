@@ -16,7 +16,7 @@ export function DoacoesBrasil({ estatisticas }: { estatisticas: EstatisticaUF[] 
       <div className="doacoes-brasil-numero">
         <h2 id="doacoes-brasil">Sangue doado no Brasil</h2>
         <p>
-          <strong>{numero(p.porDia)}</strong> bolsas por dia, em média, em {p.ano}
+          <strong>{numero(p.porDia)}</strong> bolsas por dia em {p.ano}
         </p>
       </div>
       <div className="doacoes-barra" aria-hidden="true">
@@ -26,10 +26,10 @@ export function DoacoesBrasil({ estatisticas }: { estatisticas: EstatisticaUF[] 
         </span>
       </div>
       <p className="nota">
-        O mínimo da OMS para o Brasil seria {numero(p.minimoPorDia)} bolsas por dia ({MINIMO_OMS_POR_MIL}{' '}
-        doações por mil habitantes por ano).{' '}
+        <abbr title={`${MINIMO_OMS_POR_MIL} doações por mil habitantes ao ano`}>Mínimo da OMS</abbr>:{' '}
+        {numero(p.minimoPorDia)} por dia.{' '}
         {p.abaixoDoMinimo.length > 0
-          ? `${p.abaixoDoMinimo.length === 1 ? '1 estado fica' : `${p.abaixoDoMinimo.length} estados ficam`} abaixo dele: ${juntarTipos(p.abaixoDoMinimo)}.`
+          ? `Abaixo dele: ${juntarTipos(p.abaixoDoMinimo)}.`
           : 'Todos os estados com dado completo passam dele.'}
       </p>
       <DoacoesNoSite />
