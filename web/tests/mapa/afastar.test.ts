@@ -23,10 +23,19 @@ describe('afastarCaixas', () => {
     expect(d.get('MS')).toBe(14) // 0 + 30 + 4 = 34; estava em 20
   })
 
-  it('resolve uma pilha em cascata', () => {
+  it('resolve uma pilha indo para o lado livre mais perto', () => {
     const d = afastarCaixas([caixa('A', 0, 0), caixa('B', 0, 5), caixa('C', 0, 10)], 0)
 
-    expect(d.get('B')).toBe(25)
-    expect(d.get('C')).toBe(50)
+    expect(d.get('B')).toBe(25) // logo abaixo de A
+    expect(d.get('C')).toBe(-40) // subir 40 é mais perto que descer 50
+  })
+
+  it('também desvia dos obstáculos fixos, como o ponto de outro estado', () => {
+    const ponto = caixa('ponto-MS', 50, 40, 10, 10)
+
+    const d = afastarCaixas([caixa('MG', 0, 25)], 4, [ponto])
+
+    expect(d.get('MG')).toBe(-19) // acima do ponto: 40 - 4 - 30 = 6, mais perto que descer para 54
+    expect(d.has('ponto-MS')).toBe(false)
   })
 })

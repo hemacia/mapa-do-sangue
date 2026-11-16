@@ -1060,6 +1060,14 @@ h3 {
   }
 }
 
+/* Palco médio: com dez estados publicando, o texto "N críticos" faz as placas se baterem no centro do
+   país. As bolsas vermelhas já contam os críticos, e o aria-label da placa diz o número. */
+@container (max-width: 899px) {
+  .mapa-area .placa-resumo {
+    display: none;
+  }
+}
+
 /* Palco estreito: placas mais baixas para caberem nos vãos entre os estados. */
 @container (max-width: 699px) {
   .mapa-area .placa {

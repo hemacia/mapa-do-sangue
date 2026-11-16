@@ -23,11 +23,18 @@ export function ArrumarPlacas() {
         (placa) => placa.offsetParent !== null,
       )
       for (const placa of visiveis) placa.style.removeProperty('--afastamento')
+      // Os pontos dos estados não se mexem: uma placa não pode cobrir o ponto de outro estado.
+      const pontos = [...area.querySelectorAll<HTMLElement>('.placa-ponto')].map((ponto, i) => {
+        const { left, right, top, bottom } = ponto.getBoundingClientRect()
+        return { id: `ponto-${i}`, left, right, top, bottom }
+      })
       const deslocamentos = afastarCaixas(
         visiveis.map((placa) => {
           const { left, right, top, bottom } = placa.getBoundingClientRect()
           return { id: placa.dataset.uf ?? '', left, right, top, bottom }
         }),
+        4,
+        pontos,
       )
       const { top, bottom } = area.getBoundingClientRect()
       const altura = bottom - top
