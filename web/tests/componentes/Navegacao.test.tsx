@@ -10,6 +10,7 @@ describe('Navegacao', () => {
     ['/', 'Estoque'],
     ['/estado/mg', 'Estoque'],
     ['/hemocentros', 'Hemocentros'],
+    ['/historico', 'Histórico'],
     ['/posso-doar', 'Posso doar?'],
     ['/sobre', 'Sobre os dados'],
   ])('em %s marca "%s" como a página atual', (caminho, rotulo) => {
