@@ -17,7 +17,17 @@ pre-commit:
     - name: typecheck do site
       root: web/
       glob: "*.{ts,tsx}"
-      run: npx tsc --noEmit
+      run: npm run -s typecheck
+
+# Os mesmos lints do CI no projeto inteiro: o pre-commit só olha os arquivos do commit.
+pre-push:
+  parallel: true
+  jobs:
+    - name: biome ci
+      root: web/
+      run: npx biome ci .
+    - name: golangci-lint
+      run: make lint
 
 commit-msg:
   jobs:
