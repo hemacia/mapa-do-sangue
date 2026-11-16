@@ -95,6 +95,24 @@ paths:
                 type: array
                 items: { $ref: "#/components/schemas/AlertaNoticiado" }
         "400": { $ref: "#/components/responses/Problema" }
+  /v1/hemocentros/{id}/historico:
+    get:
+      operationId: historicoDoHemocentro
+      summary: Nível de cada tipo dia a dia nos últimos 90 dias (a última leitura de cada dia)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, pattern: "^[a-z0-9-]{2,40}$" }
+      responses:
+        "200":
+          description: Do dia mais antigo para o mais recente; vazio se o hemocentro não existe
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/DiaEstoque" }
+        "400": { $ref: "#/components/responses/Problema" }
   /v1/doacoes:
     post:
       operationId: registrarDoacao
@@ -222,6 +240,14 @@ components:
         ateMes: { type: integer }
         coletas: { type: integer }
         coletasAnoAnterior: { type: integer }
+    DiaEstoque:
+      type: object
+      required: [data, estoque]
+      properties:
+        data: { type: string, format: date }
+        estoque:
+          type: object
+          additionalProperties: { $ref: "#/components/schemas/Nivel" }
     AlertaNoticiado:
       type: object
       required: [uf, fonte, titulo, url, publicadoEm]

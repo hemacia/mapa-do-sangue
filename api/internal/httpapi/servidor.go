@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"log/slog"
 	"net/http"
+	"regexp"
 	"slices"
 	"strings"
 	"time"
@@ -20,6 +21,7 @@ type Repositorio interface {
 	Estatisticas(ctx context.Context) ([]EstatisticaUF, error)
 	PontosColeta(ctx context.Context, uf string) ([]PontoColeta, error)
 	Alertas(ctx context.Context, uf string, desde time.Time) ([]AlertaNoticiado, error)
+	HistoricoDiario(ctx context.Context, hemocentro string, desde time.Time) ([]DiaEstoque, error)
 	RegistrarDoacao(ctx context.Context, doacao Doacao) error
 	ContarDoacoes(ctx context.Context, dia time.Time) (mes, hoje int, err error) // total do mês de dia e do próprio dia
 }
@@ -145,6 +147,19 @@ func (s *servidor) ListarAlertas(ctx context.Context, req ListarAlertasRequestOb
 		return nil, err
 	}
 	return ListarAlertas200JSONResponse(naoNulo(alertas)), nil
+}
+
+var idHemocentro = regexp.MustCompile(`^[a-z0-9-]{2,40}$`)
+
+func (s *servidor) HistoricoDoHemocentro(ctx context.Context, req HistoricoDoHemocentroRequestObject) (HistoricoDoHemocentroResponseObject, error) {
+	if !idHemocentro.MatchString(req.Id) {
+		return HistoricoDoHemocentro400ApplicationProblemPlusJSONResponse{problema(400, "Hemocentro inválido", req.Id)}, nil
+	}
+	dias, err := s.repo.HistoricoDiario(ctx, req.Id, s.hoje().AddDate(0, 0, -90))
+	if err != nil {
+		return nil, err
+	}
+	return HistoricoDoHemocentro200JSONResponse(naoNulo(dias)), nil
 }
 
 // O corpo vem do navegador: nada é confiável, e a data é sempre a do servidor.

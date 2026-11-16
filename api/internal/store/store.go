@@ -12,6 +12,7 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/jackc/pgx/v5/stdlib"
+	openapi_types "github.com/oapi-codegen/runtime/types"
 	"github.com/pressly/goose/v3"
 
 	"github.com/hemacia/mapa-do-sangue/api/internal/coleta"
@@ -336,6 +337,67 @@ func (s *Store) GravarImportacao(ctx context.Context, imp estatisticas.Importaca
 		}
 		return nil
 	})
+}
+
+// GravarHistorico semeia dias antigos de uma fonte (o portal do ES guarda alguns dias para trás).
+// Cada dia entra como lido ao meio-dia de Brasília; dia já gravado não é duplicado.
+func (s *Store) GravarHistorico(ctx context.Context, dias []coleta.Resultado) (int, error) {
+	gravadas := 0
+	err := pgx.BeginFunc(ctx, s.pool, func(tx pgx.Tx) error {
+		for _, dia := range dias {
+			data, err := time.Parse(time.DateOnly, dia.AtualizadoNaFonte)
+			if err != nil {
+				return fmt.Errorf("dia sem data: %q", dia.AtualizadoNaFonte)
+			}
+			meioDia := time.Date(data.Year(), data.Month(), data.Day(), 15, 0, 0, 0, time.UTC)
+			var ja bool
+			if err := tx.QueryRow(ctx, `
+			  SELECT EXISTS (SELECT 1 FROM leituras_estoque WHERE hemocentro_id = $1
+			    AND (coletado_em AT TIME ZONE 'America/Sao_Paulo')::date = $2::date)`,
+				dia.FonteID, dia.AtualizadoNaFonte).Scan(&ja); err != nil {
+				return err
+			}
+			if ja {
+				continue
+			}
+			for _, l := range dia.Leituras {
+				if _, err := tx.Exec(ctx, `INSERT INTO leituras_estoque (hemocentro_id, tipo, nivel, atualizado_na_fonte, coletado_em)
+				  VALUES ($1, $2, $3, $4, $5)`, dia.FonteID, l.Tipo, l.Nivel, dia.AtualizadoNaFonte, meioDia); err != nil {
+					return fmt.Errorf("gravar dia %s: %w", dia.AtualizadoNaFonte, err)
+				}
+			}
+			gravadas++
+		}
+		return nil
+	})
+	return gravadas, err
+}
+
+// HistoricoDiario devolve, para cada dia com leitura, o nível de cada tipo na última coleta do dia.
+func (s *Store) HistoricoDiario(ctx context.Context, hemocentro string, desde time.Time) ([]httpapi.DiaEstoque, error) {
+	linhas, err := s.pool.Query(ctx, `
+	  SELECT DISTINCT ON (dia, tipo) (coletado_em AT TIME ZONE 'America/Sao_Paulo')::date AS dia, tipo::text, nivel::text
+	  FROM leituras_estoque
+	  WHERE hemocentro_id = $1 AND coletado_em >= $2
+	  ORDER BY dia, tipo, coletado_em DESC`, hemocentro, desde)
+	if err != nil {
+		return nil, fmt.Errorf("consultar histórico diário: %w", err)
+	}
+	defer linhas.Close()
+	var dias []httpapi.DiaEstoque
+	for linhas.Next() {
+		var dia time.Time
+		var tipo string
+		var nivel httpapi.Nivel
+		if err := linhas.Scan(&dia, &tipo, &nivel); err != nil {
+			return nil, err
+		}
+		if len(dias) == 0 || !dias[len(dias)-1].Data.Equal(dia) {
+			dias = append(dias, httpapi.DiaEstoque{Data: openapi_types.Date{Time: dia}, Estoque: map[string]httpapi.Nivel{}})
+		}
+		dias[len(dias)-1].Estoque[tipo] = nivel
+	}
+	return dias, linhas.Err()
 }
 
 func (s *Store) RegistrarDoacao(ctx context.Context, d httpapi.Doacao) error {

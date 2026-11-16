@@ -125,6 +125,12 @@ type Bolsas struct {
 	Minimo int `json:"minimo"`
 }
 
+// DiaEstoque defines model for DiaEstoque.
+type DiaEstoque struct {
+	Data    openapi_types.Date `json:"data"`
+	Estoque map[string]Nivel   `json:"estoque"`
+}
+
 // Doacao defines model for Doacao.
 type Doacao struct {
 	Data openapi_types.Date `json:"data"`
@@ -299,6 +305,9 @@ type ServerInterface interface {
 	// ListarEstoque Estoque atual de cada hemocentro
 	// (GET /v1/estoque)
 	ListarEstoque(w http.ResponseWriter, r *http.Request, params ListarEstoqueParams)
+	// HistoricoDoHemocentro Nível de cada tipo dia a dia nos últimos 90 dias (a última leitura de cada dia)
+	// (GET /v1/hemocentros/{id}/historico)
+	HistoricoDoHemocentro(w http.ResponseWriter, r *http.Request, id string)
 	// ListarPontosColeta Unidades de hemoterapia do CNES que podem receber doador em um estado
 	// (GET /v1/pontos-coleta)
 	ListarPontosColeta(w http.ResponseWriter, r *http.Request, params ListarPontosColetaParams)
@@ -440,6 +449,32 @@ func (siw *ServerInterfaceWrapper) ListarEstoque(w http.ResponseWriter, r *http.
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.ListarEstoque(w, r, params)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// HistoricoDoHemocentro operation middleware
+func (siw *ServerInterfaceWrapper) HistoricoDoHemocentro(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "id" -------------
+	var id string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "id", r.PathValue("id"), &id, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "id", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.HistoricoDoHemocentro(w, r, id)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -608,6 +643,7 @@ func HandlerWithOptions(si ServerInterface, options StdHTTPServerOptions) http.H
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/estatisticas", wrapper.ListarEstatisticas)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/pontos-coleta", wrapper.ListarPontosColeta)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/alertas", wrapper.ListarAlertas)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/hemocentros/{id}/historico", wrapper.HistoricoDoHemocentro)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/doacoes", wrapper.RegistrarDoacao)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/doacoes/mes", wrapper.ContarDoacoesDoMes)
 
@@ -844,6 +880,44 @@ func (response ListarEstoque400ApplicationProblemPlusJSONResponse) VisitListarEs
 	return err
 }
 
+type HistoricoDoHemocentroRequestObject struct {
+	Id string `json:"id"`
+}
+
+type HistoricoDoHemocentroResponseObject interface {
+	VisitHistoricoDoHemocentroResponse(w http.ResponseWriter) error
+}
+
+type HistoricoDoHemocentro200JSONResponse []DiaEstoque
+
+func (response HistoricoDoHemocentro200JSONResponse) VisitHistoricoDoHemocentroResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type HistoricoDoHemocentro400ApplicationProblemPlusJSONResponse struct {
+	ProblemaApplicationProblemPlusJSONResponse
+}
+
+func (response HistoricoDoHemocentro400ApplicationProblemPlusJSONResponse) VisitHistoricoDoHemocentroResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(400)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
 type ListarPontosColetaRequestObject struct {
 	Params ListarPontosColetaParams
 }
@@ -905,6 +979,9 @@ type StrictServerInterface interface {
 	// ListarEstoque Estoque atual de cada hemocentro
 	// (GET /v1/estoque)
 	ListarEstoque(ctx context.Context, request ListarEstoqueRequestObject) (ListarEstoqueResponseObject, error)
+	// HistoricoDoHemocentro Nível de cada tipo dia a dia nos últimos 90 dias (a última leitura de cada dia)
+	// (GET /v1/hemocentros/{id}/historico)
+	HistoricoDoHemocentro(ctx context.Context, request HistoricoDoHemocentroRequestObject) (HistoricoDoHemocentroResponseObject, error)
 	// ListarPontosColeta Unidades de hemoterapia do CNES que podem receber doador em um estado
 	// (GET /v1/pontos-coleta)
 	ListarPontosColeta(ctx context.Context, request ListarPontosColetaRequestObject) (ListarPontosColetaResponseObject, error)
@@ -1121,6 +1198,32 @@ func (sh *strictHandler) ListarEstoque(w http.ResponseWriter, r *http.Request, p
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
 	} else if validResponse, ok := response.(ListarEstoqueResponseObject); ok {
 		if err := validResponse.VisitListarEstoqueResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// HistoricoDoHemocentro operation middleware
+func (sh *strictHandler) HistoricoDoHemocentro(w http.ResponseWriter, r *http.Request, id string) {
+	var request HistoricoDoHemocentroRequestObject
+
+	request.Id = id
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.HistoricoDoHemocentro(ctx, request.(HistoricoDoHemocentroRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "HistoricoDoHemocentro")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(HistoricoDoHemocentroResponseObject); ok {
+		if err := validResponse.VisitHistoricoDoHemocentroResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {

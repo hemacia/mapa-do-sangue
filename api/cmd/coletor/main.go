@@ -76,6 +76,16 @@ func executar() error {
 		fmt.Printf("falha ao gravar alertas: %v\n", err)
 	}
 	fmt.Printf("alertas noticiados nos últimos 60 dias: %d\n", len(noticias))
+	// O portal do ES regrava o arquivo e apaga dias antigos: guardar os dias que ele ainda mostra.
+	if corpo, err := coleta.BaixarHTTP(cliente)(ctx, coleta.URLHistoricoHemoes); err != nil {
+		fmt.Printf("falha histórico HEMOES: %v\n", err)
+	} else if dias, err := coleta.LerHistoricoHemoes(string(corpo), agora); err != nil {
+		fmt.Printf("falha histórico HEMOES: %v\n", err)
+	} else if novos, err := banco.GravarHistorico(ctx, dias); err != nil {
+		fmt.Printf("falha ao gravar o histórico HEMOES: %v\n", err)
+	} else {
+		fmt.Printf("histórico HEMOES: %d dias no portal, %d novos\n", len(dias), novos)
+	}
 	for _, r := range resultados {
 		if r.Erro == nil {
 			return nil

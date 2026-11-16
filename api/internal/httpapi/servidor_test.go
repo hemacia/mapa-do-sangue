@@ -26,6 +26,13 @@ type repositorioFalso struct {
 	pontos       []PontoColeta
 	alertas      []AlertaNoticiado
 	desdePedido  time.Time
+	dias         []DiaEstoque
+	pedido       string
+}
+
+func (r *repositorioFalso) HistoricoDiario(_ context.Context, hemocentro string, desde time.Time) ([]DiaEstoque, error) {
+	r.pedido, r.desdePedido = hemocentro, desde
+	return r.dias, r.erro
 }
 
 func (r *repositorioFalso) Alertas(_ context.Context, uf string, desde time.Time) ([]AlertaNoticiado, error) {
@@ -381,6 +388,28 @@ func TestListarAlertasPedeOsUltimos30Dias(t *testing.T) {
 
 func TestListarAlertasRecusaUFInvalida(t *testing.T) {
 	if resp := requisitar(novoServidor(&repositorioFalso{}), http.MethodGet, "/v1/alertas?uf=ZZ", ""); resp.Code != http.StatusBadRequest {
+		t.Errorf("status = %d", resp.Code)
+	}
+}
+
+func TestHistoricoDoHemocentroPedeOsUltimos90Dias(t *testing.T) {
+	repo := &repositorioFalso{dias: []DiaEstoque{{Estoque: map[string]Nivel{"O-": Critico}}}}
+	h := novoServidor(repo)
+
+	resp := requisitar(h, http.MethodGet, "/v1/hemocentros/hemoes/historico", "")
+
+	if resp.Code != http.StatusOK || repo.pedido != "hemoes" {
+		t.Fatalf("status = %d, pedido = %q", resp.Code, repo.pedido)
+	}
+	if !repo.desdePedido.Equal(time.Date(2026, 9, 1, 0, 0, 0, 0, time.UTC)) {
+		t.Errorf("desde = %v, quero 90 dias antes de 30/11 em Brasília", repo.desdePedido)
+	}
+}
+
+func TestHistoricoDoHemocentroRecusaIDEstranho(t *testing.T) {
+	resp := requisitar(novoServidor(&repositorioFalso{}), http.MethodGet, "/v1/hemocentros/DROP%20TABLE/historico", "")
+
+	if resp.Code != http.StatusBadRequest {
 		t.Errorf("status = %d", resp.Code)
 	}
 }

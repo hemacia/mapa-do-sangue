@@ -438,3 +438,29 @@ func TestGravarImportacaoAtualizaOAnoEOParcial(t *testing.T) {
 		}
 	}
 }
+
+func TestGravarHistoricoNaoDuplicaEMontaODiaADia(t *testing.T) {
+	s := bancoDeTeste(t)
+	ctx := context.Background()
+	dias := []coleta.Resultado{
+		{FonteID: "hemoes", AtualizadoNaFonte: "2026-10-26", Leituras: []coleta.Leitura{{Tipo: "O-", Nivel: httpapi.Critico}}},
+		{FonteID: "hemoes", AtualizadoNaFonte: "2026-10-27", Leituras: []coleta.Leitura{{Tipo: "O-", Nivel: httpapi.Alerta}}},
+	}
+
+	primeira, err := s.GravarHistorico(ctx, dias)
+	if err != nil {
+		t.Fatal(err)
+	}
+	segunda, _ := s.GravarHistorico(ctx, dias)
+	if primeira != 2 || segunda != 0 {
+		t.Errorf("gravou %d e depois %d, quero 2 e 0", primeira, segunda)
+	}
+
+	historico, err := s.HistoricoDiario(ctx, "hemoes", time.Date(2026, 10, 1, 0, 0, 0, 0, time.UTC))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(historico) != 2 || historico[0].Data.Format(time.DateOnly) != "2026-10-26" || historico[1].Estoque["O-"] != httpapi.Alerta {
+		t.Errorf("histórico = %+v", historico)
+	}
+}
