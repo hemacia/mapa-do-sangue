@@ -10,7 +10,7 @@
     "format": "biome format --write",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "next typegen && tsc --noEmit",
     "gerar:api": "openapi-typescript ../api/openapi.yaml -o lib/api/schema.d.ts",
     "prepare": "cd .. && lefthook install"
   },
