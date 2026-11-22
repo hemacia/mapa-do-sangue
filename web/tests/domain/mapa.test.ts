@@ -52,4 +52,10 @@ describe('nível de um tipo sanguíneo em cada estado', () => {
 
     expect(niveis.SP).toBeNull()
   })
+
+  it('deixa sem nível o estado cujo hemocentro não publica o estoque por tipo', () => {
+    const niveis = nivelPorUF([{ uf: 'SP', nivelGeral: 'critico' as const }], 'A+')
+
+    expect(niveis.SP).toBeNull()
+  })
 })

@@ -16,6 +16,7 @@ describe('normalizarTipo', () => {
     ['AB NEGATIVO', 'AB-'],
     ['Sangue tipo O-', 'O-'],
     ['Tipo A Neg', 'A-'],
+    ['Tipo B POS', 'B+'],
   ])('reconhece "%s" como %s', (texto, esperado) => {
     expect(normalizarTipo(texto)).toBe(esperado)
   })

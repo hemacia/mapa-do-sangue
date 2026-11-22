@@ -9,6 +9,7 @@ describe('normalizarNivel', () => {
     ['Alerta', 'alerta'],
     ['Reduzido', 'alerta'],
     ['Regular', 'alerta'],
+    ['Baixo', 'alerta'],
     ['Estável', 'estavel'],
     ['Adequado', 'adequado'],
   ])('converte "%s" para %s', (texto, esperado) => {
