@@ -53,6 +53,7 @@ A arquitetura completa está em [docs/design](docs/design/).
 - **Coletor em Go** (`api/cmd/coletor`, `goquery`): baixa as 16 fontes de estoque de 10 estados ao mesmo tempo (páginas, JSON, gráficos do Google, um painel Qlik e a imagem diária do DF, lida pela cor) e grava as leituras numa transação. Uma fonte fora do ar não impede as outras. Também lê as notícias de estoque baixo de 11 estados sem estoque publicado
 - **Docker Compose**: ambiente local e testes de integração; imagem da API `distroless`
 - **Vitest + Testing Library**: testes de unidade e de componentes, com cobertura mínima de 80% configurada
+- **Stryker**: teste de mutação nas regras de domínio do site, com mutation score mínimo de 90% configurado
 - **Playwright**: testes end-to-end no navegador, contra a API e o banco em Docker
 - **Biome, golangci-lint e lefthook**: lint, formatação e padrão Conventional Commits verificados antes do commit
 - **GitHub Actions + Codecov**: CI em Linux, macOS e Windows a cada commit, com relatório de cobertura publicado no Codecov
@@ -98,6 +99,9 @@ cd web && npm ci && cd ..
 # testes de unidade e de componentes, com cobertura (web/coverage)
 cd web && npm run test:coverage && cd ..
 
+# teste de mutação das regras de domínio (web/lib/domain), relatório em web/reports/mutation
+cd web && npm run test:mutation && cd ..
+
 # e2e: sobe API e Postgres em Docker com dados fixos, faz o build do site e roda o Playwright
 # (na primeira vez: cd web && npx playwright install chromium)
 make test-e2e-web
@@ -141,7 +145,8 @@ cd api && go run ./cmd/cnes migrations/<arquivo>.sql
 
 - **TDD**: cada regra começou por um teste falhando, visível no histórico de commits (`test:` seguido de `feat:`)
 - **Arrange, Act, Assert** em cada teste, com linhas em branco separando as etapas
-- **FIRST**: testes rápidos, independentes entre si, repetíveis (nenhum depende do relógio ou da internet: a data de "hoje" é injetada), autoverificáveis e escritos junto com o código
+- **FIRST**: testes rápidos, independentes entre si, repetíveis (nenhum depende do relógio, do fuso da máquina ou da internet: a data de "hoje" é injetada e os testes rodam em UTC), autoverificáveis e escritos junto com o código
+- **Teste de mutação**: o Stryker altera o código das regras de domínio (troca `<` por `<=`, apaga condições, esvazia textos) e confere se algum teste falha. O mutation score de `web/lib/domain` é de **98%**: os mutantes que sobrevivem são equivalentes, ou seja, mudam o código sem mudar o comportamento. Foi o teste de mutação que mostrou que alguns testes passavam só porque a máquina estava no fuso de Brasília
 - Testes pela API pública dos módulos e com nomes que descrevem o comportamento esperado
 
 ## Licença

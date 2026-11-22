@@ -42,7 +42,11 @@ describe('avaliarIdade', () => {
   })
 
   it('rejeita data de nascimento no futuro', () => {
-    expect(() => avaliarIdade(nascidoEm('2027-01-01'), HOJE, false)).toThrow()
+    expect(() => avaliarIdade(nascidoEm('2027-01-01'), HOJE, false)).toThrow('Data de nascimento no futuro')
+  })
+
+  it('aceita quem nasceu hoje e o considera inapto', () => {
+    expect(avaliarIdade(HOJE, HOJE, false)).toBe('inapto')
   })
 })
 
@@ -142,6 +146,21 @@ describe('avaliarCandidato', () => {
 
     expect(resultado.podeDoarHoje).toBe(true)
     expect(resultado.mensagens[0]).toMatch(/responsável/)
+  })
+
+  it('bloqueia a primeira doação de quem tem mais de 60 anos', () => {
+    const resultado = avaliarCandidato({ ...adulto, nascimento: parseData('1960-01-01') }, HOJE)
+
+    expect(resultado.podeDoarHoje).toBe(false)
+  })
+
+  it('libera quem já doou e tem mais de 60 anos', () => {
+    const resultado = avaliarCandidato(
+      { ...adulto, nascimento: parseData('1960-01-01'), doacoes: [parseData('2025-01-01')] },
+      HOJE,
+    )
+
+    expect(resultado.podeDoarHoje).toBe(true)
   })
 
   it('avisa sobre avaliação médica aos 70 anos ou mais', () => {

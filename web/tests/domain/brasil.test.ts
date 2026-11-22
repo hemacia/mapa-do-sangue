@@ -32,4 +32,15 @@ describe('panoramaNacional', () => {
     expect(panoramaNacional([])).toBeNull()
     expect(panoramaNacional([uf('MA', null, 7_000_000, null, 'sem-dado')])).toBeNull()
   })
+
+  it('lista em ordem alfabética os estados abaixo do mínimo, sem contar quem está no mínimo ou sem taxa', () => {
+    const p = panoramaNacional([
+      uf('RR', 2_000, 700_000, 2.9, 'completo'),
+      uf('AC', 5_067, 884_372, 5.7, 'completo'),
+      uf('PB', 41_645, 4_164_468, 10, 'completo'),
+      uf('AP', 1_000, 800_000, null, 'completo'),
+    ])
+
+    expect(p?.abaixoDoMinimo).toEqual(['AC', 'RR'])
+  })
 })

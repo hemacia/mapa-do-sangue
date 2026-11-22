@@ -1,0 +1,50 @@
+name: Teste de mutação
+
+on:
+  # Leva uns 4 minutos: roda quando as regras de domínio ou os testes delas mudam, e toda semana.
+  pull_request:
+    paths:
+      - 'web/lib/domain/**'
+      - 'web/tests/domain/**'
+      - 'web/stryker.config.json'
+  schedule:
+    # Segunda, 9h de Brasília.
+    - cron: '0 12 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: mutacao-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  stryker:
+    name: Stryker (regras de domínio do site)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - run: npm ci
+
+      # Falha se o mutation score ficar abaixo de 90% (break em web/stryker.config.json).
+      - name: Teste de mutação
+        run: npm run test:mutation
+
+      - name: Relatório do Stryker
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: relatorio-mutacao
+          path: web/reports/mutation
+          retention-days: 14

@@ -27,6 +27,12 @@ describe('panoramaPorTipo', () => {
     expect(bPositivo?.preenchimento).toBe(1)
   })
 
+  it('tira a média entre níveis diferentes: estável e crítico deixam a bolsa com um terço', () => {
+    const aPositivo = panoramaPorTipo([...HEMOCENTROS]).find((p) => p.tipo === 'A+')
+
+    expect(aPositivo?.preenchimento).toBeCloseTo(1 / 3)
+  })
+
   it('deixa o preenchimento nulo para tipo sem nenhuma informação', () => {
     const abNegativo = panoramaPorTipo([...HEMOCENTROS]).find((p) => p.tipo === 'AB-')
 
@@ -88,6 +94,12 @@ describe('montarManchete', () => {
 
     expect(manchete.titulo).toBe('A- e O- estão críticos em 3 dos 6 hemocentros que publicam')
     expect(manchete.complemento).toBeNull()
+  })
+
+  it('usa o plural no complemento quando o segundo lugar é um empate', () => {
+    const manchete = montarManchete(todos({ 'O-': 6, 'A-': 2, 'B-': 2 }), 6)
+
+    expect(manchete.complemento).toBe('A- e B- estão críticos em 2 deles.')
   })
 
   it('avisa quando nenhum tipo está crítico', () => {

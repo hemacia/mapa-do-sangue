@@ -1,6 +1,10 @@
 import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vitest/config'
 
+// Fuso fixo: o resultado dos testes não pode depender do relógio da máquina que roda.
+// Definido aqui, antes de o Vitest (ou o Stryker) abrir os processos dos testes, que herdam o fuso.
+process.env.TZ = 'UTC'
+
 export default defineConfig({
   plugins: [react()],
   resolve: { tsconfigPaths: true },
