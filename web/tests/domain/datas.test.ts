@@ -27,6 +27,11 @@ describe('parseData', () => {
   it('rejeita dia que não existe no calendário', () => {
     expect(() => parseData('2026-02-30')).toThrow('Data inválida')
   })
+
+  it('rejeita data com texto antes ou depois', () => {
+    expect(() => parseData('x2026-11-10')).toThrow('Data inválida')
+    expect(() => parseData('2026-11-10x')).toThrow('Data inválida')
+  })
 })
 
 describe('adicionarMeses', () => {
@@ -61,6 +66,12 @@ describe('idadeEmAnos', () => {
 
     expect(idadeEmAnos(nascimento, parseData('2026-11-09'))).toBe(15)
     expect(idadeEmAnos(nascimento, parseData('2026-11-10'))).toBe(16)
+  })
+
+  it('não conta o ano quando o mês do aniversário ainda não chegou', () => {
+    const nascimento = parseData('2010-12-01')
+
+    expect(idadeEmAnos(nascimento, parseData('2026-11-15'))).toBe(15)
   })
 
   it('trata quem nasceu em 29/02 como aniversariante em 01/03 nos anos não bissextos', () => {
@@ -100,6 +111,27 @@ describe('interpretarDataAmbigua', () => {
     expect(formatarData(interpretarDataAmbigua('10/11/2026', coleta))).toBe('2026-11-10')
   })
 
+  it('descarta a leitura que cai depois da coleta', () => {
+    expect(formatarData(interpretarDataAmbigua('10/12/2026', coleta))).toBe('2026-10-12')
+  })
+
+  it('fica com dia/mês quando as duas leituras caem depois da coleta', () => {
+    expect(formatarData(interpretarDataAmbigua('11/12/2026', coleta))).toBe('2026-12-11')
+  })
+
+  it('aceita dia e mês com um dígito e espaços em volta', () => {
+    expect(formatarData(interpretarDataAmbigua(' 3/29/2026 ', coleta))).toBe('2026-03-29')
+  })
+
+  it('rejeita data com texto antes ou depois', () => {
+    expect(() => interpretarDataAmbigua('x29/03/2026', coleta)).toThrow('Data inválida')
+    expect(() => interpretarDataAmbigua('29/03/2026x', coleta)).toThrow('Data inválida')
+  })
+
+  it('rejeita quando nenhuma das duas leituras existe no calendário', () => {
+    expect(() => interpretarDataAmbigua('31/31/2026', coleta)).toThrow('Data inválida: 31/31/2026')
+  })
+
   it('rejeita texto que não é data', () => {
     expect(() => interpretarDataAmbigua('ontem', coleta)).toThrow('Data inválida')
   })
@@ -112,6 +144,10 @@ describe('extrairDataBR', () => {
 
   it('extrai só a data quando não há hora', () => {
     expect(extrairDataBR('Última atualização: 05/11/2026')).toBe('2026-11-05')
+  })
+
+  it('extrai a hora mesmo com mais de um espaço depois da data', () => {
+    expect(extrairDataBR('Atualizado em 10/11/2026   12:35')).toBe('2026-11-10T12:35')
   })
 
   it('devolve null quando o texto não tem data', () => {
