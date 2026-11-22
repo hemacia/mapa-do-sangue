@@ -55,6 +55,14 @@ describe('faixaDeColetas', () => {
     expect(faixaDeColetas(0, 'incompleto')).toBe('incompleto')
     expect(faixaDeColetas(null, 'sem-dado')).toBeNull()
   })
+
+  it('não põe em faixa nenhuma o estado sem dado, mesmo que venha uma taxa', () => {
+    expect(faixaDeColetas(16, 'sem-dado')).toBeNull()
+  })
+
+  it('não põe em faixa nenhuma o estado completo sem taxa', () => {
+    expect(faixaDeColetas(null, 'completo')).toBeNull()
+  })
 })
 
 describe('posicaoNoRanking', () => {
@@ -75,5 +83,17 @@ describe('posicaoNoRanking', () => {
 
   it('não ranqueia estado com envio incompleto', () => {
     expect(posicaoNoRanking(ESTADOS, 'RJ')).toBeNull()
+  })
+
+  it('ordena pela taxa mesmo quando os estados chegam fora de ordem', () => {
+    const foraDeOrdem = [ESTADOS[2], ESTADOS[0], ESTADOS[1]]
+
+    expect(posicaoNoRanking(foraDeOrdem, 'PB')).toEqual({ posicao: 1, total: 3, mediana: 16.2 })
+  })
+
+  it('deixa fora do ranking o estado completo que veio sem taxa', () => {
+    const semTaxa = { uf: 'SP', porMil: null, cobertura: 'completo' as const }
+
+    expect(posicaoNoRanking([...ESTADOS, semTaxa], 'MG')).toEqual({ posicao: 2, total: 3, mediana: 16.2 })
   })
 })
