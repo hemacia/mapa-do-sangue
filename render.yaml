@@ -1,0 +1,23 @@
+# Deploy da API no Render (plano gratuito), lido pelo Render como Blueprint.
+# O banco fica no Neon e o site na Vercel; a coleta roda no GitHub Actions (.github/workflows/coleta.yml).
+services:
+  - type: web
+    name: mapa-do-sangue-api
+    runtime: docker
+    plan: free
+    # Mais perto do Neon em us-east-1: cada requisição da API vai ao banco.
+    region: virginia
+    dockerfilePath: ./api/Dockerfile
+    dockerContext: ./api
+    healthCheckPath: /healthz
+    # Novo deploy só quando a API muda.
+    buildFilter:
+      paths:
+        - api/**
+    envVars:
+      # String de conexão do Neon (com sslmode=require); preenchida no painel do Render.
+      - key: DATABASE_URL
+        sync: false
+      # Endereço do site na Vercel, para o CORS do POST /v1/doacoes.
+      - key: ALLOWED_ORIGIN
+        sync: false
