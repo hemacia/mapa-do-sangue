@@ -14,19 +14,10 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  # Enquanto a API não está no ar, a coleta grava num Postgres temporário: serve para
-  # avisar (anotação no resumo) quando uma fonte sai do ar ou muda o layout.
+  # Grava as leituras no banco de produção. Uma fonte fora do ar ou com layout novo
+  # aparece como anotação no resumo da execução.
   coletar:
     runs-on: ubuntu-latest
-    services:
-      postgres:
-        image: postgres:18-alpine
-        env:
-          POSTGRES_USER: mapa
-          POSTGRES_PASSWORD: mapa
-          POSTGRES_DB: mapa
-        ports: ["5432:5432"]
-        options: --health-cmd "pg_isready -U mapa" --health-interval 2s --health-retries 20
     steps:
       - uses: actions/checkout@v7
 
@@ -39,4 +30,5 @@ jobs:
         working-directory: api
         run: go run ./cmd/coletor
         env:
-          DATABASE_URL: postgres://mapa:mapa@localhost:5432/mapa?sslmode=disable
+          # Conexão direta (sem pooler) com o banco de produção no Neon.
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
