@@ -14,19 +14,10 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  # Como a coleta de estoque, enquanto o banco do deploy não existe grava num Postgres temporário:
-  # o job serve para avisar quando o CSV ou a API do IBGE mudarem de formato.
+  # Atualiza as estatísticas no banco de produção. Falha quando o CSV ou a API do IBGE
+  # mudarem de formato.
   atualizar:
     runs-on: ubuntu-latest
-    services:
-      postgres:
-        image: postgres:18-alpine
-        env:
-          POSTGRES_USER: mapa
-          POSTGRES_PASSWORD: mapa
-          POSTGRES_DB: mapa
-        ports: ["5432:5432"]
-        options: --health-cmd "pg_isready -U mapa" --health-interval 2s --health-retries 20
     steps:
       - uses: actions/checkout@v7
 
@@ -39,4 +30,5 @@ jobs:
         working-directory: api
         run: go run ./cmd/coletor -anvisa
         env:
-          DATABASE_URL: postgres://mapa:mapa@localhost:5432/mapa?sslmode=disable
+          # Conexão direta (sem pooler) com o banco de produção no Neon.
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
