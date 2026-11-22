@@ -43,6 +43,8 @@ Funcionalidades:
 | MT-Hemocentro | MT | Página pública do agendamento (nível no nome da imagem) |
 | Fundação Hemocentro de Brasília | DF | Imagem diária, lida pela altura do vermelho em cada gota |
 
+> **Em produção:** a coleta roda no GitHub Actions, em servidores fora do Brasil. Hemosc (SC), MT-Hemocentro (MT) e FHB (DF) não respondem a esses servidores (tempo esgotado ou falha de DNS), e o Hemominas (MG) às vezes também não. Quando uma fonte falha, o site mostra a última leitura dela que estiver no banco; se não houver nenhuma, o estado aparece como sem estoque publicado. De uma conexão no Brasil, as páginas de MT, DF e MG respondem normalmente, o que indica bloqueio ou lentidão para servidores de fora.
+
 Os outros 17 estados não publicam o estoque de forma que dê para coletar. Para eles o site mostra os dados da Anvisa, as unidades de hemoterapia do CNES e, em 11 estados, as notícias de estoque baixo dos sites oficiais. A pesquisa que embasou o projeto (fontes por estado, regras de doação, projetos parecidos) está em [docs/pesquisa](docs/pesquisa/).
 
 ## Tecnologias
