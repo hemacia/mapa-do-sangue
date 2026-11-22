@@ -12,7 +12,8 @@
     "test:coverage": "vitest run --coverage",
     "typecheck": "next typegen && tsc --noEmit",
     "gerar:api": "openapi-typescript ../api/openapi.yaml -o lib/api/schema.d.ts",
-    "prepare": "cd .. && lefthook install"
+    "prepare": "cd .. && lefthook install",
+    "test:mutation": "stryker run"
   },
   "dependencies": {
     "d3-geo": "^3.1.2",
@@ -24,6 +25,8 @@
   "devDependencies": {
     "@biomejs/biome": "^2.6.7",
     "@playwright/test": "^1.65.1",
+    "@stryker-mutator/core": "^10.1.1",
+    "@stryker-mutator/vitest-runner": "^10.1.1",
     "@testing-library/jest-dom": "^7.0.1",
     "@testing-library/react": "^16.3.3",
     "@testing-library/user-event": "^14.6.10",
