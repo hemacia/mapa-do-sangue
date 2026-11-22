@@ -5,6 +5,8 @@
 
 Mapa aberto do estoque de sangue dos hemocentros do Brasil: quais tipos estão em falta, quais estão estáveis, estatísticas por estado e ferramentas para incentivar a doação.
 
+**No ar:** [mapa-do-sangue.vercel.app](https://mapa-do-sangue.vercel.app) · API: [mapa-do-sangue-api.onrender.com](https://mapa-do-sangue-api.onrender.com/healthz)
+
 ## Integrantes
 
 - Ítalo Dell Areti
@@ -57,6 +59,7 @@ A arquitetura completa está em [docs/design](docs/design/).
 - **Playwright**: testes end-to-end no navegador, contra a API e o banco em Docker
 - **Biome, golangci-lint e lefthook**: lint, formatação e padrão Conventional Commits verificados antes do commit
 - **GitHub Actions + Codecov**: CI em Linux, macOS e Windows a cada commit, com relatório de cobertura publicado no Codecov
+- **Vercel, Render e Neon** (planos gratuitos): o site fica na Vercel, a API em Docker no Render (configurada em `render.yaml`) e o PostgreSQL no Neon. A coleta e a atualização da Anvisa rodam no GitHub Actions e gravam direto no banco de produção. No plano gratuito a API dorme após 15 minutos sem uso; as páginas do site ficam em cache, então só a primeira chamada depois disso demora
 - **Dependabot**: atualização semanal das dependências, das imagens Docker e das actions
 
 ## Uso de IA
