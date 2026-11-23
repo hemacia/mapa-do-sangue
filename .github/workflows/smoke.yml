@@ -1,0 +1,52 @@
+name: Smoke test em produção
+
+on:
+  # A Vercel avisa o GitHub a cada deploy; o smoke roda quando o de produção termina.
+  deployment_status:
+  schedule:
+    # Todo dia às 9h30 de Brasília, depois da coleta das 9h.
+    - cron: '30 12 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: smoke
+  cancel-in-progress: true
+
+jobs:
+  smoke:
+    name: Site e API publicados
+    if: >-
+      github.event_name != 'deployment_status' ||
+      (github.event.deployment_status.state == 'success' && github.event.deployment.environment == 'Production')
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - run: npm ci
+
+      - name: Instala navegador do Playwright
+        run: npx playwright install --with-deps chromium
+
+      # Só leitura: nenhum teste grava no banco de produção.
+      - name: Smoke test
+        run: npm run test:smoke
+
+      - name: Relatório do Playwright em caso de falha
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: smoke-report
+          path: web/test-results
+          retention-days: 7

@@ -13,7 +13,8 @@
     "typecheck": "next typegen && tsc --noEmit",
     "gerar:api": "openapi-typescript ../api/openapi.yaml -o lib/api/schema.d.ts",
     "prepare": "cd .. && lefthook install",
-    "test:mutation": "stryker run"
+    "test:mutation": "stryker run",
+    "test:smoke": "playwright test -c playwright.smoke.config.ts"
   },
   "dependencies": {
     "d3-geo": "^3.1.2",
