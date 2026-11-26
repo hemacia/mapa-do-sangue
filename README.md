@@ -58,7 +58,7 @@ A arquitetura completa está em [docs/design](docs/design/).
 - **Docker Compose**: ambiente local e testes de integração; imagem da API `distroless`
 - **Vitest + Testing Library**: testes de unidade e de componentes, com cobertura mínima de 80% configurada
 - **Stryker**: teste de mutação nas regras de domínio do site, com mutation score mínimo de 90% configurado
-- **Playwright**: testes end-to-end no navegador, contra a API e o banco em Docker
+- **Playwright**: testes end-to-end no navegador, contra a API e o banco em Docker, e smoke test contra o site e a API em produção, que roda todo dia no GitHub Actions
 - **Biome, golangci-lint e lefthook**: lint, formatação e padrão Conventional Commits verificados antes do commit
 - **GitHub Actions + Codecov**: CI em Linux, macOS e Windows a cada commit, com relatório de cobertura publicado no Codecov
 - **Vercel, Render e Neon** (planos gratuitos): o site fica na Vercel, a API em Docker no Render (configurada em `render.yaml`) e o PostgreSQL no Neon. A coleta e a atualização da Anvisa rodam no GitHub Actions e gravam direto no banco de produção. No plano gratuito a API dorme após 15 minutos sem uso; as páginas do site ficam em cache, então só a primeira chamada depois disso demora
@@ -110,6 +110,10 @@ cd web && npm run test:mutation && cd ..
 # e2e: sobe API e Postgres em Docker com dados fixos, faz o build do site e roda o Playwright
 # (na primeira vez: cd web && npx playwright install chromium)
 make test-e2e-web
+
+# smoke test contra o site publicado (só leitura, não grava nada no banco de produção)
+# SMOKE_URL troca o endereço, por exemplo para a prévia de um deploy da Vercel
+cd web && npm run test:smoke && cd ..
 ```
 
 ### API (Go + PostgreSQL)
